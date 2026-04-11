@@ -1,0 +1,77 @@
+name: Security-Issue|安全问题
+description: 当您发现安全问题时，使用此模板反馈。
+title: "[Security-Issue|安全问题]: "
+labels: ["security"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        感谢对 CANN 社区的支持与关注，欢迎反馈安全问题。
+        请勿在公开 Issue 中披露敏感安全信息，敏感安全问题请通过安全邮件反馈。
+  - type: input
+    attributes:
+      label: 漏洞编号 / CVE ID (Optional / 选填)
+      description: 请提供漏洞编号（如已分配）
+      placeholder: "CVE-XXXX-XXXXX"
+  - type: input
+    attributes:
+      label: 受影响组件 / Affected Component (Mandatory / 必填)
+      description: 请描述受漏洞影响的组件
+      placeholder: 如：hccl、hcom、atc 等
+    validations:
+      required: true
+  - type: input
+    attributes:
+      label: 受影响版本 / Affected Version (Mandatory / 必填)
+      description: 请描述受漏洞影响的版本范围
+      placeholder: "CANN 8.0.0 - 8.5.0"
+    validations:
+      required: true
+  - type: dropdown
+    attributes:
+      label: 漏洞类型 / Vulnerability Type (Mandatory / 必填)
+      description: 漏洞类型分类
+      options:
+        - "缓冲区溢出 / Buffer Overflow"
+        - "内存泄漏 / Memory Leak"
+        - "空指针解引用 / Null Pointer Dereference"
+        - "整数溢出 / Integer Overflow"
+        - "权限提升 / Privilege Escalation"
+        - "信息泄露 / Information Disclosure"
+        - "拒绝服务 / Denial of Service"
+        - "代码注入 / Code Injection"
+        - "其他 / Other"
+    validations:
+      required: true
+  - type: input
+    attributes:
+      label: CVSS V3.0 分值 / CVSS V3.0 Score (Optional / 选填)
+      description: 请描述 CVSS V3.0 分值
+      placeholder: "0.0 - 10.0"
+  - type: textarea
+    attributes:
+      label: 漏洞简述 / Vulnerability Summary (Mandatory / 必填)
+      description: 请提供漏洞的描述信息
+      placeholder: 简要描述漏洞的触发条件和影响
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: 影响性分析 / Impact Analysis (Optional / 选填)
+      description: 请描述该漏洞的影响范围和严重程度
+      placeholder: 描述漏洞可能造成的影响
+  - type: textarea
+    attributes:
+      label: 技术分析 / Technical Analysis (Optional / 选填)
+      description: 请分析漏洞的原理和触发条件
+      placeholder: 描述漏洞的技术原理
+  - type: textarea
+    attributes:
+      label: 规避方案 / Mitigation (Optional / 选填)
+      description: 请描述临时规避方案或消减措施
+      placeholder: 描述用户可以采取的临时规避措施
+  - type: textarea
+    attributes:
+      label: 修复建议 / Fix Suggestion (Optional / 选填)
+      description: 如有修复建议，请在此描述
+      placeholder: 描述建议的修复方案
