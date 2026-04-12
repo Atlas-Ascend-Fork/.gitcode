@@ -190,15 +190,18 @@ state-transitions:
 
 | 标签 | 模块名称 | 正则匹配规则 | 负责仓库 | CIE 联系人 |
 |------|----------|--------------|----------|------------|
-| `module/ops` | 算子 | `(?i)(算子|op_|ops-)` | cann/opbase, cann/ops-* | @songkai111 |
-| `module/hccl` | 通信 | `(?i)(通信|hccl|hcomm|collective|allreduce|allgather)` | cann/hccl, cann/hcomm | @jiyuanhao |
-| `module/ge` | 图编译 | `(?i)(图|graph|fusion|算子融合|atc)` | cann/graph-autofusion | @jikai-tyler |
-| `module/runtime` | 运行时 | `(?i)(运行时|runtime|acl|执行)` | cann/runtime | @duanpengliang |
-| `module/driver` | 驱动 | `(?i)(驱动|driver|npu|设备)` | cann/driver | @ad_cx |
-| `module/ascendc` | AscendC | `(?i)(ascendc|asc-devkit|asc-tools|算子开发)` | cann/asc-devkit | @DragonBornHD84 |
-| `module/pypto` | PTO | `(?i)(pto|pypto|tile|性能优化)` | cann/pto-*, cann/pypto | @y30038433 |
-| `module/tools` | 工具 | `(?i)(工具|tool|amct|oam|转换|量化)` | cann/amct, cann/oam-tools | @RQL7 |
+| `module/ops` | 算子 | `(?i)(算子|op_|ops-)` | cann/opbase, cann/ops-* | @zhou-qilong |
+| `module/hccl` | 通信 | `(?i)(通信|hccl|hcomm|collective|allreduce|allgather)` | cann/hccl, cann/hcomm | @yanyefeng |
+| `module/ge` | 图编译 | `(?i)(图|ge|graph|fusion|算子融合|atc)` | cann/ge, cann/metadef, cann/graph-autofusion | @wqtshg_wt |
+| `module/runtime` | 运行时 | `(?i)(运行时|runtime|acl|执行)` | cann/runtime | @wangtao43 |
+| `module/driver` | 驱动 | `(?i)(驱动|driver|npu|设备)` | cann/driver | @tangguijin |
+| `module/ascendc` | AscendC | `(?i)(ascendc|asc-devkit|asc-tools|算子开发)` | cann/asc-devkit, cann/asc-tools | @ascendhjh |
+| `module/pypto` | PTO | `(?i)(pto|pypto|tile|性能优化)` | cann/pto-*, cann/pypto | @linjiashu |
+| `module/tools` | 工具 | `(?i)(工具|tool|amct|oam|转换|量化)` | cann/amct, cann/oam-tools | @jinyingqi |
+| `module/ops-transformer` | Transformer算子 | `(?i)(transformer|flashattention|attention|moe|gmm|ffn|posembedding)` | cann/ops-transformer | @liudan12 |
 | `module/recipes` | 模型 | `(?i)(模型|model|recipe|推理|训练)` | cann/cann-recipes-* | @rous_zhang |
+| `module/infrastructure` | 基础设施 | `(?i)(基础设施|infrastructure|ci|机器人|robot|cla)` | cann/infrastructure | @songchangxia |
+| `module/doc` | 文档 | `(?i)(文档|doc|readme|guide|指南)` | cann/doc | @TianXL |
 
 
 ## 六、SIG 标签 (sig/*)
@@ -206,7 +209,7 @@ state-transitions:
 ### 6.1 兴趣小组标签
 
 | 标签 | SIG 名称 | 职责范围  |
-|------|----------|----------|----------|
+|------|----------|----------|
 | `sig/infrastructure` | 基础设施 | CI/CD、机器人、社区服务 | 
 | `sig/ops` | 算子开发 | 算子库开发与维护 | 
 | `sig/performance` | 性能优化 | 性能分析与调优 | 
@@ -312,14 +315,18 @@ label-auto-match:
       label: "module/ops"
     - pattern: "(?i)(通信|hccl|hcomm|collective|allreduce)"
       label: "module/hccl"
-    - pattern: "(?i)(图|graph|fusion|算子融合|atc)"
+    - pattern: "(?i)(图|ge|graph|fusion|算子融合|atc)"
       label: "module/ge"
     - pattern: "(?i)(运行时|runtime|acl)"
       label: "module/runtime"
     - pattern: "(?i)(驱动|driver|npu)"
       label: "module/driver"
-    - pattern: "(?i)(Ascendc|ascendc)"
+    - pattern: "(?i)(Ascendc|ascendc|asc-devkit|asc-tools)"
       label: "module/ascendc"
+    - pattern: "(?i)(transformer|flashattention|attention|moe|gmm)"
+      label: "module/ops-transformer"
+    - pattern: "(?i)(基础设施|infrastructure|ci|机器人)"
+      label: "module/infrastructure"
 
 # 模板到标签映射
 template-label-mapping:
@@ -374,7 +381,7 @@ template-label-mapping:
 
 ---
 
-## 十9、参考资源
+## 十、参考资源
 
 - [CANN 官方文档](https://www.hiascend.com/document)
 - [Infrastructure 仓库](https://gitcode.com/cann/infrastructure)
