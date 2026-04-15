@@ -1,0 +1,80 @@
+name: Bug-Report|缺陷反馈
+description: 当您发现了一个缺陷，需要向社区反馈时，请使用此模板。
+title: "[Bug-Report|缺陷反馈]: "
+labels: ["bug-report"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        感谢对 CANN 社区的支持与关注，欢迎反馈缺陷。
+        Thanks for sending an issue! Please fill in the following template to help quickly solve your problem.
+  - type: textarea
+    attributes:
+      label: 问题描述 / Describe the current behavior (Mandatory / 必填)
+      description: 提供尽可能多的信息描述产生了什么问题
+      placeholder: 请描述具体问题现象，如报错信息、异常行为等
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: 环境信息 / Environment Information (Mandatory / 必填)
+      description: 请提供昇腾硬件型号与软件环境信息
+      placeholder: |
+        - 昇腾硬件型号：如 Ascend 910B 等
+        - CANN 版本：如 8.0.0、8.5.0 等
+        - Python 版本：如 3.9.0
+    validations:
+      required: false
+  - type: textarea
+    attributes:
+      label: 重现步骤 / Steps to reproduce (Mandatory / 必填)
+      description: 提供尽可能多的信息描述如何重现该缺陷
+      placeholder: |
+        1. 首先执行 '...'
+        2. 然后运行 '...'
+        3. 接着输入 '...'
+        4. 出现错误
+    validations:
+      required: false
+  - type: textarea
+    attributes:
+      label: 预期结果 / Expected behavior (Mandatory / 必填)
+      description: 描述期望的行为应该是什么样子的
+      placeholder: 请描述正常情况下应该得到的结果
+    validations:
+      required: false
+  - type: textarea
+    attributes:
+      label: 日志/截图 / Log / Screenshot (Mandatory / 必填)
+      description: 提供相关的日志文件、截图或最小复现代码
+      placeholder: |
+        请提供以下信息（至少一项）：
+        - 完整的错误日志
+        - 截图
+        - 最小复现代码
+        - host日志路径：/usr/local/Ascend/log/
+        - device日志路径：/usr/local/Ascend/log/
+    validations:
+      required: false
+  - type: checkboxes
+    attributes:
+      label: 影响范围 / Impact Scope (Mandatory / 必填)
+      description: 该缺陷影响的功能范围
+      options:
+        - label: 算子功能 / Operator
+        - label: 通信功能 / Communication
+        - label: 图编译 / Graph Compilation
+        - label: 模型转换 / Model Conversion
+        - label: 性能 / Performance
+        - label: 稳定性 / Stability
+        - label: 使用体验 / Stability
+        - label: 其他 / Other
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: 备注 / Additional Notes (Optional / 选填)
+      description: 补充其他您认为需要提供的信息
+      placeholder: 如已尝试的解决方案、临时规避方法等
+    validations:
+      required: false

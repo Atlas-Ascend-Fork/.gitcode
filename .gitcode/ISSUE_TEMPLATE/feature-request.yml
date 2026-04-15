@@ -1,0 +1,75 @@
+name: Feature-Request|功能需求
+description: 您需要反馈或实现一个新需求时，请使用此模板。
+title: "[Feature-Request|功能需求]: "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        感谢提出新需求！请填写以下模板帮助我们更好地理解您的需求。
+        Thanks for sending an feature request! Please fill in the following template.
+  - type: textarea
+    attributes:
+      label: 功能描述 / Feature Description (Mandatory / 必填)
+      description: 请描述新需求的功能是什么，解决了什么问题
+      placeholder: |
+        请详细说明：
+        - 需要实现什么功能
+        - 该功能解决什么痛点
+        - 与现有功能的关系
+    validations:
+      required: false
+  - type: textarea
+    attributes:
+      label: 应用场景 / Application Scenario (Mandatory / 必填)
+      description: 请描述该功能的应用场景和具体用例
+      placeholder: |
+        - 应用场景描述
+        - 使用案例
+        - 预期收益
+    validations:
+      required: false
+  - type: dropdown
+    attributes:
+      label: 需求类型 / Requirement Type (Mandatory / 必填)
+      description: 该需求属于哪类功能
+      options:
+        - "新增算子 / New Operator"
+        - "算子优化 / Operator Optimization"
+        - "通信算子 / Communication Operator"
+        - "图优化 / Graph Optimization"
+        - "新特性 / New Feature"
+        - "API 增强 / API Enhancement"
+        - "工具链 / Toolchain"
+        - "其他 / Other"
+    validations:
+      required: false
+  - type: textarea
+    attributes:
+      label: 设计方案 / Design Proposal (Optional / 选填)
+      description: 如果有初步的设计思路，请简要描述
+      placeholder: |
+        可包含：
+        - 接口设计
+        - 实现思路
+        - 伪代码
+        - 参考实现
+  - type: textarea
+    attributes:
+      label: 价值评估 / Value Assessment (Optional / 选填)
+      description: 请描述该需求的价值和优先级
+      placeholder: |
+        - 性能提升预期
+        - 用户体验改善
+        - 生态兼容性
+        - 行业对标情况
+  - type: input
+    attributes:
+      label: 需求来源 / Requirement Source (Optional / 选填)
+      description: 请说明需求来源，便于确定优先级
+      placeholder: "如：某客户项目、开源社区、内部规划等"
+  - type: textarea
+    attributes:
+      label: 备注 / Additional Notes (Optional / 选填)
+      description: 其他补充信息
+      placeholder: 如相关 Issue、PR、文档链接等
