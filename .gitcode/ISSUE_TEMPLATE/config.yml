@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 📚 CANN 官方文档
+    url: https://www.hiascend.com/cann/document
+    about: 查阅 CANN 官方文档获取更多信息
+  - name: 💬 开发者社区
+    url: https://www.hiascend.com/forum/forum-0106101385921175004-1.html
+    about: 加入开发者社区进行讨论
+  - name: 📖 昇腾学习资源
+    url: https://www.hiascend.com/learn
+    about: 学习昇腾 AI 处理器相关技术
