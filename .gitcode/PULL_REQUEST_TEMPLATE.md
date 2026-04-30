@@ -19,7 +19,7 @@ about: Submit your changes for review
 
 ## Related Issues / 关联 Issue
 
-<!-- Closes #123 to auto-close / Closes #123 可自动关闭 -->
+<!-- Closes #000 to auto-close / Closes #000 可自动关闭 -->
 
 - Closes #
 - References #
