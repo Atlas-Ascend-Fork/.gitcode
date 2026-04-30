@@ -1,7 +1,6 @@
 ---
 name: Pull Request Template
 about: Submit your changes for review
-title: '[TYPE]: Brief description'
 ---
 
 ## Description / 变更描述

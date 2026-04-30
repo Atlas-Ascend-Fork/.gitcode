@@ -1,7 +1,6 @@
 ---
 name: Pull Request Template (中文)
 about: 提交代码变更申请审核
-title: '[类型]: 简要描述'
 ---
 
 ## 变更描述 / Description
