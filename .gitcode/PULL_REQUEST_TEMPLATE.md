@@ -1,7 +1,6 @@
 ---
 name: Pull Request Template
 about: Submit your changes for review
-title: '[TYPE]: Brief description'
 ---
 
 ## Description / 变更描述
@@ -20,7 +19,7 @@ title: '[TYPE]: Brief description'
 
 ## Related Issues / 关联 Issue
 
-<!-- Closes #123 to auto-close / Closes #123 可自动关闭 -->
+<!-- Closes #000 to auto-close / Closes #000 可自动关闭 -->
 
 - Closes #
 - References #

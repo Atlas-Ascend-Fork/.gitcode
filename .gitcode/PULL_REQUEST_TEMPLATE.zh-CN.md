@@ -1,7 +1,6 @@
 ---
 name: Pull Request Template (中文)
 about: 提交代码变更申请审核
-title: '[类型]: 简要描述'
 ---
 
 ## 变更描述 / Description
@@ -20,7 +19,7 @@ title: '[类型]: 简要描述'
 
 ## 关联 Issue / Related Issues
 
-<!-- Closes #123 可自动关闭 / Closes #123 to auto-close -->
+<!-- Closes #000 可自动关闭 / Closes #000 to auto-close -->
 
 - Closes #
 - References #
