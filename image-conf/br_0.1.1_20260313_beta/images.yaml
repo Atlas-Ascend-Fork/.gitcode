@@ -1,0 +1,1109 @@
+global:
+  os_mirror:
+    ubuntu20.04:
+      arm:
+        lv1: ubuntu20.04.05_arm:lv1_v1.1003
+        lv2: ubuntu20.04.05_arm:lv2_v1.1011
+        lv3: ubuntu20.04.05_arm:lv3_v1.1084
+        lv4: ubuntu20.04.05_arm:lv4_v1.1079
+        lv5: ubuntu20.04.05_arm:lv5_v1.1080
+        lv6: ubuntu20.04.05_arm:lv6_v1.1059
+        smoke: ubuntu20.04.05_arm:mindspore_v1.1016
+      x86:
+        lv1: ubuntu20.04.05_x86:lv1_v1.1003
+        lv2: ubuntu20.04.05_x86:lv2_v1.1010
+        lv3: ubuntu20.04.05_x86:lv3_v1.1093
+        lv4: ubuntu20.04.05_x86:lv4_v1.1080
+        lv5: ubuntu20.04.05_x86:lv5_v1.1081
+        lv6: ubuntu20.04.05_x86:lv6_v1.1058
+    ubuntu24.04:
+      arm:
+        lv1: ubuntu24.04_arm:lv6_v1.1019
+        lv2: ubuntu24.04_arm:lv6_v1.1019
+        lv3: ubuntu24.04_arm:lv6_v1.1019
+        lv4: ubuntu24.04_arm:lv6_v1.1019
+        lv5: ubuntu24.04_arm:lv6_v1.1019
+        lv6: ubuntu24.04_arm:lv6_v1.1019
+      x86:
+        lv1: ubuntu24.04_x86:lv6_v1.1019
+        lv2: ubuntu24.04_x86:lv6_v1.1019
+        lv3: ubuntu24.04_x86:lv6_v1.1019
+        lv4: ubuntu24.04_x86:lv6_v1.1019
+        lv5: ubuntu24.04_x86:lv6_v1.1019
+        lv6: ubuntu24.04_x86:lv6_v1.1019
+    ubuntu22.04:
+      x86:
+        asnumpy: ubuntu22.04_x86:v1.1
+
+gray_global:
+  os_mirror:
+    ubuntu20.04:
+      arm:
+        lv1: ubuntu20.04.05_arm:lv1_v1.1003
+        lv2: ubuntu20.04.05_arm:lv2_v1.1011
+        lv3: ubuntu20.04.05_arm:lv3_v1.1080
+        lv4: ubuntu20.04.05_arm:lv4_v1.1076
+        lv5: ubuntu20.04.05_arm:lv5_v1.1077
+        lv6: ubuntu20.04.05_arm:lv6_v1.1051
+      x86:
+        lv1: ubuntu20.04.05_x86:lv1_v1.1003
+        lv2: ubuntu20.04.05_x86:lv2_v1.1010
+        lv3: ubuntu20.04.05_x86:lv3_v1.1085
+        lv4: ubuntu20.04.05_x86:lv4_v1.1077
+        lv5: ubuntu20.04.05_x86:lv5_v1.1078
+        lv6: ubuntu20.04.05_x86:lv6_v1.1052
+    ubuntu24.04:
+      arm:
+        lv1: ubuntu24.04_arm:lv6_v1.1019
+        lv2: ubuntu24.04_arm:lv6_v1.1019
+        lv3: ubuntu24.04_arm:lv6_v1.1019
+        lv4: ubuntu24.04_arm:lv6_v1.1019
+        lv5: ubuntu24.04_arm:lv6_v1.1019
+        lv6: ubuntu24.04_arm:lv6_v1.1019
+      x86:
+        lv1: ubuntu24.04_x86:lv6_v1.1019
+        lv2: ubuntu24.04_x86:lv6_v1.1019
+        lv3: ubuntu24.04_x86:lv6_v1.1019
+        lv4: ubuntu24.04_x86:lv6_v1.1019
+        lv5: ubuntu24.04_x86:lv6_v1.1019
+        lv6: ubuntu24.04_x86:lv6_v1.1019
+
+repos:
+  opbase:
+    os_mirror:
+      ubuntu24.04:
+        x86:
+          api_check: ubuntu24.04.3_x86:lv6_v1.1059
+    stages:
+      Compile_Ascend_X86:
+        ubuntu20.04:x86:lv6
+      Compile_Ascend_X86_ubuntu24:
+        ubuntu24.04:x86:lv6
+      Compile_Ascend_ARM:
+        ubuntu20.04:arm:lv6
+      Compile_Ascend_ARM_ubuntu24:
+        ubuntu24.04:arm:lv6
+      API_Check:
+        ubuntu24.04:x86:api_check
+      UT_Test:
+        ubuntu20.04:x86:lv4
+
+  ops-math:
+    os_mirror:
+      ubuntu24.04:
+        x86:
+          api_check: ubuntu24.04.3_x86:lv6_v1.1059
+    stages:
+      Compile_Ascend_X86:
+        ubuntu20.04:x86:lv5
+      Compile_Ascend_X86_ubuntu24:
+        ubuntu24.04:x86:lv6
+      Compile_Ascend_X86_mobile_station:
+        ubuntu20.04:x86:lv6
+      Compile_Ascend_X86_mobile_station_ubuntu24:
+        ubuntu24.04:x86:lv6
+      Compile_Ascend_X86_experimental:
+        ubuntu20.04:x86:lv5
+      Compile_Ascend_X86_experimental_ubuntu24:
+        ubuntu24.04:x86:lv6
+      Compile_Ascend_X86_A5:
+        ubuntu20.04:x86:lv5
+      Compile_Ascend_X86_A5_ubuntu24:
+        ubuntu24.04:x86:lv6
+      Compile_Ascend_ARM:
+        ubuntu20.04:arm:lv5
+      Compile_Ascend_ARM_ubuntu24:
+        ubuntu24.04:arm:lv6
+      Compile_Ascend_ARM_experimental:
+        ubuntu20.04:arm:lv5
+      Compile_Ascend_ARM_experimental_ubuntu24:
+        ubuntu24.04:arm:lv6
+      Compile_Ascend_single:
+        ubuntu20.04:arm:lv5
+      Compile_Ascend_single_ubuntu24:
+        ubuntu24.04:arm:lv6
+      Compile_Ascend_ARM_A5:
+        ubuntu20.04:arm:lv5
+      Compile_Ascend_ARM_A5_ubuntu24:
+        ubuntu24.04:arm:lv6
+      API_Check:
+        ubuntu24.04:x86:api_check
+      UT_Test:
+        ubuntu20.04:x86:lv6
+      UT_Test_experimental:
+        ubuntu20.04:x86:lv5
+      Smoke_A900_npupool:
+        ubuntu20.04:arm:smoke
+
+  ops-nn:
+    os_mirror:
+      ubuntu24.04:
+        x86:
+          api_check: ubuntu24.04.3_x86:lv6_v1.1059
+    stages:
+      Compile_Ascend_X86:
+        ubuntu20.04:x86:lv6
+      Compile_Ascend_X86_ubuntu24:
+        ubuntu24.04:x86:lv6
+      Compile_Ascend_X86_mobile_station:
+        ubuntu20.04:x86:lv6
+      Compile_Ascend_X86_mobile_station_ubuntu24:
+        ubuntu24.04:x86:lv6
+      Compile_Ascend_X86_950:
+        ubuntu20.04:x86:lv6
+      Compile_Ascend_X86_950_ubuntu24:
+        ubuntu24.04:x86:lv6
+      Compile_Ascend_ARM:
+        ubuntu20.04:arm:lv6
+      Compile_Ascend_ARM_ubuntu24:
+        ubuntu24.04:arm:lv6
+      Compile_Ascend_ARM_950:
+        ubuntu20.04:arm:lv6
+      Compile_Ascend_ARM_950_ubuntu24:
+        ubuntu24.04:arm:lv6
+      Compile_Ascend_single:
+        ubuntu20.04:arm:lv6
+      Compile_Ascend_single_ubuntu24:
+        ubuntu24.04:arm:lv6
+      Compile_Ascend_experimental:
+        ubuntu20.04:arm:lv6
+      Compile_Ascend_experimental_ubuntu24:
+        ubuntu24.04:arm:lv6
+      Pre_Compile:
+        ubuntu20.04:arm:lv6
+      Pre_Compile_ubuntu24:
+        ubuntu24.04:arm:lv6
+      API_Check:
+        ubuntu24.04:x86:api_check
+      UT_Test_ophost:
+        ubuntu20.04:x86:lv6
+      UT_Test_opapi:
+        ubuntu20.04:x86:lv6
+      UT_Test_kernel:
+        ubuntu20.04:x86:lv6
+      UT_Test_opgraph:
+        ubuntu20.04:x86:lv6
+      Smoke_A900_npupool:
+        ubuntu20.04:arm:smoke
+
+  ops-ras:
+    os_mirror:
+      ubuntu24.04:
+        x86:
+          api_check: ubuntu24.04.3_x86:lv6_v1.1059
+    stages:
+      Compile_Ascend_X86:
+        ubuntu20.04:x86:lv6
+      Compile_Ascend_X86_ubuntu24:
+        ubuntu24.04:x86:lv6
+      Compile_Ascend_X86_mobile_station:
+        ubuntu20.04:x86:lv6
+      Compile_Ascend_X86_mobile_station_ubuntu24:
+        ubuntu24.04:x86:lv6
+      Compile_Ascend_X86_950:
+        ubuntu20.04:x86:lv6
+      Compile_Ascend_X86_950_ubuntu24:
+        ubuntu24.04:x86:lv6
+      Compile_Ascend_ARM:
+        ubuntu20.04:arm:lv6
+      Compile_Ascend_ARM_ubuntu24:
+        ubuntu24.04:arm:lv6
+      Compile_Ascend_ARM_950:
+        ubuntu20.04:arm:lv6
+      Compile_Ascend_ARM_950_ubuntu24:
+        ubuntu24.04:arm:lv6
+      Compile_Ascend_single:
+        ubuntu20.04:arm:lv6
+      Compile_Ascend_single_ubuntu24:
+        ubuntu24.04:arm:lv6
+      Compile_Ascend_experimental:
+        ubuntu20.04:arm:lv6
+      Compile_Ascend_experimental_ubuntu24:
+        ubuntu24.04:arm:lv6
+      API_Check:
+        ubuntu24.04:x86:api_check
+      UT_Test_ophost:
+        ubuntu20.04:x86:lv6
+      UT_Test_opapi:
+        ubuntu20.04:x86:lv6
+      UT_Test_opgraph:
+        ubuntu20.04:x86:lv6
+
+  ops-cv:
+    os_mirror:
+      ubuntu24.04:
+        x86:
+          api_check: ubuntu24.04.3_x86:lv6_v1.1059
+    stages:
+      Compile_Ascend_X86:
+        ubuntu20.04:x86:lv6
+      Compile_Ascend_X86_ubuntu24:
+        ubuntu24.04:x86:lv6
+      Compile_Ascend_X86_mobile_station:
+        ubuntu20.04:x86:lv6
+      Compile_Ascend_X86_mobile_station_ubuntu24:
+        ubuntu24.04:x86:lv6
+      Compile_Ascend_X86_experimental:
+        ubuntu20.04:x86:lv6
+      Compile_Ascend_X86_experimental_ubuntu24:
+        ubuntu24.04:x86:lv6
+      Compile_Ascend_X86_A5:
+        ubuntu20.04:x86:lv6
+      Compile_Ascend_X86_A5_ubuntu24:
+        ubuntu24.04:x86:lv6
+      Compile_Ascend_ARM_experimental:
+        ubuntu20.04:arm:lv6
+      Compile_Ascend_ARM_experimental_ubuntu24:
+        ubuntu24.04:arm:lv6
+      Compile_Ascend_ARM:
+        ubuntu20.04:arm:lv6
+      Compile_Ascend_ARM_ubuntu24:
+        ubuntu24.04:arm:lv6
+      Pre_Compile:
+        ubuntu20.04:arm:lv6
+      Pre_Compile_ubuntu24:
+        ubuntu24.04:arm:lv6
+      API_Check:
+        ubuntu24.04:x86:api_check
+      UT_Test:
+        ubuntu20.04:x86:lv6
+      Smoke_A900_npupool:
+        ubuntu20.04:arm:smoke
+      Compile_Ascend_X86_VB:
+        ubuntu20.04:x86:lv6
+      Compile_Ascend_ARM_VB:
+        ubuntu20.04:arm:lv6
+
+  ops-transformer:
+    os_mirror:
+      ubuntu24.04:
+        x86:
+          api_check: ubuntu24.04.3_x86:lv6_v1.1059
+    stages:
+      Compile_Ascend_X86:
+        ubuntu20.04:x86:lv5
+      Compile_Ascend_X86_ubuntu24:
+        ubuntu24.04:x86:lv6
+      Compile_Ascend_ARM:
+        ubuntu20.04:arm:lv5
+      Compile_Ascend_ARM_ubuntu24:
+        ubuntu24.04:arm:lv6
+      Compile_Ascend_X86_experimental:
+        ubuntu20.04:x86:lv5
+      Compile_Ascend_X86_experimental_ubuntu24:
+        ubuntu24.04:x86:lv6
+      Compile_Ascend_ARM_experimental:
+        ubuntu20.04:arm:lv5
+      Compile_Ascend_ARM_experimental_ubuntu24:
+        ubuntu24.04:arm:lv6
+      Compile_Ascend_X86_mobile_station:
+        ubuntu20.04:x86:lv6
+      Compile_Ascend_X86_mobile_station_ubuntu24:
+        ubuntu24.04:x86:lv6
+      Pre_Compile:
+        ubuntu20.04:arm:lv5
+      Pre_Compile_ubuntu24:
+        ubuntu24.04:arm:lv6
+      API_Check:
+        ubuntu24.04:x86:api_check
+      UT_Test:
+        ubuntu20.04:x86:lv6
+      Smoke_A900_npupool:
+        ubuntu20.04:arm:smoke
+
+  asnumpy:
+    stages:
+      Compile_Ascend_X86:
+        ubuntu22.04:x86:asnumpy
+      # 不处理 ubuntu24，因为 base 是 ubuntu22
+
+  graph-autofusion:
+    stages:
+      Compile_Ascend_X86:
+        ubuntu20.04:x86:lv6
+      Compile_Ascend_X86_ubuntu24:
+        ubuntu24.04:x86:lv6
+      Compile_Ascend_ARM:
+        ubuntu20.04:arm:lv6
+      Compile_Ascend_ARM_ubuntu24:
+        ubuntu24.04:arm:lv6
+      UT_Test:
+        ubuntu20.04:x86:lv6
+      ST_Test:
+        ubuntu20.04:x86:lv6
+      Smoke_A900_npupool:
+        ubuntu20.04:arm:smoke
+
+  hixl:
+    os_mirror:
+      ubuntu24.04:
+        x86:
+          api_check: ubuntu24.04.3_x86:lv6_v1.1059
+    stages:
+      Compile_Ascend_X86:
+        ubuntu20.04:x86:lv6
+      Compile_Ascend_X86_ubuntu24:
+        ubuntu24.04:x86:lv6
+      Compile_Ascend_ARM:
+        ubuntu20.04:arm:lv6
+      Compile_Ascend_ARM_ubuntu24:
+        ubuntu24.04:arm:lv6
+      UT_Test:
+        ubuntu20.04:x86:lv6
+      UT_Test_Python:
+        ubuntu20.04:x86:lv6
+      API_Check:
+        ubuntu24.04:x86:api_check
+      Smoke_A900_npupool:
+        ubuntu20.04:arm:smoke
+
+  hccl:
+    os_mirror:
+      ubuntu24.04:
+        x86:
+          api_check: ubuntu24.04.3_x86:lv6_v1.1059
+    stages:
+      Compile_Ascend_X86:
+        ubuntu20.04:x86:lv6
+      Compile_Ascend_X86_ubuntu24:
+        ubuntu24.04:x86:lv6
+      Compile_Ascend_ARM:
+        ubuntu20.04:arm:lv6
+      Compile_Ascend_ARM_ubuntu24:
+        ubuntu24.04:arm:lv6
+      UT_Test:
+        ubuntu20.04:x86:lv6
+      API_Check:
+        ubuntu24.04:x86:api_check
+      Smoke_A900_npupool:
+        ubuntu20.04:arm:smoke
+
+  asc-devkit:
+    os_mirror:
+      ubuntu24.04:
+        x86:
+          api_check: ubuntu24.04.3_x86:lv6_v1.1059
+    stages:
+      Compile_Ascend_X86:
+        ubuntu20.04:x86:lv6
+      Compile_Ascend_X86_ubuntu24:
+        ubuntu24.04:x86:lv6
+      Compile_Ascend_ARM:
+        ubuntu20.04:arm:lv6
+      Compile_Ascend_ARM_ubuntu24:
+        ubuntu24.04:arm:lv6
+      UT_Test:
+        ubuntu20.04:x86:lv6
+      UT_Test_1:
+        ubuntu20.04:x86:lv6
+      UT_Test_2:
+        ubuntu20.04:x86:lv6
+      UT_Test_3:
+        ubuntu20.04:x86:lv6
+      UT_Test_reprot:
+        ubuntu20.04:x86:lv6
+      API_Check:
+        ubuntu24.04:x86:api_check
+
+  asc-devkit-dev:
+    os_mirror:
+      ubuntu24.04:
+        x86:
+          api_check: ubuntu24.04.3_x86:lv6_v1.1059
+    stages:
+      Compile_Ascend_X86:
+        ubuntu20.04:x86:lv4
+      Compile_Ascend_X86_ubuntu24:
+        ubuntu24.04:x86:lv6
+      Compile_Ascend_ARM:
+        ubuntu20.04:arm:lv4
+      Compile_Ascend_ARM_ubuntu24:
+        ubuntu24.04:arm:lv6
+      UT_Test:
+        ubuntu20.04:x86:lv4
+      UT_Test_1:
+        ubuntu20.04:x86:lv4
+      UT_Test_2:
+        ubuntu20.04:x86:lv4
+      UT_Test_3:
+        ubuntu20.04:x86:lv4
+      UT_Test_report:
+        ubuntu20.04:x86:lv4
+      API_Check:
+        ubuntu24.04:x86:api_check
+
+  hcomm:
+    os_mirror:      
+      ubuntu24.04:
+        x86:
+          api_check: ubuntu24.04.3_x86:lv6_v1.1059
+    stages:
+      Compile_Ascend_X86:
+        ubuntu20.04:x86:lv6
+      Compile_Ascend_X86_ubuntu24:
+        ubuntu24.04:x86:lv6
+      Compile_Ascend_ARM:
+        ubuntu20.04:arm:lv6
+      Compile_Ascend_ARM_ubuntu24:
+        ubuntu24.04:arm:lv6
+      UT_Test:
+        ubuntu20.04:x86:lv6
+      API_Check:
+        ubuntu24.04:x86:api_check
+      Smoke_A900_npupool:
+        ubuntu20.04:arm:smoke
+
+  atvoss:
+    stages:
+      Compile_Ascend_X86:
+        ubuntu20.04:x86:lv6
+      Compile_Ascend_X86_ubuntu24:
+        ubuntu24.04:x86:lv6
+      Compile_Ascend_ARM:
+        ubuntu20.04:arm:lv6
+      Compile_Ascend_ARM_ubuntu24:
+        ubuntu24.04:arm:lv6
+      UT_Test:
+        ubuntu20.04:x86:lv6
+      ST_Test:
+        ubuntu20.04:x86:lv6
+
+  atvc:
+    stages:
+      Compile_Ascend_X86:
+        ubuntu20.04:x86:lv6
+      Compile_Ascend_X86_ubuntu24:
+        ubuntu24.04:x86:lv6
+      Compile_Ascend_ARM:
+        ubuntu20.04:arm:lv6
+      Compile_Ascend_ARM_ubuntu24:
+        ubuntu24.04:arm:lv6
+      UT_Test:
+        ubuntu20.04:x86:lv6
+      Smoke_A900_npupool:
+        ubuntu20.04:arm:smoke
+
+  amct:
+    stages:
+      Compile_Ascend_X86:
+        ubuntu20.04:x86:lv6
+      Compile_Ascend_X86_ubuntu24:
+        ubuntu24.04:x86:lv6
+      Compile_Ascend_ARM:
+        ubuntu20.04:arm:lv6
+      Compile_Ascend_ARM_ubuntu24:
+        ubuntu24.04:arm:lv6
+      UT_Test:
+        ubuntu20.04:x86:lv6
+
+  ge:
+    os_mirror:
+      ubuntu20.04:
+        arm:
+          lv3: ubuntu20.04.05_arm:lv3_v1.1080
+          lv6: ubuntu20.04.05_arm:lv6_v1.1051
+        x86:
+          lv3: ubuntu20.04.05_x86:lv3_v1.1085
+          lv6: ubuntu20.04.05_x86:lv6_v1.1052
+      ubuntu24.04:
+        arm:
+          lv6: ubuntu24.04_arm:lv6_v1.1019
+        x86:
+          api_check: ubuntu24.04.3_x86:lv6_v1.1058
+          lv6: ubuntu24.04_x86:lv6_v1.1019
+    stages:
+      Compile_X86_compiler:
+        ubuntu20.04:x86:lv6
+      Compile_X86_compiler_ubuntu24:
+        ubuntu24.04:x86:lv6
+      Compile_X86_executor:
+        ubuntu20.04:x86:lv3
+      Compile_X86_executor_ubuntu24:
+        ubuntu24.04:x86:lv6
+      Compile_X86_dflow:
+        ubuntu20.04:x86:lv3
+      Compile_X86_dflow_ubuntu24:
+        ubuntu24.04:x86:lv6
+      Compile_ARM_compiler:
+        ubuntu20.04:arm:lv6
+      Compile_ARM_compiler_ubuntu24:
+        ubuntu24.04:arm:lv6
+      Compile_ARM_executor:
+        ubuntu20.04:arm:lv3
+      Compile_ARM_executor_ubuntu24:
+        ubuntu24.04:arm:lv6
+      Compile_ARM_dflow:
+        ubuntu20.04:arm:lv3
+      Compile_ARM_dflow_ubuntu24:
+        ubuntu24.04:arm:lv6
+      UT_Test_Report:
+        ubuntu20.04:x86:lv3
+      UT_Test_dflow:
+        ubuntu20.04:x86:lv3
+      UT_Test_ge_common:
+        ubuntu20.04:x86:lv3
+      UT_Test_parser:
+        ubuntu20.04:x86:lv3
+      UT_Test_python:
+        ubuntu20.04:x86:lv3
+      UT_Test_rt:
+        ubuntu20.04:x86:lv3
+      UT_Test_acl:
+        ubuntu20.04:x86:lv3
+      UT_Test_autofuse:
+        ubuntu20.04:x86:lv6
+      UT_Test_autofuse_ascendc_api:
+        ubuntu20.04:x86:lv6
+      UT_Test_executor:
+        ubuntu20.04:x86:lv3
+      UT_Test_dflow_ubuntu24:
+        ubuntu24.04:x86:lv6
+      UT_Test_ge_common_ubuntu24:
+        ubuntu24.04:x86:lv6
+      UT_Test_parser_ubuntu24:
+        ubuntu24.04:x86:lv6
+      UT_Test_python_ubuntu24:
+        ubuntu24.04:x86:lv6
+      UT_Test_rt_ubuntu24:
+        ubuntu24.04:x86:lv6
+      UT_Test_acl_ubuntu24:
+        ubuntu24.04:x86:lv6
+      UT_Test_autofuse_ubuntu24:
+        ubuntu24.04:x86:lv6
+      UT_Test_autofuse_ascendc_api_ubuntu24:
+        ubuntu24.04:x86:lv6
+      UT_Test_executor_ubuntu24:
+        ubuntu24.04:x86:lv6
+      ST_Test_Report:
+        ubuntu20.04:x86:lv3
+      ST_Test_dflow:
+        ubuntu20.04:x86:lv3
+      ST_Test_ge_common:
+        ubuntu20.04:x86:lv3
+      ST_Test_parser:
+        ubuntu20.04:x86:lv3
+      ST_Test_python:
+        ubuntu20.04:x86:lv3
+      ST_Test_rt:
+        ubuntu20.04:x86:lv6
+      ST_Test_autofuse:
+        ubuntu20.04:x86:lv6
+      ST_Test_executor:
+        ubuntu20.04:x86:lv3
+      ST_Test_hetero:
+        ubuntu20.04:x86:lv3
+      ST_Test_ubuntu24:
+        ubuntu24.04:x86:lv6
+      ST_Test_dflow_ubuntu24:
+        ubuntu24.04:x86:lv6
+      ST_Test_ge_common_ubuntu24:
+        ubuntu24.04:x86:lv6
+      ST_Test_parser_ubuntu24:
+        ubuntu24.04:x86:lv6
+      ST_Test_python_ubuntu24:
+        ubuntu24.04:x86:lv6
+      ST_Test_rt_ubuntu24:
+        ubuntu24.04:x86:lv6
+      ST_Test_autofuse_ubuntu24:
+        ubuntu24.04:x86:lv6
+      ST_Test_executor_ubuntu24:
+        ubuntu24.04:x86:lv6
+      ST_Test_hetero_ubuntu24:
+        ubuntu24.04:x86:lv6
+      API_Check:
+        ubuntu24.04:x86:api_check
+
+  metadef:
+    os_mirror:
+      ubuntu24.04:
+        x86:
+          api_check: ubuntu24.04.3_x86:lv6_v1.1059
+      ubuntu20.04:
+        arm:
+          lv3: ubuntu20.04.05_arm:lv3_v1.1080
+        x86:
+          lv3: ubuntu20.04.05_x86:lv3_v1.1085
+    stages:
+      Compile_Ascend_X86:
+        ubuntu20.04:x86:lv3
+      Compile_Ascend_X86_ubuntu24:
+        ubuntu24.04:x86:lv6
+      Compile_Ascend_ARM:
+        ubuntu20.04:arm:lv3
+      Compile_Ascend_ARM_ubuntu24:
+        ubuntu24.04:arm:lv6
+      UT_Test:
+        ubuntu20.04:x86:lv3
+      UT_Test_ubuntu24:
+        ubuntu24.04:x86:lv6
+      API_Check:
+        ubuntu24.04:x86:api_check
+
+  runtime-dev:
+    os_mirror:
+      ubuntu24.04:
+        x86:
+          api_check: ubuntu24.04.3_x86:lv6_v1.1059
+    stages:
+      Compile_Ascend_X86:
+        ubuntu20.04:x86:lv3
+      Compile_Ascend_X86_ubuntu24:
+        ubuntu24.04:x86:lv6
+      Compile_Ascend_ARM:
+        ubuntu20.04:arm:lv3
+      Compile_Ascend_ARM_ubuntu24:
+        ubuntu24.04:arm:lv6
+      UT_Test_acl:
+        ubuntu20.04:x86:lv3
+      UT_Test_rts:
+        ubuntu20.04:x86:lv3
+      UT_Test_platform:
+        ubuntu20.04:x86:lv3
+      UT_Test_qs:
+        ubuntu20.04:x86:lv3
+      UT_Test_aicpusd:
+        ubuntu20.04:x86:lv3
+      UT_Test_tsd:
+        ubuntu20.04:x86:lv3
+      UT_Test_dfx:
+        ubuntu20.04:x86:lv3
+      API_Check:
+        ubuntu24.04:x86:api_check
+
+  runtime:
+    os_mirror:
+      ubuntu24.04:
+        x86:
+          api_check: ubuntu24.04.3_x86:lv6_v1.1059
+      ubuntu20.04:
+        arm:
+          lv3: ubuntu20.04.05_arm:lv3_v1.1080
+        x86:
+          lv3: ubuntu20.04.05_x86:lv3_v1.1085
+    stages:
+      Compile_Ascend_X86:
+        ubuntu20.04:x86:lv3
+      Compile_Ascend_X86_ubuntu24:
+        ubuntu24.04:x86:lv6
+      Compile_Ascend_ARM:
+        ubuntu20.04:arm:lv3
+      Compile_Ascend_ARM_ubuntu24:
+        ubuntu24.04:arm:lv6
+      UT_Test_acl:
+        ubuntu20.04:x86:lv3
+      UT_Test_rts:
+        ubuntu20.04:x86:lv3
+      UT_Test_platform:
+        ubuntu20.04:x86:lv3
+      UT_Test_qs:
+        ubuntu20.04:x86:lv3
+      UT_Test_aicpusd:
+        ubuntu20.04:x86:lv3
+      UT_Test_tsd:
+        ubuntu20.04:x86:lv3
+      UT_Test_dfx:
+        ubuntu20.04:x86:lv3
+      UT_Test_mmpa:
+        ubuntu20.04:x86:lv3
+      API_Check:
+        ubuntu24.04:x86:api_check
+
+  oam-tools:
+    os_mirror:
+      ubuntu24.04:
+        x86:
+          api_check: ubuntu24.04.3_x86:lv6_v1.1059
+    stages:
+      Compile_Ascend_X86:
+        ubuntu20.04:x86:lv4
+      Compile_Ascend_X86_ubuntu24:
+        ubuntu24.04:x86:lv6
+      Compile_Ascend_ARM:
+        ubuntu20.04:arm:lv4
+      Compile_Ascend_ARM_ubuntu24:
+        ubuntu24.04:arm:lv6
+      API_Check:
+        ubuntu24.04:x86:api_check
+      UT_Test:
+        ubuntu20.04:x86:lv4
+      UT_Test_ubuntu24:
+        ubuntu24.04:x86:lv6
+
+  oam-tools-diag:
+    os_mirror:
+      ubuntu24.04:
+        x86:
+          api_check: ubuntu24.04.3_x86:lv6_v1.1059
+    stages:
+      Compile_Ascend_X86:
+        ubuntu20.04:x86:lv4
+      Compile_Ascend_X86_ubuntu24:
+        ubuntu24.04:x86:lv6
+      Compile_Ascend_ARM:
+        ubuntu20.04:arm:lv4
+      Compile_Ascend_ARM_ubuntu24:
+        ubuntu24.04:arm:lv6
+      API_Check:
+        ubuntu24.04:x86:api_check
+      UT_Test:
+        ubuntu20.04:x86:lv4
+
+  pypto-dev:
+    stages:
+      Compile_Ascend_X86:
+        ubuntu20.04:x86:lv3
+      Compile_Ascend_X86_ubuntu24:
+        ubuntu24.04:x86:lv6
+      Compile_Ascend_ARM:
+        ubuntu20.04:arm:lv3
+      Compile_Ascend_ARM_ubuntu24:
+        ubuntu24.04:arm:lv6
+      UT_Test_Py3_ninja_simulation:
+        ubuntu20.04:x86:lv3
+      UT_Test_Py3_ninja:
+        ubuntu20.04:x86:lv3
+      UT_Test_Cpp_make_clang:
+        ubuntu20.04:x86:lv3
+      UT_Test_Cpp_make_gnu:
+        ubuntu20.04:x86:lv3
+
+  driver:
+    os_mirror:
+      ubuntu20.04:
+        x86:
+          driver: ubuntu20.04.05_x86:headers540-v1.3
+      openeuler:
+        arm: 
+          driver: openeuler_arm:kernel510-v1.3
+      ubuntu24.04:
+        x86:
+          driver: ubuntu24.04_x86:headers680-v1.9
+          api_check: ubuntu24.04.3_x86:lv6-13_v1.1007
+    stages:
+      Compile_Ascend_X86_driver_npu_910b:
+        ubuntu20.04:x86:driver
+      Compile_Ascend_X86_driver_ubuntu_24_04_npu_910b:
+        ubuntu24.04:x86:driver
+      Compile_Ascend_X86_driver_npu_910_93:
+        ubuntu20.04:x86:driver
+      Compile_Ascend_X86_driver_ubuntu_24_04_npu_910_93:
+        ubuntu24.04:x86:driver
+      Compile_Ascend_ARM_driver_npu_910_93:
+        openeuler:arm:driver
+      Compile_Ascend_ARM_driver_npu_910b:
+        openeuler:arm:driver
+      UT_Test:
+        ubuntu20.04:x86:driver
+      API_Check:
+        ubuntu24.04:x86:api_check
+    # 注意：driver 类任务已用专用 driver 镜像，不适用 lv6，故不加通用 _ubuntu24
+
+  driver-dev:
+    os_mirror:
+      ubuntu20.04:
+        x86:
+          driver: ubuntu20.04.05_x86:headers540-v1.3
+      openeuler:
+        arm: 
+          driver: openeuler_arm:kernel510-v1.3
+      ubuntu24.04:
+        x86:
+          driver: ubuntu24.04_x86:headers680-v1.9
+          api_check: ubuntu24.04.3_x86:lv6-13_v1.1007
+    stages:
+      Compile_Ascend_X86_driver-dev_npu_910b:
+        ubuntu20.04:x86:driver
+      Compile_Ascend_X86_driver-dev_ubuntu_24_04_npu_910b:
+        ubuntu24.04:x86:driver
+      Compile_Ascend_ARM_driver-dev_npu_910b:
+        openeuler:arm:driver
+      UT_Test:
+        ubuntu20.04:x86:driver
+      API_Check:
+        ubuntu24.04:x86:api_check
+    # 同上，driver 任务已有 ubuntu24 版本，无需额外添加通用 _ubuntu24
+
+  pypto:
+    stages:
+      Compile_Ascend_X86:
+        ubuntu20.04:x86:lv3
+      Compile_Ascend_X86_ubuntu24:
+        ubuntu24.04:x86:lv6
+      Compile_Ascend_ARM:
+        ubuntu20.04:arm:lv3
+      Compile_Ascend_ARM_ubuntu24:
+        ubuntu24.04:arm:lv6
+      UT_Test_Py3_ninja_simulation:
+        ubuntu20.04:x86:lv3
+      UT_Test_Py3_ninja:
+        ubuntu20.04:x86:lv3
+      UT_Test_Cpp_make_clang:
+        ubuntu20.04:x86:lv3
+      UT_Test_Cpp_make_gnu:
+        ubuntu20.04:x86:lv3
+      UT_Test_Cpp_make_gnu_part_1:
+        ubuntu20.04:x86:lv3
+      UT_Test_Cpp_make_gnu_part_2:
+        ubuntu20.04:x86:lv3
+      UT_Test_Cpp_make_gnu_part_3:
+        ubuntu20.04:x86:lv3
+      UT_Test_report:
+        ubuntu20.04:x86:lv3
+
+  ops-base-dev:
+    os_mirror:
+      ubuntu24.04:
+        x86:
+          api_check: ubuntu24.04.3_x86:lv6_v1.1059
+    stages:
+      Compile_Ascend_X86:
+        ubuntu20.04:x86:lv4
+      Compile_Ascend_X86_ubuntu24:
+        ubuntu24.04:x86:lv6
+      Compile_Ascend_ARM:
+        ubuntu20.04:arm:lv4
+      Compile_Ascend_ARM_ubuntu24:
+        ubuntu24.04:arm:lv6
+      UT_Test:
+        ubuntu20.04:x86:lv4
+      API_Check:
+        ubuntu24.04:x86:api_check
+
+  pto-isa:
+    stages:
+      Compile_Ascend_X86:
+        ubuntu20.04:x86:lv6
+      Compile_Ascend_X86_ubuntu24:
+        ubuntu24.04:x86:lv6
+      Compile_Ascend_ARM:
+        ubuntu20.04:arm:lv6
+      Compile_Ascend_ARM_ubuntu24:
+        ubuntu24.04:arm:lv6
+      Compile_Ascend_ARM_A5:
+        ubuntu20.04:arm:lv6
+      Compile_Ascend_X86_A5_ubuntu24:
+        ubuntu24.04:x86:lv6
+      UT_Test:
+        ubuntu24.04:x86:lv6
+      Smoke_A900_npupool:
+        ubuntu20.04:arm:smoke
+  dvpp-dev:
+    os_mirror:
+      ubuntu20.04:
+        x86:
+          lv4: ubuntu20.04.05_x86:lv4_v1.1064
+      ubuntu24.04:
+        x86:
+          api_check: ubuntu24.04.3_x86:lv6_v1.1059
+    stages:
+      Compile_Ascend_X86:
+        ubuntu20.04:x86:lv4
+      Compile_Ascend_X86_ubuntu24:
+        ubuntu24.04:x86:lv6
+      Compile_Ascend_ARM:
+        ubuntu20.04:arm:lv4
+      Compile_Ascend_ARM_ubuntu24:
+        ubuntu24.04:arm:lv6
+      UT_Test:
+        ubuntu20.04:x86:lv4
+      API_Check:
+        ubuntu24.04:x86:api_check
+
+  acl-extend-dev:
+    os_mirror:
+      ubuntu24.04:
+        x86:
+          api_check: ubuntu24.04.3_x86:lv6_v1.1059
+    stages:
+      Compile_Ascend_X86:
+        ubuntu20.04:x86:lv3
+      Compile_Ascend_X86_ubuntu24:
+        ubuntu24.04:x86:lv6
+      Compile_Ascend_ARM:
+        ubuntu20.04:arm:lv3
+      Compile_Ascend_ARM_ubuntu24:
+        ubuntu24.04:arm:lv6
+      UT_Test:
+        ubuntu20.04:x86:lv3
+      API_Check:
+        ubuntu24.04:x86:api_check
+
+  cann-samples:
+    stages:
+      Compile_Ascend_X86_ubuntu24:
+        ubuntu24.04:x86:lv6
+      Compile_Ascend_ARM_ubuntu24:
+        ubuntu24.04:arm:lv6
+      UT_Test:
+        ubuntu20.04:x86:lv6
+      ST_Test:
+        ubuntu20.04:x86:lv6
+  asc-tools:
+    os_mirror:
+      ubuntu24.04:
+        x86:
+          api_check: ubuntu24.04.3_x86:lv6_v1.1059
+    stages:
+      Compile_Ascend_X86:
+        ubuntu20.04:x86:lv6
+      Compile_Ascend_X86_ubuntu24:
+        ubuntu24.04:x86:lv6
+      Compile_Ascend_ARM:
+        ubuntu20.04:arm:lv6
+      Compile_Ascend_ARM_ubuntu24:
+        ubuntu24.04:arm:lv6
+      UT_Test:
+        ubuntu20.04:x86:lv6
+      API_Check:
+        ubuntu24.04:x86:api_check
+
+  asc-toolkit-dev:
+    os_mirror:
+      ubuntu24.04:
+        x86:
+          api_check: ubuntu24.04.3_x86:lv6_v1.1059
+    stages:
+      Compile_Ascend_X86:
+        ubuntu20.04:x86:lv6
+      Compile_Ascend_X86_ubuntu24:
+        ubuntu24.04:x86:lv6
+      Compile_Ascend_ARM:
+        ubuntu20.04:arm:lv6
+      Compile_Ascend_ARM_ubuntu24:
+        ubuntu24.04:arm:lv6
+      UT_Test:
+        ubuntu20.04:x86:lv6
+      API_Check:
+        ubuntu24.04:x86:api_check
+
+  pyasc:
+    os_mirror:
+      ubuntu20.04:
+        arm:
+          lv6: ubuntu20.04.05_arm:lv6_v1.1047
+        x86:
+          lv6: ubuntu20.04.05_x86:lv6_v1.1048
+    stages:
+      Compile_Ascend_X86:
+        ubuntu20.04:x86:lv6
+      Compile_Ascend_X86_ubuntu24:
+        ubuntu24.04:x86:lv6
+      Compile_Ascend_ARM:
+        ubuntu20.04:arm:lv6
+      Compile_Ascend_ARM_ubuntu24:
+        ubuntu24.04:arm:lv6
+      UT_Test:
+        ubuntu20.04:x86:lv6
+      UT_Test_Python:
+        ubuntu20.04:x86:lv6
+
+  tensorflow:
+    os_mirror:
+      ubuntu20.04:
+        arm:
+          lv6: ubuntu20.04.05_arm:lv6_v1.1058
+        x86:
+          lv6: ubuntu20.04.05_x86:lv6_v1.1057
+    stages:
+      Compile_Ascend_X86:
+        ubuntu20.04:x86:lv6
+      Compile_Ascend_X86_ubuntu24:
+        ubuntu24.04:x86:lv6
+      Compile_Ascend_X86_TF:
+        ubuntu20.04:x86:lv6
+      Compile_Ascend_X86_TF_ubuntu24:
+        ubuntu24.04:x86:lv6
+      Compile_Ascend_ARM:
+        ubuntu20.04:arm:lv6
+      Compile_Ascend_ARM_ubuntu24:
+        ubuntu24.04:arm:lv6
+      Compile_Ascend_ARM_TF_ubuntu24:
+        ubuntu24.04:arm:lv6
+      UT_Test:
+        ubuntu20.04:x86:lv6
+      ST_Test:
+        ubuntu20.04:x86:lv6
+  torchtitan-npu:
+    stages:
+      Compile_Ascend_X86:
+        ubuntu20.04:x86:lv6
+      Compile_Ascend_ARM:
+        ubuntu20.04:arm:lv6
+      UT_Test:
+        ubuntu20.04:x86:lv6
+
+  cmake:
+    stages:
+      UT_Test:
+        ubuntu20.04:x86:lv1
+      ST_Test:
+        ubuntu20.04:x86:lv1
+
+  test-dev:
+    stages:
+      Compile_Ascend_X86:
+        ubuntu20.04:x86:lv6
+      Compile_Ascend_X86_ubuntu24:
+        ubuntu24.04:x86:lv6
+      Compile_Ascend_ARM:
+        ubuntu20.04:arm:lv6
+      Compile_Ascend_ARM_ubuntu24:
+        ubuntu24.04:arm:lv6
+
+  ops-rand:
+    os_mirror:
+      ubuntu24.04:
+        x86:
+          api_check: ubuntu24.04.3_x86:lv6_v1.1059
+          lv6: ubuntu24.04_x86:lv6_v1.1019
+        arm:
+          lv6: ubuntu24.04_arm:lv6_v1.1019
+    stages:
+      Compile_Ascend_X86:
+        ubuntu20.04:x86:lv5
+      Compile_Ascend_X86_ubuntu24:
+        ubuntu24.04:x86:lv6
+      Compile_Ascend_ARM:
+        ubuntu20.04:arm:lv5
+      Compile_Ascend_ARM_ubuntu24:
+        ubuntu24.04:arm:lv6
+      API_Check:
+        ubuntu24.04:x86:api_check
+  ops-tensor:
+    os_mirror:
+      ubuntu24.04:
+        x86:
+          api_check: ubuntu24.04.3_x86:lv6_v1.1059
+          lv6: ubuntu24.04_x86:lv6_v1.1013
+        arm:
+          lv6: ubuntu24.04_arm:lv6_v1.1013
+    stages:
+      Compile_Ascend_X86:
+        ubuntu20.04:x86:lv5
+      Compile_Ascend_X86_ubuntu24:
+        ubuntu24.04:x86:lv6
+      Compile_Ascend_ARM:
+        ubuntu20.04:arm:lv5
+      Compile_Ascend_ARM_ubuntu24:
+        ubuntu24.04:arm:lv6
+      API_Check:
+        ubuntu24.04:x86:api_check
+  ops-fft:
+    os_mirror:
+      ubuntu24.04:
+        x86:
+          api_check: ubuntu24.04.3_x86:lv6_v1.1059
+          lv6: ubuntu24.04_x86:lv6_v1.1013
+        arm:
+          lv6: ubuntu24.04_arm:lv6_v1.1013
+    stages:
+      Compile_Ascend_X86:
+        ubuntu20.04:x86:lv5
+      Compile_Ascend_X86_ubuntu24:
+        ubuntu24.04:x86:lv6
+      Compile_Ascend_ARM:
+        ubuntu20.04:arm:lv5
+      Compile_Ascend_ARM_ubuntu24:
+        ubuntu24.04:arm:lv6
+      API_Check:
+        ubuntu24.04:x86:api_check

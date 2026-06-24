@@ -1,0 +1,79 @@
+global:
+  os_mirror:
+    ubuntu20.04:
+      arm:
+        lv1: ubuntu20.04.05_arm:lv1_v1.1003
+        lv2: ubuntu20.04.05_arm:lv2_v1.1011
+        lv3: ubuntu20.04.05_arm:lv3_v1.1106
+        lv4: ubuntu20.04.05_arm:lv4_v1.1101
+        lv5: ubuntu20.04.05_arm:lv5_v1.1102
+        lv6: ubuntu20.04.05_arm:lv6_v1.1084
+        smoke: ubuntu20.04.05_arm:mindspore_v1.1041
+        smoke_A3: ubuntu20.04.05_arm:mindspore_A3_v1.1041
+        lv6_monitor: ubuntu20.04.05_arm:lv6_v1.1067
+      x86:
+        lv1: ubuntu20.04.05_x86:lv1_v1.1003
+        lv2: ubuntu20.04.05_x86:lv2_v1.1010
+        lv3: ubuntu20.04.05_x86:lv3_v1.1118
+        lv4: ubuntu20.04.05_x86:lv4_v1.1103
+        lv5: ubuntu20.04.05_x86:lv5_v1.1103
+        lv6: ubuntu20.04.05_x86:lv6_v1.1087
+        lv6_monitor: ubuntu20.04.05_x86:lv6_v1.1069
+        lv6_monitor_9_0_0: ubuntu20.04.05_x86:lv6_v1.1082
+    ubuntu24.04:
+      arm:
+        lv6: ubuntu24.04_arm:lv6_v1.1071
+        smoke: ubuntu24.04_arm:pre_mindspore_A2_conda_v1.1008
+        smoke_A3: ubuntu24.04_arm:pre_mindspore_A3_conda_v1.1004
+        asnumpy: ubuntu24.04_arm:asnumpy_v1.1001
+      x86:
+        lv6: ubuntu24.04_x86:lv6_v1.1072
+        xla_npu: ubuntu_npu:v1.0
+        asnumpy: ubuntu24.04_x86:asnumpy_v1.1002
+
+gray_global:
+  os_mirror:
+    ubuntu20.04:
+      arm:
+        lv1: ubuntu20.04.05_arm:lv1_v1.1003
+        lv2: ubuntu20.04.05_arm:lv2_v1.1011
+        lv3: ubuntu20.04.05_arm:lv3_v1.1080
+        lv4: ubuntu20.04.05_arm:lv4_v1.1076
+        lv5: ubuntu20.04.05_arm:lv5_v1.1077
+        lv6: ubuntu20.04.05_arm:lv6_v1.1051
+      x86:
+        lv1: ubuntu20.04.05_x86:lv1_v1.1003
+        lv2: ubuntu20.04.05_x86:lv2_v1.1010
+        lv3: ubuntu20.04.05_x86:lv3_v1.1085
+        lv4: ubuntu20.04.05_x86:lv4_v1.1077
+        lv5: ubuntu20.04.05_x86:lv5_v1.1078
+        lv6: ubuntu20.04.05_x86:lv6_v1.1052
+    ubuntu24.04:
+      arm:
+        lv1: ubuntu24.04_arm:lv6_v1.1019
+        lv2: ubuntu24.04_arm:lv6_v1.1019
+        lv3: ubuntu24.04_arm:lv6_v1.1019
+        lv4: ubuntu24.04_arm:lv6_v1.1019
+        lv5: ubuntu24.04_arm:lv6_v1.1019
+        lv6: ubuntu24.04_arm:lv6_v1.1019
+      x86:
+        lv1: ubuntu24.04_x86:lv6_v1.1019
+        lv2: ubuntu24.04_x86:lv6_v1.1019
+        lv3: ubuntu24.04_x86:lv6_v1.1019
+        lv4: ubuntu24.04_x86:lv6_v1.1019
+        lv5: ubuntu24.04_x86:lv6_v1.1019
+        lv6: ubuntu24.04_x86:lv6_v1.1019
+
+repos:
+  skills-dev:
+    os_mirror:
+      ubuntu20.04:
+        x86:
+          lv6: ubuntu20.04.05_x86:lv6_v1.1065
+    stages:
+      Compile_Ascend_X86:
+        ubuntu20.04:x86:lv6
+      Compile_Ascend_ARM:
+        ubuntu20.04:arm:lv6
+      UT_Test:
+        ubuntu20.04:x86:lv6
