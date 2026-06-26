@@ -1,0 +1,29 @@
+name: 'statichcek'
+author: 'CANN'
+version: '1.0.0'
+description: 'this is a staticcheck action'
+inputs:
+  workspace:
+    description: 代码工作目录
+    required: true
+  check_type:
+    description: 检查类型
+    required: true
+  repo_name:
+    description: 仓库名称
+    required: true
+  target_branch:
+    description: 对比基准分支
+    required: true
+  merge_id:
+    description: PR/MERGE编号
+    required: true
+  commit_id:
+    description: 当前提交commit hash
+    required: false
+    default: "0"
+
+
+runs:
+  using: 'node16'
+  main: 'dist/main.js'
