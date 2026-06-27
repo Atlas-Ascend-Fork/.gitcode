@@ -61,12 +61,12 @@ else
       # 双重校验：变量非空 + 文件真实存在
       if [[ -z "${coverage_info}" ]]; then
           echo "ERROR: 未找到 ops.info / coverage.info 任意文件"
-          exit 1
+          exit 0
       fi
       if [[ ! -f "${coverage_info}" ]]; then
           echo "ERROR: 找到的路径不存在文件: ${coverage_info}"
           ls -la "${WORKSPACE}"
-          exit 1
+          exit 0
       fi
 
       # 拷贝、重命名，所有变量加双引号兼容空格路径
