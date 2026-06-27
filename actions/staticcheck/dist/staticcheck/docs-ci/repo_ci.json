@@ -1,0 +1,22 @@
+{
+    "link-validity-check": {
+        "master": [
+            "link-validity-check"
+        ]
+    },
+    "codespell-check": {
+        "master": [
+            "codespell-check"
+        ]
+    },
+    "resource_existence_check": {
+        "master": [
+            "resource_existence_check"
+        ]
+    },
+    "tag_closed_check": {
+        "master": [
+            "tag_closed_check"
+        ]
+    }
+}
