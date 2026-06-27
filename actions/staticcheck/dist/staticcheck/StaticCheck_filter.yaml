@@ -1,0 +1,24 @@
+StaticCheck_markdownlint:  #黑名单
+  ops-math-dev:  # 仓名
+    - test1/   # 例子1,目录
+    - test2/abc.md  #例子2，文件
+    - 'cmake/testtest.md:68'
+  asc-devkit:
+    - docs/api/
+    - docs/guide/
+StaticCheck_codespell_check:
+  asc-devkit:
+    - docs/api/
+    - docs/guide/
+StaticCheck_link_validity_check:
+  asc-devkit:
+    - docs/api/
+    - docs/guide/
+StaticCheck_resource_existence_check:
+  asc-devkit:
+    - docs/api/
+    - docs/guide/
+StaticCheck_tag_closed_check:
+  asc-devkit:
+    - docs/api/
+    - docs/guide/
