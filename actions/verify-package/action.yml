@@ -1,0 +1,21 @@
+name: 'verify-package'
+author: 'CANN'
+version: '1.0.0'
+description: 'this is a verify package action'
+inputs:
+  workspace:
+    description: 代码检出根目录
+    required: true
+  package_path:
+    description: 包目录
+    required: false
+    default: build_out
+  package_type:
+    description: 包类型
+    required: false
+    default: run
+
+
+runs:
+  using: 'node16'
+  main: 'dist/main.js'
