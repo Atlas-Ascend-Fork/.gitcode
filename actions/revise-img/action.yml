@@ -1,0 +1,17 @@
+name: 'revise-img'
+author: 'CANN'
+version: '1.0.0'
+description: 'this is a revise img action'
+inputs:
+  repo_name:
+    required: true
+  target_branch:
+    required: true
+  repo_url:
+    description: ci仓库地址
+    required: false
+    default: "https://gitcode.com/cann/.gitcode.git"
+
+runs:
+  using: 'node16'
+  main: 'dist/main.js'

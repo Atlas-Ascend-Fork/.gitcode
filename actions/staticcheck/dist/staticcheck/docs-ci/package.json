@@ -1,0 +1,7 @@
+{
+    "name": "docs-ci",
+    "version": "0.0.1",
+    "dependencies": {
+      "cspell-lib": "9.2.1"
+    }
+  }
