@@ -252,8 +252,8 @@ class CodeCheck(object):
             # self.write_task_json()
             sys.exit(-1)
         lresult = "pass" if self.comment == "pass" else "no pass"
-        logging.info(f"majun_url: {self.report_url}, {lresult}\n")
-        print(json.dumps({"status": lresult, "link": self.report_url}))
+        logging.info(json.dumps({"result": lresult, "url": self.report_url}))
+        print(self.report_url)
         if lresult == "no pass":
             logging.info(
                 f"[anti posion {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] anti posion result: no pass."

@@ -310,8 +310,8 @@ class CodeCheck(object):
             )
 
         lresult = "pass" if self.result == "pass" else "no pass"
-        logging.info(f"majun_url: {self.report_url}, {lresult}\n")
-        print(json.dumps({"result": lresult, "url": self.report_url}))
+        logging.info(json.dumps({"result": lresult, "url": self.report_url}))
+        print(self.report_url)
         if lresult == "no pass" and os.getenv("remark") != "codestyle":
             logging.info(
                 f"[codecheck {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] codecheck result: no pass."
