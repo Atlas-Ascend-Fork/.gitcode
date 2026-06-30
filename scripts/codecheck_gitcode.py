@@ -56,6 +56,8 @@ class CodeCheck(object):
         self.taskid = None
         self.MESSAGE = None
         self.json_name="codecheck.json"
+        self.env_dist = os.environ
+        self.gitcode_output = self.env_dist.get("ATOMGIT_OUTPUT")
 
     def _determine_repo_type(self):
         repo_type = None
@@ -310,8 +312,10 @@ class CodeCheck(object):
             )
 
         lresult = "pass" if self.result == "pass" else "no pass"
-        logging.info(f"majun_url: {self.report_url}, {lresult}\n")
-        print(json.dumps({"result": lresult, "url": self.report_url}))
+        logging.info(json.dumps({"result": lresult, "url": self.report_url}))
+        os.system(
+            command=f'echo "report_url={self.report_url}" >> {self.gitcode_output}'
+        )
         if lresult == "no pass" and os.getenv("remark") != "codestyle":
             logging.info(
                 f"[codecheck {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] codecheck result: no pass."

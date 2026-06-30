@@ -52,7 +52,9 @@ class CodeCheck(object):
         self.gitcode_domain = "https://gitcode.com"
         self.repo_type = self._determine_repo_type()
         self.project_name = "CANN"
-        self.MESSAGE = None 
+        self.MESSAGE = None
+        self.env_dist = os.environ
+        self.gitcode_output = self.env_dist.get("ATOMGIT_OUTPUT")
 
     def _determine_repo_type(self):
         repo_type = None
@@ -262,8 +264,10 @@ class CodeCheck(object):
             # self._write_task_json()
             sys.exit(-1)
         lresult = "pass" if self.result == "pass" else "no pass"
-        logging.info(f"majun_url: {self.report_url}, {lresult}\n")
-        print(json.dumps({"status": lresult, "link": self.report_url}))
+        logging.info(json.dumps({"result": lresult, "url": self.report_url}))
+        os.system(
+            command=f'echo "report_url={self.report_url}" >> {self.gitcode_output}'
+        )
         if lresult == "no pass":
             logging.error(
                 f"[code sca {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] code scan result: no pass."
