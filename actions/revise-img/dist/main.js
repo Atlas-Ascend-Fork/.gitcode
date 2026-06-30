@@ -66,8 +66,24 @@ async function run() {
         const cloneDir = "cann-ci";
         console.log('开始拉取 cann-ci...');
         (0, child_process_1.execSync)(`git clone ${repoUrl} ${cloneDir} --depth 1`, { stdio: 'inherit' });
-        const images_yaml_path = `image-conf/${target_branch}/images.yaml`;
-        const fullYamlPath = path_1.default.join(cloneDir, images_yaml_path);
+        // 1. 优先当前分支配置
+        const branchYamlRel = `image-conf/${target_branch}/images.yaml`;
+        const branchYamlFull = path_1.default.join(cloneDir, branchYamlRel);
+        // 2. master 配置
+        const masterYamlRel = `image-conf/master/images.yaml`;
+        const masterYamlFull = path_1.default.join(cloneDir, masterYamlRel);
+        let fullYamlPath;
+        if (fs_1.default.existsSync(branchYamlFull)) {
+            fullYamlPath = branchYamlFull;
+            console.log(`使用当前分支配置文件：${fullYamlPath}`);
+        }
+        else {
+            fullYamlPath = masterYamlFull;
+            console.log(`分支 ${target_branch} 无配置，使用 master 配置：${fullYamlPath}`);
+            if (!fs_1.default.existsSync(fullYamlPath)) {
+                throw new Error(`分支配置 ${branchYamlFull} 与 master 配置 ${masterYamlFull} 均不存在`);
+            }
+        }
         console.log(`配置文件路径：${fullYamlPath}`);
         const pyScript = path_1.default.resolve(__dirname, "./get_repo_images.py");
         const output = (0, child_process_1.execSync)(`python3 "${pyScript}" "${fullYamlPath}" "${repo_name}"`, { encoding: 'utf-8', stdio: ['pipe', 'pipe', 'inherit'] }).trim();
@@ -27624,7 +27640,7 @@ module.exports = parseParams
 /************************************************************************/
 /******/ 	// The module cache
 /******/ 	var __webpack_module_cache__ = {};
-/******/ 	
+/******/
 /******/ 	// The require function
 /******/ 	function __nccwpck_require__(moduleId) {
 /******/ 		// Check if module is in cache
@@ -27638,7 +27654,7 @@ module.exports = parseParams
 /******/ 			// no module.loaded needed
 /******/ 			exports: {}
 /******/ 		};
-/******/ 	
+/******/
 /******/ 		// Execute the module function
 /******/ 		var threw = true;
 /******/ 		try {
@@ -27647,23 +27663,23 @@ module.exports = parseParams
 /******/ 		} finally {
 /******/ 			if(threw) delete __webpack_module_cache__[moduleId];
 /******/ 		}
-/******/ 	
+/******/
 /******/ 		// Return the exports of the module
 /******/ 		return module.exports;
 /******/ 	}
-/******/ 	
+/******/
 /************************************************************************/
 /******/ 	/* webpack/runtime/compat */
-/******/ 	
+/******/
 /******/ 	if (typeof __nccwpck_require__ !== 'undefined') __nccwpck_require__.ab = __dirname + "/";
-/******/ 	
+/******/
 /************************************************************************/
-/******/ 	
+/******/
 /******/ 	// startup
 /******/ 	// Load entry module and return exports
 /******/ 	// This entry module is referenced by other modules so it can't be inlined
 /******/ 	var __webpack_exports__ = __nccwpck_require__(1188);
 /******/ 	module.exports = __webpack_exports__;
-/******/ 	
+/******/
 /******/ })()
 ;

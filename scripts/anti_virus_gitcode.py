@@ -51,6 +51,8 @@ class CodeCheck(object):
         self.scanId = None
         self.comment= None
         self.MESSAGE = None
+        self.env_dist = os.environ
+        self.gitcode_output = self.env_dist.get("ATOMGIT_OUTPUT")
 
     def _read_task_json(self):
         package_path = f"https://ascend-ci.obs.cn-north-4.myhuaweicloud.com/{self.repository_name}/package/{self.pr_id}/codecheck.json"
@@ -252,8 +254,10 @@ class CodeCheck(object):
             # self.write_task_json()
             sys.exit(-1)
         lresult = "pass" if self.comment == "pass" else "no pass"
-        logging.info(f"majun_url: {self.report_url}, {lresult}\n")
-        print(json.dumps({"status": lresult, "link": self.report_url}))
+        logging.info(json.dumps({"result": lresult, "url": self.report_url}))
+        os.system(
+            command=f'echo "report_url={self.report_url}" >> {self.gitcode_output}'
+        )
         if lresult == "no pass":
             logging.info(
                 f"[anti posion {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] anti posion result: no pass."
