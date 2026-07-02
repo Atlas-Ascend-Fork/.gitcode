@@ -2,8 +2,8 @@
 
 依据 `task_name` 内容执行不同流程：
 
-- 含 `compile`：调用 `api_compile_upload.sh`，使用 `APIInfoGenTool` 分析编译产物并上报 API 文档，执行可用性检查。
-- 含 `ubuntu24`：调用 `api_check.sh`，查询 PR 接口校验结果。
+- 含 `compile`：调用 `api_compile_upload.sh`。该脚本内部进一步判断 `task_name` 是否同时含 `ubuntu24`，**仅当同时包含 `compile` 与 `ubuntu24` 时**才执行 API 文档生成、上报与可用性检查；否则直接退出（"no need to api check"）。
+- 不含 `compile`：调用 `api_check.sh`，查询 PR 接口校验结果。
 
 ## 输入参数
 
