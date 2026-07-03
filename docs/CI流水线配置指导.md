@@ -172,10 +172,7 @@ PR 评论 /compile
 │       ├── x86_compile_action.yml   # x86 编译子 workflow
 │       ├── arm_compile_action.yml   # arm 编译子 workflow
 │       ├── staticcheck_action.yml   # 静态检查子 workflow
-│       ├── llt_action.yml           # 单元测试子 workflow
-│       ├── x86_compile.sh           # x86 编译脚本
-│       └── arm_compile.sh           # arm 编译脚本
-└── classify_rule.yaml               # 覆盖率分类规则（如需 UT 覆盖率）
+│       └── llt_action.yml           # 单元测试子 workflow
 ```
 
 同时在 CI 仓库（`cann/.gitcode`）中配置镜像：
@@ -379,12 +376,14 @@ jobs:
             cd ${{ steps.process_checkout.outputs.path }}
             export task_name=${{ inputs.task_name }}
             export GIT_TARGET_BRANCH=${{ env.TARGET_BRANCH }}
-            BuildAccelerate bash .gitcode/workflows/x86_compile.sh
+            # gcc 版本切换 + CANN 环境加载 + 编译命令（inline）
+            ...
           AC_SERVER_IP: ${{ vars.AC_SERVER_IP }}
       - name: verify_package
         uses: cann/.gitcode/actions/verify-package@master
         with:
           workspace: ${{ steps.process_checkout.outputs.path }}
+          package_type: run  # 产物包扩展名，默认 run；Python whl 包传 whl
       - name: upload
         uses: obs-upload
         with:
@@ -400,14 +399,27 @@ jobs:
       image: swr.cn-north-4.myhuaweicloud.com/ci_cann/${{ inputs.image_version }}
 ```
 
-#### x86_compile.sh（编译脚本示例）
+#### 编译命令
 
-编译脚本通过 `task_name` 区分不同的编译场景。脚本需放置在仓库的 `.gitcode/workflows/` 目录下。
+编译逻辑直接 inline 在 `build-accelerate` 的 `command` 中，通过 `task_name` 区分不同的编译场景。命令中需包含环境初始化（gcc 版本切换、CANN 环境加载）：
 
 ```bash
-#!/bin/bash
-cd ${WORKSPACE}
+# gcc 版本：ubuntu24 用 gcc-14，否则用 devtoolset-7
+echo $(grep -E "^VERSION_ID=" /etc/os-release | cut -d'"' -f2)
+if [[ "${task_name}" == *ubuntu24* ]]; then
+    sudo update-alternatives --set gcc /usr/bin/gcc-14
+else
+    if [[ -f "/opt/rh/devtoolset-7/enable" ]]; then
+        echo "source devtoolset"
+        source /opt/rh/devtoolset-7/enable
+    fi
+fi
+gcc --version
+
+# CANN 环境
 source /home/jenkins/Ascend/cann/bin/setenv.bash
+
+# 编译
 set +e
 case "${task_name}" in
     x86_compile*)
@@ -421,7 +433,7 @@ case "${task_name}" in
 esac
 ```
 
-> arm 编译 workflow (`arm_compile_action.yml`) 结构与 x86 相同，仅 `runs-on` 改为 `[dedicate-hosted, arm64, xlarge]`，编译脚本改为 `arm_compile.sh`。
+> arm 编译 workflow (`arm_compile_action.yml`) 结构与 x86 相同，仅 `runs-on` 改为 `[dedicate-hosted, arm64, xlarge]`。
 
 ### 3.5 代码检查 Workflow
 
@@ -622,14 +634,12 @@ jobs:
           path: ${{ steps.process_checkout.outputs.path }}
       - name: ut_acc
         identifier: ut
-        uses: build-accelerate
-        with:
-          command: |
-            export WORKSPACE=${{ steps.process_checkout.outputs.path }}
-            cd ${{ steps.process_checkout.outputs.path }}
-            export ut_type=${{ inputs.ut_type }}
-            BuildAccelerate bash .gitcode/workflows/ut.sh ${ut_type}
-          AC_SERVER_IP: ${{ vars.AC_SERVER_IP }}
+        run: |
+          export WORKSPACE=${{ steps.process_checkout.outputs.path }}
+          cd ${{ steps.process_checkout.outputs.path }}
+          export GE_ST_RT2=${{ inputs.ut_type }}
+          # gcc 切换 + CANN 环境 + 按 ut_type 分发执行（inline）
+          ...
       - name: ut_cov
         identifier: ut_cov
         uses: cann/.gitcode/actions/ut-cov-report@master
@@ -655,10 +665,11 @@ jobs:
       image: swr.cn-north-4.myhuaweicloud.com/ci_cann/${{ inputs.image_version }}
 ```
 
-> **UT 脚本约定**：`ut.sh` 通过 `ut_type` 分发到不同的测试目标。脚本需通过 `$ATOMGIT_OUTPUT` 文件输出 `ut_process` 变量（`ut_cov` 或 `coverage`），供下游 `ut-cov-report` action 消费：
+> **UT 执行约定**：UT 逻辑直接 inline 在 `command` 中，通过 `ut_type` 分发到不同的测试目标。产出覆盖率的 UT 类型需通过 `$ATOMGIT_OUTPUT` 文件输出 `ut_process` 变量，供下游 `ut-cov-report` action 消费：
 > ```bash
-> echo "ut_process=ut_cov" >> $ATOMGIT_OUTPUT
+> echo "ut_process=coverage" >> $ATOMGIT_OUTPUT
 > ```
+> 不产覆盖率的类型（如 clang/asan 模式）无需输出。
 
 ### 3.8 覆盖率报告 Workflow（可选）
 
@@ -714,20 +725,7 @@ stage4:
         image: swr.cn-north-4.myhuaweicloud.com/ci_cann/ubuntu24.04_x86:lv6_v1.1073
 ```
 
-> `modules` 参数列出需要合并的 UT 模块名（空格分隔），对应 `stage3` 中各 `llt_action` 的 `ut_type`。`ut_field` 为业务域标识，需与 `classify_rule.yaml` 中的分类一致。
-
-### 3.9 覆盖率分类规则文件
-
-在仓库根目录创建 `classify_rule.yaml`，定义代码文件的 UT 分类归属，供 `ut-cov-report` action 统计增量覆盖率：
-
-```yaml
-# 示例结构，具体规则根据仓库实际目录调整
-<ut_type>:
-  - "src/module_a/**"
-  - "src/module_b/**"
-```
-
-> 可参考 `ops-nn/classify_rule.yaml` 或 `runtime/classify_rule.yaml` 的实际配置。
+> `modules` 参数列出需要合并的 UT 模块名（空格分隔），对应 `stage3` 中各 `llt_action` 的 `ut_type`，仅包含产出覆盖率的 UT 类型。`ut_field` 为业务域标识。
 
 ---
 
@@ -812,11 +810,11 @@ GitCode CI 平台提供以下官方 Action：
     command: |
       export WORKSPACE=${{ steps.process_checkout.outputs.path }}
       cd ${{ steps.process_checkout.outputs.path }}
-      BuildAccelerate bash .gitcode/workflows/x86_compile.sh
+      # 编译命令直接 inline 在此
     AC_SERVER_IP: ${{ vars.AC_SERVER_IP }}
 ```
 
-- `command` 中通过 `export` 注入环境变量，再调用编译脚本。
+- `command` 中通过 `export` 注入环境变量，再 inline 执行编译/测试命令。
 - `AC_SERVER_IP` 为编译加速服务器地址，通过仓库 Variable 配置。
 
 ---
@@ -919,10 +917,23 @@ API 文档生成与上报 / PR 接口校验。含 `compile` 且同时含 `ubuntu
 
 校验编译产物包的安装与卸载。在编译步骤后调用。
 
+| 参数 | 必填 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| `workspace` | 是 | - | 代码检出根目录 |
+| `package_path` | 否 | `build_out` | 包所在目录 |
+| `package_type` | 否 | `run` | 包扩展名类型（CANN `.run` 包用 `run`；Python `.whl` 包用 `whl`） |
+
 ```yaml
+# CANN .run 包（默认）
 - uses: cann/.gitcode/actions/verify-package@master
   with:
     workspace: ${{ steps.process_checkout.outputs.path }}
+
+# Python .whl 包
+- uses: cann/.gitcode/actions/verify-package@master
+  with:
+    workspace: ${{ steps.process_checkout.outputs.path }}
+    package_type: whl
 ```
 
 > 详细文档：[verify-package/README.md](../actions/verify-package/README.md)
@@ -930,6 +941,11 @@ API 文档生成与上报 / PR 接口校验。含 `compile` 且同时含 `ubuntu
 ### ut-cov-report
 
 单元测试覆盖率处理，支持 `cov`（打包覆盖率）和 `report`（合并生成报告）两种模式。
+
+- `cov` 模式根据 `ut_process` 进一步区分：
+  - `coverage`：查找 `coverage_filtered.info` / `ops.info` / `coverage.info` 并重命名为 `coverage_<ut_type>.info`，供 report 模式合并。UT 命令需输出 `ut_process=coverage`。
+  - `ut_cov`：统计增量覆盖率，打包 `ut_cov_<ut_type>.tar.gz`。UT 命令需输出 `ut_process=ut_cov`。
+  - 空（未输出 `ut_process`）：跳过覆盖率打包。
 
 ```yaml
 # cov 模式（UT 执行后调用）
@@ -954,6 +970,8 @@ API 文档生成与上报 / PR 接口校验。含 `compile` 且同时含 `ubuntu
     git_token: ${{ secrets.GIT_TOKEN }}
 ```
 
+> `modules` 仅列出产出覆盖率（`ut_process=coverage`）的模块；不产覆盖率的 UT 类型不应列入。
+
 > 详细文档：[ut-cov-report/README.md](../actions/ut-cov-report/README.md)
 
 ---
@@ -970,10 +988,6 @@ API 文档生成与上报 / PR 接口校验。含 `compile` 且同时含 `ubuntu
 | `arm_compile_action.yml` | 仓库 `.gitcode/workflows/` | arm 编译子 workflow |
 | `staticcheck_action.yml` | 仓库 `.gitcode/workflows/` | 静态检查子 workflow |
 | `llt_action.yml` | 仓库 `.gitcode/workflows/` | 单元测试子 workflow |
-| `x86_compile.sh` | 仓库 `.gitcode/workflows/` | x86 编译脚本 |
-| `arm_compile.sh` | 仓库 `.gitcode/workflows/` | arm 编译脚本 |
-| `ut.sh` | 仓库 `.gitcode/workflows/` | 单元测试脚本（如需 UT） |
-| `classify_rule.yaml` | 仓库根目录 | 覆盖率分类规则（如需 UT 覆盖率） |
 | `images.yaml` | CI 仓库 `image-conf/<branch>/` | 镜像配置 |
 
 ### 参考仓库
@@ -989,7 +1003,7 @@ A: 每个 Job 运行在独立容器中，工作区不共享。需要重新 check
 
 **Q: 如何新增一个编译任务？**
 
-A: 1) 在 `images.yaml` 中添加 stage；2) 在编译脚本中添加 `task_name` 对应的 case；3) 在主入口 workflow 中添加 Job 调用编译子 workflow。
+A: 1) 在 `images.yaml` 中添加 stage；2) 在编译命令中添加 `task_name` 对应的 case；3) 在主入口 workflow 中添加 Job 调用编译子 workflow。
 
 **Q: `fail-fast` 如何设置？**
 
@@ -998,3 +1012,7 @@ A: `stage1` 设为 `true`（准备阶段失败则终止全部）；`stage2`/`sta
 **Q: 如何只保留必要检查项？**
 
 A: 在主入口 workflow 中按需删减 `stage2`/`stage3` 中的 Job。例如不需要 UT 则去掉 `stage3`；不需要覆盖率报告则去掉 `stage4`。
+
+**Q: verify-package 如何校验 Python whl 包？**
+
+A: 传 `package_type: whl` 参数。默认 `package_type: run` 适用于 CANN `.run` 包。
