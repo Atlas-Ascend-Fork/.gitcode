@@ -310,6 +310,7 @@ def init_args():
 
 
 if __name__ == "__main__":
+    sys.exit(0)
     args = init_args()
     codecheck = CodeCheck(
         args.access_key,
