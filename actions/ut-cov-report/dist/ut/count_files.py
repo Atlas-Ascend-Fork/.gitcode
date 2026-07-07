@@ -162,22 +162,27 @@ def count_yaml(class_rule_path, component, component_path, field_path):
                 continue
     print("++++++++++++++++++++++++++++++++++++++++")
     print(unrelease_path)
+    print(type(unrelease_path))
 
     if unrelease_path:
         print("111111111111111111")
+        unreleas_set=set()
         for paths in unrelease_path:
             for path in Path(component_path).glob(paths):
                 if os.path.isdir(path):
-                    unreleas_file.extend(
-                        get_unrelease_files(component_path, paths)
-                    )
+                    for file_line in get_unrelease_files(component_path, paths):
+                        unreleas_file.append(file_line)
+                        unreleas_set.add(file_line)
                 else:
                     if path.is_file():
                         relative_path = path.relative_to(component_path)
                         unreleas_file.append(str(relative_path) + "\n")
-        for tmp in release_file[:]:
-            if tmp in unreleas_file:
-                release_file.remove(tmp)
+                        unreleas_set.add(str(relative_path) + "\n")
+        new_release = []
+        for line in release_file:
+            if line not in unreleas_set:
+                new_release.append(line)
+        release_file[:] = new_release
     with open(field, "a", encoding="utf-8") as tmp_class_rule_path:
         tmp_class_rule_path.writelines("[" + component_origin + "]" + "\n")
         tmp_class_rule_path.writelines(release_file)
