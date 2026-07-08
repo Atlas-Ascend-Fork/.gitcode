@@ -62,6 +62,7 @@ if __name__ == "__main__":
     else:
         filter_lst = []
     print("markdownlint filter:", filter_lst)
+    print(1111111111111111111111111111111111111111111111)
     # 获取修改行号
     with open(pr_filelist_file, "r") as fr:
         pr_filelist = fr.readlines()
