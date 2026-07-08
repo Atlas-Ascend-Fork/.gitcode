@@ -18,6 +18,14 @@ def write_task_json(warn_num, tool_name, commit_id, res_dir):
 
 
 
+def gen_summary_file(print_summary_lst):
+    summary_path = os.environ.get('ATOMGIT_STEP_SUMMARY')
+    if summary_path:
+        with open(summary_path, 'a') as f:
+            f.write("\n".join(print_summary_lst))
+
+
+
 def load_modified_files(pr_file):
     """
     返回修改文件.md列表
@@ -35,11 +43,11 @@ def any_diff_info(diff_output):
     # 初始化行号列表
     added_lines = []
     deleted_lines = []
-    
+
     # 当前块的起始行号
     old_start = 0
     new_start = 0
-    
+
     # 逐行解析 diff 输出
     for line in diff_output.splitlines():
         if hunk_re.match(line):

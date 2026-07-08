@@ -17,7 +17,7 @@ def read_yaml(files):
     with open(files) as file:
         data = yaml.load(file, Loader=yaml.FullLoader)
         return data
-    
+
 def parse_file(file_path):
     '''
     分析gitdiff.txt文件内容
@@ -52,6 +52,7 @@ if __name__ == "__main__":
     repo_name = sys.argv[5]  # 仓名 例如 ops-nn
     tool_name = sys.argv[6]
     commit_id = sys.argv[7]
+    print_summary_lst = []
     # 获取工具-仓-屏蔽数据
     filter_file = os.path.join(os.path.dirname(tool_dir), "StaticCheck_filter.yaml")
     ss = read_yaml(filter_file)
@@ -70,7 +71,10 @@ if __name__ == "__main__":
     gitdiff_dic = {}
     gitdiff_file = os.path.join(workspace, "gitdiff.txt")
     if os.path.exists(gitdiff_file) and os.path.getsize(gitdiff_file):
-       gitdiff_dic = parse_file(gitdiff_file)
+        gitdiff_dic = parse_file(gitdiff_file)
+        print(f"[INFO] GET DIFF FILE SUCC! {gitdiff_file}")
+    else:
+        print(f"[WARING] GET DIFF FILE FAILED! {gitdiff_file}")
 
     changefile_dic = {}
     for check_md in pr_filelist:
@@ -129,9 +133,13 @@ if __name__ == "__main__":
     result_file = os.path.join(workspace, "markdownlint.md")
     with open(result_file, "w") as fw:
         fw.write("".join(result_lst))
-
+    print_summary_lst.append(f"###\t{tool_name}\t###\n")
+    for ret_info in result_lst:
+        print_summary_lst.append(ret_info)
+    git_diff.gen_summary_file(print_summary_lst)
+    print("\n".join(print_summary_lst))
     git_diff.write_task_json(len(result_lst), tool_name, commit_id, workspace)
 
- 
+
 
 

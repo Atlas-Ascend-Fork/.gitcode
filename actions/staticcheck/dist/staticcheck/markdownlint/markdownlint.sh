@@ -52,6 +52,8 @@ else
     touch ${WORKSPACE}/build_out/${tool_name}.csv
     line_count=0
 fi
+
+exit $line_count
 # 写入 StaticCheck.js 告警个数，上传到OBS（流水新增OBS上传）
 #python3  ${WORKSPACE}/CI/cann/pipeline/bin/common/StaticCheck.py ${REPOSITORY_NAME} \
 #          ${GIT_PR_NUMBER} ${line_count} ${tool_name} ${COMMIT_ID}
