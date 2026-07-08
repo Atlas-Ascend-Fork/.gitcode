@@ -17,6 +17,7 @@ COMMIT_ID=$5
 echo "当前脚本路径： $SCRIPT_PATH, $WORK_CODE_DIR"
 
 target_branch="${TARGET_BRANCH}"
+cd "${WORKSPACE}"
 
 git branch
 git branch -r
