@@ -23,6 +23,9 @@ def gen_summary_file(print_summary_lst):
     if summary_path:
         with open(summary_path, 'a') as f:
             f.write("\n".join(print_summary_lst))
+        print(f'[INFO] GEN SUMMARY SUCC! {summary_path}')
+    else:
+        print(f'[Waring] Get SUMMARY FILE failed! {summary_path}\n', os.environ)
 
 
 
