@@ -76,6 +76,67 @@ class PreCommitChecker(CodeCheckerBaseClass):
         else:
             logging.info("✅ 所有文件格式检查通过！")
 
+        # 写入步骤摘要到 ATOMGIT_STEP_SUMMARY
+        summary_path = os.environ.get("ATOMGIT_STEP_SUMMARY", "")
+        if summary_path:
+            passed = check_result.returncode == 0
+            status_icon = "✅" if passed else "❌"
+            summary_lines = [
+                f"## {status_icon} Pre-commit 检查结果\n",
+                f"**状态**: {'通过' if passed else '失败'}\n",
+            ]
+
+            # 从 .pre-commit-config.yaml 读取 hook 列表，
+            # 结合 pre-commit 日志输出（格式：hook_name...Passed/Failed/Skipped）生成摘要。
+            # pre-commit 日志输出的是 hook 的 name（内置 hook 的 name 与 id 不同），
+            # 因此以日志解析的结果为准，config 中定义了 name 的 local hook 用 config 的 name。
+            import re
+            hook_results = []
+
+            # 从 config 收集所有 hook 的 id->name 映射（local hook 可能自定义 name）
+            config_id_to_name = {}
+            try:
+                with open(".pre-commit-config.yaml", "r", encoding="utf-8") as f:
+                    config_data = yaml.safe_load(f)
+                if config_data and "repos" in config_data:
+                    for repo_entry in config_data["repos"]:
+                        for hook in repo_entry.get("hooks", []):
+                            hook_id = hook.get("id", "")
+                            hook_name = hook.get("name", hook_id)
+                            if hook_id:
+                                config_id_to_name[hook_id] = hook_name
+            except Exception as e:
+                logging.info(f"读取 .pre-commit-config.yaml 失败: {e}")
+
+            # 从日志解析所有结果行
+            for line in normal_output.splitlines():
+                stripped = line.strip()
+                if not stripped:
+                    continue
+                m = re.match(r'^(.+?)\.{2,}(?:\(.*?\))?(Passed|Failed|Skipped)\s*$', stripped)
+                if not m:
+                    continue
+                hook_name = m.group(1).strip()
+                status = m.group(2)
+                if status == "Passed":
+                    hook_results.append((hook_name, "✅ Passed"))
+                elif status == "Failed":
+                    hook_results.append((hook_name, "❌ Failed"))
+                elif status == "Skipped":
+                    hook_results.append((hook_name, "⏭️ Skipped"))
+
+            if hook_results:
+                summary_lines.append("\n| 检查项 | 结果 |")
+                summary_lines.append("|--------|------|")
+                for hook_name, hook_status in hook_results:
+                    summary_lines.append(f"| {hook_name} | {hook_status} |")
+
+            if not passed:
+                summary_lines.append("\n> ⚠️ 详细 diff 信息请查看日志或 `pre-commit.txt` 产物")
+
+            with open(summary_path, "a", encoding="utf-8") as f:
+                f.write("\n".join(summary_lines) + "\n")
+
         if os.path.exists("codecheck.json"):
             with open("codecheck.json", 'r', encoding='utf-8') as f:
                 result=json.load(f)
