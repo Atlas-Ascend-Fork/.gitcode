@@ -4,7 +4,7 @@ sc_tool_file=$(readlink -f "$0")  #获取当前脚本绝对路径
 # script_dir=/home/jenkins/share-data/gitcode/cann/ops-math-dev/code/compile/7427/ci/cann/pipeline/bin/common/docs-ci
 sc_tool_dir=$(dirname "$sc_tool_file")
 echo "script directory: ${sc_tool_dir}"
-echo ""
+echo "1111111111111111111111111111111111111111"
 
 REPOSITORY_NAME=$2
 WORKSPACE=$1
@@ -22,7 +22,9 @@ pr_filelist=${WORKSPACE}/pr_filelist.txt  #变更文件
 cd ${WORKSPACE}
 cp ${sc_tool_dir}/package.json  .
 cp ${sc_tool_dir}/.npmrc  .
+echo "222222222222222222222222222222222222222"
 npm i > /dev/null 2>&1
+echo "3333333333333333333333333333"
 python3 ${sc_tool_dir}/docs-ci.py ${tool_name} \
     ${WORKSPACE} ${pr_filelist} ${sc_tool_dir} ${GIT_TARGET_BRANCH} ${REPOSITORY_NAME} ${COMMIT_ID}
 return_value=$?
