@@ -42,7 +42,7 @@ def run(code_dir, paths_lst, remotec_ci_config_name, script_dir):
         code_dir = os.path.dirname(code_dir) # 获取目录的父路径，也就是去掉末尾“/”
     paths = ",".join(paths_lst)
     #paths = "QUICKSTART.md"  # 测试全仓time
-    cmd = ['node', f'{script_dir}/docs-ci.js', f'--repoPath={code_dir}', 
+    cmd = ['node', f'{script_dir}/docs-ci.js', f'--repoPath={code_dir}',
            f'--checkDirs={paths}', '--checkAll=true', f'--targetOwnerRepo={remotec_ci_config_name}',
              '-targetBranch=master', '--detailUrl=Your Detail Url', '--outputCount=20000',
                f'--remoteCiConfigUrl={script_dir}/repo_ci.json',
@@ -107,7 +107,7 @@ def get_change_file_dic(code_dir, branch, check_md_lst):
         md_output = gitdiff_dic.get(check_md, "") # 该文件git diff的内容
         line_lst = git_diff.get_git_diff_lines(code_dir, check_md, branch, md_output)
         change_file_dic[check_md] = git_diff.convert_to_ranges(line_lst)
-    print("change_file_dic:", change_file_dic)  
+    print("change_file_dic:", change_file_dic)
     return change_file_dic
 
 
@@ -166,6 +166,7 @@ if __name__ == "__main__":
     profilelst = [line.strip() for line in lines]
     if not len(profilelst):
         sys.exit(0)   # 变更列表为空
+    print(44444444444444444444444444444444)
     # 不同的工具使用的repo_ci配置文件不一样
     remotec_ci_config_name = ""
     if tool_name in ["link_validity_check", "codespell_check", "resource_existence_check", "tag_closed_check"]:
@@ -181,10 +182,13 @@ if __name__ == "__main__":
     # paths_lst = get_check_paths(profilelst, tool_name)
     # md文件列表
     check_md_lst = git_diff.load_modified_files(profile)
+    print(5555555555555555555555, check_md_lst)
     if not len(check_md_lst):
         sys.exit(0)   # 变更md列表为空
     change_file_dic = get_change_file_dic(code_dir, branch, check_md_lst)
+    print(666666666666666666666666, change_file_dic)
     status = run(code_dir, check_md_lst, remotec_ci_config_name, script_dir)
+    print(77777777777777777777777777, status)
     output_file= os.path.join(code_dir, "output.md")
     if not status:
         print("running ERROR status: False")
