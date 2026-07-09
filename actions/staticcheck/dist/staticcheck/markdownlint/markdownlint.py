@@ -134,7 +134,7 @@ if __name__ == "__main__":
     result_file = os.path.join(workspace, "markdownlint.md")
     with open(result_file, "w") as fw:
         fw.write("".join(result_lst))
-    if len(result_lst):
+    if not len(result_lst):
         print_summary_lst.append(f"###✅\t {tool_name}\t###\n")
         print_summary_lst.append('状态: 成功')
     else:
