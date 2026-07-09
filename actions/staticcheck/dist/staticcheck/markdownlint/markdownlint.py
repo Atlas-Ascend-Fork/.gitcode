@@ -140,7 +140,7 @@ if __name__ == "__main__":
     else:
         print_summary_lst.append(f"###❌\t {tool_name}\t###\n")
         print_summary_lst.append('状态: 失败')
-        print_summary_lst('⚠️ 详细告警信息请查看日志或 markdownlint.csv 产物')
+        print_summary_lst.append('⚠️ 详细告警信息请查看日志或 markdownlint.csv 产物')
     git_diff.gen_summary_file(print_summary_lst)
     git_diff.write_task_json(len(result_lst), tool_name, commit_id, workspace)
 
