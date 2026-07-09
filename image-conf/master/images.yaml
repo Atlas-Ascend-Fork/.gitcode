@@ -932,8 +932,6 @@ repos:
         ubuntu24.04:x86:lv6
       UT_Test_Cpp_make_clang:
         ubuntu24.04:x86:lv6
-      # UT_Test_Cpp_make_gnu: # 程定要求删除
-      #   ubuntu24.04:x86:lv6
       UT_Test_Cpp_make_gnu_part_1:
         ubuntu24.04:x86:lv6
       UT_Test_Cpp_make_gnu_part_2:
