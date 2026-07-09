@@ -134,11 +134,14 @@ if __name__ == "__main__":
     result_file = os.path.join(workspace, "markdownlint.md")
     with open(result_file, "w") as fw:
         fw.write("".join(result_lst))
-    print_summary_lst.append(f"###\t{tool_name}\t###\n")
-    for ret_info in result_lst:
-        print_summary_lst.append(ret_info)
+    if len(result_lst):
+        print_summary_lst.append(f"###✅\t {tool_name}\t###\n")
+        print_summary_lst.append('状态: 成功')
+    else:
+        print_summary_lst.append(f"###❌\t {tool_name}\t###\n")
+        print_summary_lst.append('状态: 失败')
+        print_summary_lst('⚠️ 详细告警信息请查看日志或 markdownlint.csv 产物')
     git_diff.gen_summary_file(print_summary_lst)
-    print("\n".join(print_summary_lst))
     git_diff.write_task_json(len(result_lst), tool_name, commit_id, workspace)
 
 
