@@ -25,6 +25,7 @@ cp ${sc_tool_dir}/.npmrc  .
 echo "222222222222222222222222222222222222222"
 npm i > /dev/null 2>&1
 echo "3333333333333333333333333333"
+echo "python3 ${sc_tool_dir}/docs-ci.py ${tool_name} ${WORKSPACE} ${pr_filelist} ${sc_tool_dir} ${GIT_TARGET_BRANCH} ${REPOSITORY_NAME} ${COMMIT_ID}"
 python3 ${sc_tool_dir}/docs-ci.py ${tool_name} \
     ${WORKSPACE} ${pr_filelist} ${sc_tool_dir} ${GIT_TARGET_BRANCH} ${REPOSITORY_NAME} ${COMMIT_ID}
 return_value=$?

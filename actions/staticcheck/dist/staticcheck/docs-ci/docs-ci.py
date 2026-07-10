@@ -161,6 +161,7 @@ if __name__ == "__main__":
     branch = sys.argv[5] # 分支
     repo_name = sys.argv[6] # 分支
     commit_id = sys.argv[7]
+    print(32323232323232323)
     with open(profile, 'r', encoding="utf-8") as fr:
         lines = fr.readlines()
     profilelst = [line.strip() for line in lines]
