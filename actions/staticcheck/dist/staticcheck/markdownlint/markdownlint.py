@@ -135,11 +135,18 @@ if __name__ == "__main__":
     with open(result_file, "w") as fw:
         fw.write("".join(result_lst))
     if not len(result_lst):
-        print_summary_lst.append(f"###✅\t {tool_name}\t###\n")
-        print_summary_lst.append('状态: 成功')
+        print_summary_lst.append(f"##✅\t {tool_name}\t\n")
+        print_summary_lst.append('**状态**: 成功')
     else:
-        print_summary_lst.append(f"###❌\t {tool_name}\t###\n")
-        print_summary_lst.append('状态: 失败')
+        print_summary_lst.append(f"##❌\t {tool_name}\t\n")
+        print_summary_lst.append('**状态**: 失败')
+        print_summary_lst.append('\n|告警详情|')
+        print_summary_lst.append('|--------|')
+        for idx, warn_info in enumerate(result_lst):
+            if idx > 4:
+                print_summary_lst.append(f'\n...')
+                break
+            print_summary_lst.append(f'|{warn_info}|')
         print_summary_lst.append('⚠️ 详细告警信息请查看日志或 markdownlint.csv 产物')
     git_diff.gen_summary_file(print_summary_lst)
     git_diff.write_task_json(len(result_lst), tool_name, commit_id, workspace)
