@@ -143,8 +143,8 @@ if __name__ == "__main__":
         print_summary_lst.append('\n|告警详情|')
         print_summary_lst.append('|--------|')
         for idx, warn_info in enumerate(result_lst):
-            if idx > 4:
-                print_summary_lst.append(f'\n...')
+            if idx > 2:
+                print_summary_lst.append(f'|\n...|')
                 break
             print_summary_lst.append(f'|{warn_info}|')
         print_summary_lst.append('⚠️ 详细告警信息请查看日志或 markdownlint.csv 产物')
