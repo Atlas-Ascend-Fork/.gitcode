@@ -135,11 +135,11 @@ if __name__ == "__main__":
     with open(result_file, "w") as fw:
         fw.write("".join(result_lst))
     if not len(result_lst):
-        print_summary_lst.append(f"##✅\t {tool_name}\t\n")
-        print_summary_lst.append('**状态**: 成功')
+        print_summary_lst.append(f"## ✅ {tool_name} 检查结果\n")
+        print_summary_lst.append('**状态**: 成功 \n')
     else:
-        print_summary_lst.append(f"##❌\t {tool_name}\t\n")
-        print_summary_lst.append('**状态**: 失败')
+        print_summary_lst.append(f"## ❌ {tool_name} 检查结果\n")
+        print_summary_lst.append('**状态**: 失败 \n')
         print_summary_lst.append('\n|告警详情|')
         print_summary_lst.append('|--------|')
         for idx, warn_info in enumerate(result_lst):
