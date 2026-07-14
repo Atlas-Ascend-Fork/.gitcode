@@ -21,6 +21,12 @@
 | `codecheck.json` | 检查结果汇总 |
 | `pre-commit.txt` | pre-commit 完整输出（含 diff） |
 
+## 步骤摘要
+
+检查结果会自动写入 `$ATOMGIT_STEP_SUMMARY`，在流水线运行详情页展示：
+- 检查状态（通过/失败）
+- 各 hook 检查项的明细表格（Passed/Failed/Skipped）
+
 ## 使用示例
 
 ```yaml
