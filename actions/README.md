@@ -19,3 +19,22 @@
 | [redis-cache](redis-cache/README.md) | 配置 ccache + Redis 二级缓存环境 |
 
 > 通用约定：多数 Action 依赖前置 `get-pr` 产出的 `pr_filelist.txt` / `pr_filelist_mod.txt` 等变更文件清单，建议在流水线中先调用 `get-pr`。
+
+## 开发说明
+
+- 每个 Action 目录结构统一为 `action.yml`（输入声明）+ `dist/main.js`（webpack 打包入口）+ `dist/*.sh|*.py`（业务脚本）。`main.js` 读取输入后通过环境变量透传给脚本执行。
+- `src/main.ts` 为 `dist/main.js` 的 TypeScript 源码，修改 `main.js` 自身的参数处理逻辑后需通过 `ncc build` 重新打包。
+- 修改业务脚本（`.sh`/`.py`）无需重新打包 `main.js`。
+- 调试时可设置环境变量 `INPUT_<参数名大写>` 直接运行 `node dist/main.js`。
+
+### 重新打包 main.js
+
+```bash
+cd actions/<action_name>
+npm init -y
+npm install @actions/core @actions/exec @types/node@16 @vercel/ncc typescript
+ncc build src/main.ts -o dist && mv dist/index.js dist/main.js
+rm -rf node_modules package.json package-lock.json tsconfig.json
+```
+
+> 打包时使用 Node 16 环境，与 `action.yml` 中 `using: node16` 一致。
