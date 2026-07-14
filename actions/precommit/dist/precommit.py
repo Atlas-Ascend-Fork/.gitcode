@@ -15,6 +15,8 @@ class PreCommitChecker(CodeCheckerBaseClass):
     def __init__(self, repository_name, pr_id):
         self.repository_name = repository_name
         self.pr_id = pr_id
+        self.env_dist = os.environ
+        self.target_branch = self.env_dist.get("TARGET_BRANCH")
 
     def run(self):
         logging.info("pre-commit begin!!!")
@@ -75,6 +77,104 @@ class PreCommitChecker(CodeCheckerBaseClass):
             logging.info("❌ 存在部分文件格式错误")
         else:
             logging.info("✅ 所有文件格式检查通过！")
+
+        # 写入步骤摘要到 ATOMGIT_STEP_SUMMARY
+        summary_path = os.environ.get("ATOMGIT_STEP_SUMMARY", "")
+        if summary_path:
+            passed = check_result.returncode == 0
+            status_icon = "✅" if passed else "❌"
+            summary_lines = [
+                f"## {status_icon} Pre-commit 检查结果\n",
+                f"**状态**: {'通过' if passed else '失败'}\n",
+            ]
+
+            # 从 .pre-commit-config.yaml 读取 hook 列表，
+            # 结合 pre-commit 日志输出（格式：hook_name...Passed/Failed/Skipped）生成摘要。
+            # pre-commit 日志输出的是 hook 的 name（内置 hook 的 name 与 id 不同），
+            # 因此以日志解析的结果为准，config 中定义了 name 的 local hook 用 config 的 name。
+            import re
+            hook_results = []
+
+            # 从 config 收集所有 hook 的 id->name 映射（local hook 可能自定义 name）
+            config_id_to_name = {}
+            try:
+                with open(".pre-commit-config.yaml", "r", encoding="utf-8") as f:
+                    config_data = yaml.safe_load(f)
+                if config_data and "repos" in config_data:
+                    for repo_entry in config_data["repos"]:
+                        for hook in repo_entry.get("hooks", []):
+                            hook_id = hook.get("id", "")
+                            hook_name = hook.get("name", hook_id)
+                            if hook_id:
+                                config_id_to_name[hook_id] = hook_name
+            except Exception as e:
+                logging.info(f"读取 .pre-commit-config.yaml 失败: {e}")
+
+            # 从日志解析所有结果行
+            for line in normal_output.splitlines():
+                stripped = line.strip()
+                if not stripped:
+                    continue
+                m = re.match(r'^(.+?)\.{2,}(?:\(.*?\))?(Passed|Failed|Skipped)\s*$', stripped)
+                if not m:
+                    continue
+                hook_name = m.group(1).strip()
+                status = m.group(2)
+                if status == "Passed":
+                    hook_results.append((hook_name, "✅ Passed"))
+                elif status == "Failed":
+                    hook_results.append((hook_name, "❌ Failed"))
+                elif status == "Skipped":
+                    hook_results.append((hook_name, "⏭️ Skipped"))
+
+            # 提取失败 hook 的具体 diff 信息
+            failed_diffs = {}
+            if not passed:
+                current_hook = None
+                current_lines = []
+                for line in full_output.splitlines():
+                    stripped = line.strip()
+                    m = re.match(r'^(.+?)\.{2,}(?:\(.*?\))?(Passed|Failed|Skipped)\s*$', stripped)
+                    if m:
+                        if current_hook is not None:
+                            failed_diffs[current_hook] = "\n".join(current_lines)
+                            current_hook = None
+                            current_lines = []
+                        if m.group(2) == "Failed":
+                            current_hook = m.group(1).strip()
+                        continue
+                    if current_hook is not None:
+                        current_lines.append(line)
+                if current_hook is not None:
+                    failed_diffs[current_hook] = "\n".join(current_lines)
+
+            if hook_results:
+                summary_lines.append("\n| 检查项 | 结果 |")
+                summary_lines.append("|--------|------|")
+                for hook_name, hook_status in hook_results:
+                    summary_lines.append(f"| {hook_name} | {hook_status} |")
+
+            if not passed:
+                MAX_DETAIL_CHARS = 3000
+                for hook_name, _ in hook_results:
+                    if hook_name not in failed_diffs:
+                        continue
+                    raw = failed_diffs[hook_name].strip()
+                    if not raw:
+                        continue
+                    if len(raw) > MAX_DETAIL_CHARS:
+                        raw = raw[:MAX_DETAIL_CHARS] + "\n... (已截断，完整内容请查看 pre-commit.txt)"
+                    summary_lines.append(f"\n<details>")
+                    summary_lines.append(f"<summary>❌ {hook_name} 失败详情</summary>")
+                    summary_lines.append("")
+                    summary_lines.append("```")
+                    summary_lines.append(raw)
+                    summary_lines.append("```")
+                    summary_lines.append("</details>")
+                summary_lines.append("\n> ⚠️ 完整 diff 信息请查看日志或 `pre-commit.txt` 产物")
+
+            with open(summary_path, "a", encoding="utf-8") as f:
+                f.write("\n".join(summary_lines) + "\n")
 
         if os.path.exists("codecheck.json"):
             with open("codecheck.json", 'r', encoding='utf-8') as f:
@@ -143,12 +243,13 @@ class PreCommitChecker(CodeCheckerBaseClass):
         else:
             logging.info("ℹ️ 没有需要替换的仓库地址")
 
-        # 直接删除 oat-check 配置
-        oat_removed = remove_oat_check(data)
-        if oat_removed:
-            logging.info("✅ 已成功删除整个 oat-check 配置")
-        else:
-            logging.info("ℹ️ 未找到 oat-check，无需删除")
+        if self.target_branch != 'master':
+            # 直接删除 oat-check 配置
+            oat_removed = remove_oat_check(data)
+            if oat_removed:
+                logging.info("✅ 已成功删除整个 oat-check 配置")
+            else:
+                logging.info("ℹ️ 未找到 oat-check，无需删除")
 
         # 写回文件
         with open(".pre-commit-config.yaml", "w", encoding="utf-8") as f:
@@ -162,58 +263,6 @@ class PreCommitChecker(CodeCheckerBaseClass):
         # 忽略.pre-commit-config.yaml文件
         self.run_cmd("git add .pre-commit-config.yaml", os.getcwd(), shell=True)
         self.run_cmd("git checkout -- .pre-commit-config.yaml", os.getcwd(), shell=True)
-
-    def generate_pre_commit_config(self):
-        # 1. 基础配置
-        base_config = """repos:
-  # pre-commit 基础检查
-  - repo: https://gitcode.com/pre-commit/pre-commit-hooks
-    rev: v4.6.0
-    hooks:
-      - id: trailing-whitespace
-        exclude: ^\.pre-commit-config\.yaml$
-      - id: end-of-file-fixer
-        exclude: ^\.pre-commit-config\.yaml$
-      - id: check-yaml
-        args: ["--allow-multiple-documents"]
-      - id: check-added-large-files
-      - id: check-merge-conflict
-      - id: detect-private-key
-      - id: check-json
-"""
-
-        # 2. OAT 合规检查配置
-#         oat_config = """
-#   # OAT 合规性检查 (Open Source Audit Tool)
-#   - repo: local
-#     hooks:
-#       - id: oat-check
-#         name: OAT Compliance Check
-#         entry: bash scripts/oat_check.sh
-#         language: system
-#         pass_filenames: true
-#         types: [file]
-#         stages: [commit]
-#         verbose: true
-# """
-
-        # 最终内容
-        final_content = base_config
-
-        # 判断 scripts/oat_check.sh 是否存在
-        # if os.path.exists("scripts/oat_check.sh"):
-        #     final_content += oat_config
-        #     logging.info("✅ 检测到 scripts/oat_check.sh，已自动追加 OAT 检查配置")
-
-        # 覆写写入文件
-        with open(".pre-commit-config.yaml", "w", encoding="utf-8") as f:
-            f.write(final_content)
-
-        logging.info("✅ .pre-commit-config.yaml 已生成完成！")
-        # 忽略.pre-commit-config.yaml文件
-        self.run_cmd("git add .pre-commit-config.yaml", os.getcwd(), shell=True)
-        self.run_cmd("git checkout -- .pre-commit-config.yaml", os.getcwd(), shell=True)
-
 
 def init_args():
     parser = argparse.ArgumentParser()

@@ -2,11 +2,6 @@
 set -euo pipefail
 echo "组织org_name: ${org_name}"
 
-if [[ "${task_name}" != *ubuntu24* ]]; then
-  echo "no need to api check"
-  exit 0
-fi
-
 REPOSITORY_NAME=$repo_name
 WORKSPACE=${WORKSPACE}
 GIT_PR_NUMBER=$MERGE_ID

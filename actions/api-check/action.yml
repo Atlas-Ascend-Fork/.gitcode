@@ -1,13 +1,13 @@
 name: 'api-check'
 author: 'CANN'
 version: '1.0.0'
-description: 'this is aapi check action'
+description: 'API 文档生成上报与 PR 接口校验'
 inputs:
   org_name:
     description: 组织名称，全局必填
     required: true
-  task_name:
-    description: 任务标识，含compile执行编译上报；含ubuntu24执行PR接口校验
+  mode:
+    description: 执行模式：compile（API文档生成上报）或 check（PR接口校验）
     required: true
   repo_name:
     description: 仓库名称
@@ -16,13 +16,13 @@ inputs:
     description: PR/MERGE编号
     required: false
   workspace:
-    description: 代码工作目录，compile流程必填
+    description: 代码工作目录，compile模式必填
     required: false
   source_branch:
-    description: PR源分支，compile流程必填
+    description: PR源分支，compile模式必填
     required: false
   target_branch:
-    description: PR目标分支，compile流程必填
+    description: PR目标分支，compile模式必填
     required: false
 
 

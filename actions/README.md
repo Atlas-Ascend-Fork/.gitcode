@@ -14,6 +14,9 @@
 | [verify-package](verify-package/README.md) | 编译产物安装与卸载验证 |
 | [ut-cov-report](ut-cov-report/README.md) | 单元测试覆盖率打包与报告生成 |
 | [revise-img](revise-img/README.md) | 解析仓库各构建阶段对应的镜像 |
+| [query-pipeline](query-pipeline/README.md) | 查询流水线执行情况（运行详情、Job 列表、步骤明细） |
+| [download-logs](download-logs/README.md) | 下载流水线运行日志并打包（全部日志 + 失败日志） |
+| [redis-cache](redis-cache/README.md) | 配置 ccache + Redis 二级缓存环境 |
 
 > 通用约定：多数 Action 依赖前置 `get-pr` 产出的 `pr_filelist.txt` / `pr_filelist_mod.txt` 等变更文件清单，建议在流水线中先调用 `get-pr`。
 
