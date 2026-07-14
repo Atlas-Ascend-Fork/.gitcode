@@ -1,0 +1,28 @@
+name: 'download_logs'
+author: 'CANN'
+version: '1.0.0'
+description: '下载流水线运行日志并打包为 zip（全部日志 + 失败日志）'
+inputs:
+  owner:
+    description: '仓库所属组织/用户'
+    required: false
+  repo:
+    description: '仓库名称'
+    required: false
+  run_id:
+    description: '流水线运行 ID'
+    required: false
+  url:
+    description: '流水线页面 URL（与 owner/repo/run_id 二选一）'
+    required: false
+  token:
+    description: 'GitCode 个人访问令牌'
+    required: true
+  output_dir:
+    description: '输出目录'
+    required: false
+    default: 'logs'
+
+runs:
+  using: 'node16'
+  main: 'dist/main.js'
