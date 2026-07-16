@@ -40,19 +40,18 @@ const promises_1 = __importDefault(__nccwpck_require__(1943));
 async function run() {
     try {
         // 1. 读取全部输入
-        const taskName = core.getInput("task_name", { required: true });
-        const orgName = core.getInput("org_name", { required: true }); // 全局必填
+        const mode = core.getInput("mode", { required: true });
+        const orgName = core.getInput("org_name", { required: true });
         const repoName = core.getInput("repo_name");
         const mergeId = core.getInput("merge_id");
         const workspace = core.getInput("workspace");
         const sourceBranch = core.getInput("source_branch");
         const targetBranch = core.getInput("target_branch");
-        core.info(`[入参打印] task_name=${taskName}, org_name=${orgName}`);
+        core.info(`[入参打印] mode=${mode}, org_name=${orgName}`);
         core.info(`repo_name=${repoName}, merge_id=${mergeId}`);
         core.info(`workspace=${workspace}, source_branch=${sourceBranch}, target_branch=${targetBranch}`);
-        // 2. 按任务类型动态校验依赖参数
-        if (taskName.includes("compile")) {
-            // compile流程：全量参数必填
+        // 2. 按 mode 动态校验依赖参数
+        if (mode === "compile") {
             const missList = [];
             if (!repoName)
                 missList.push("repo_name");
@@ -65,28 +64,31 @@ async function run() {
             if (!targetBranch)
                 missList.push("target_branch");
             if (missList.length > 0) {
-                core.setFailed(`compile流程缺失必填参数：${missList.join(",")}`);
+                core.setFailed(`compile模式缺失必填参数：${missList.join(",")}`);
                 return;
             }
         }
-        else {
-            // 普通ubuntu24校验流程：仅repo_name、merge_id必填
+        else if (mode === "check") {
             const missList = [];
             if (!repoName)
                 missList.push("repo_name");
             if (!mergeId)
                 missList.push("merge_id");
             if (missList.length > 0) {
-                core.setFailed(`api校验流程缺失必填参数：${missList.join(",")}`);
+                core.setFailed(`check模式缺失必填参数：${missList.join(",")}`);
                 return;
             }
+        }
+        else {
+            core.info(`未识别的 mode: ${mode}，跳过执行`);
+            return;
         }
         // 3. 脚本路径定义
         const scriptDir = __dirname;
         const apiCheckScript = path_1.default.resolve(scriptDir, "./api_check.sh");
         const apiCompileScript = path_1.default.resolve(scriptDir, "./api_compile_upload.sh");
         await Promise.all([promises_1.default.access(apiCheckScript), promises_1.default.access(apiCompileScript)]);
-        // 4. 环境变量注入（org_name统一透传给shell）
+        // 4. 环境变量注入
         const env = {
             ...process.env,
             org_name: orgName,
@@ -94,16 +96,15 @@ async function run() {
             MERGE_ID: mergeId,
             WORKSPACE: workspace,
             SOURCE_BRANCH: sourceBranch,
-            TARGET_BRANCH: targetBranch,
-            task_name: taskName
+            TARGET_BRANCH: targetBranch
         };
-        // 5. 分支执行脚本
-        if (taskName.includes("compile")) {
-            core.info("检测到compile任务，执行API文档生成上报脚本");
+        // 5. 按 mode 执行脚本
+        if (mode === "compile") {
+            core.info("执行API文档生成上报脚本");
             await execShellScript(apiCompileScript, [], scriptDir, env);
         }
         else {
-            core.info("非compile任务，执行PR接口校验脚本");
+            core.info("执行PR接口校验脚本");
             await execShellScript(apiCheckScript, [], scriptDir, env);
         }
         core.info("所有脚本执行完成");
