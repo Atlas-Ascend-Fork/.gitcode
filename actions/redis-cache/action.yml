@@ -1,0 +1,12 @@
+name: 'redis-cache'
+author: 'CANN'
+version: '1.0.0'
+description: '配置 ccache + Redis 二级缓存环境'
+inputs:
+  workspace:
+    description: '工作目录（可选，默认为脚本所在目录）'
+    required: false
+
+runs:
+  using: 'node16'
+  main: 'dist/main.js'
