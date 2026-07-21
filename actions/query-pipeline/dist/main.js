@@ -25693,8 +25693,9 @@ async function run() {
         const repo = core.getInput('repo');
         const runId = core.getInput('run_id');
         const url = core.getInput('url');
-        const jobId = core.getInput('job_id');
         const json = core.getInput('json') === 'true';
+        const prNumber = core.getInput('pr_number');
+        const applyLabel = core.getInput('apply_label') === 'true';
         const scriptDir = __dirname;
         const scriptPath = path.resolve(scriptDir, 'query_pipeline.py');
         if (!fs.existsSync(scriptPath)) {
@@ -25707,11 +25708,14 @@ async function run() {
         else {
             args.push('--owner', owner, '--repo', repo, '--run-id', runId);
         }
-        if (jobId) {
-            args.push('--job-id', jobId);
-        }
         if (json) {
             args.push('--json');
+        }
+        if (prNumber) {
+            args.push('--pr-number', prNumber);
+        }
+        if (applyLabel) {
+            args.push('--apply-label');
         }
         core.info(`执行脚本: python3 ${args.join(' ')}`);
         await exec.exec('python3', args, { cwd: scriptDir });
