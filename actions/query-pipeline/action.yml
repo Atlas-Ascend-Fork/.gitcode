@@ -1,7 +1,7 @@
 name: 'query-pipeline'
 author: 'CANN'
-version: '1.0.0'
-description: '查询 GitCode 流水线执行情况，展示运行详情和各 Job 结果'
+version: '1.2.0'
+description: '查询 GitCode 流水线执行情况，展示运行详情和各 Job 结果，并根据执行结果给 PR 打标签'
 inputs:
   owner:
     description: '仓库所属组织/用户'
@@ -18,11 +18,15 @@ inputs:
   token:
     description: 'GitCode 个人访问令牌'
     required: true
-  job_id:
-    description: '查看指定 Job 的步骤详情（可选）'
-    required: false
   json:
     description: '输出原始 JSON'
+    required: false
+    default: 'false'
+  pr_number:
+    description: 'PR 编号，传入后根据任务执行结果打标签（ci-pipeline-passed/ci-pipeline-failed）'
+    required: false
+  apply_label:
+    description: '是否根据任务执行结果打标签，需同时传入 pr_number'
     required: false
     default: 'false'
 

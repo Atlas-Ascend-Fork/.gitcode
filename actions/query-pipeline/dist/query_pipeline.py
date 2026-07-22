@@ -10,6 +10,7 @@ import urllib.request
 import urllib.error
 
 API_BASE = "https://api.gitcode.com"
+PR_LABELS_URL = "https://api.gitcode.com/api/v5/repos/{0}/{1}/pulls/{2}/labels"
 
 STATUS_ICON = {
     "COMPLETED": "✅",
@@ -24,6 +25,11 @@ STATUS_ICON = {
     "QUEUED": "⏸️",
     "PENDING": "⏸️",
 }
+
+FAILED_STATUSES = {"FAILED", "FAILURE"}
+
+LABEL_PASS = "ci-pipeline-passed"
+LABEL_FAIL = "ci-pipeline-failed"
 
 
 def api_get(url, token):
@@ -40,6 +46,88 @@ def api_get(url, token):
     except urllib.error.URLError as e:
         print(f"网络请求失败: {e.reason}")
         sys.exit(1)
+
+
+def api_request(url, token, method="GET", data=None):
+    req = urllib.request.Request(url, method=method)
+    req.add_header("Authorization", f"Bearer {token}")
+    req.add_header("Content-Type", "application/json")
+    if data is not None:
+        req.data = json.dumps(data).encode("utf-8")
+    try:
+        with urllib.request.urlopen(req, timeout=30) as resp:
+            body = resp.read().decode("utf-8")
+            return resp.status, json.loads(body) if body else None
+    except urllib.error.HTTPError as e:
+        return e.code, e.read().decode("utf-8", errors="replace")
+    except urllib.error.URLError as e:
+        print(f"网络请求失败: {e.reason}")
+        return -1, str(e.reason)
+
+
+def get_pr_labels(owner, repo, pr_number, token):
+    url = f"{PR_LABELS_URL.format(owner, repo, pr_number)}?access_token={token}&page=1&per_page=100"
+    status, body = api_request(url, token, "GET")
+    if status == 200 and isinstance(body, list):
+        return [item.get("name", "") for item in body]
+    print(f"获取 PR 标签列表失败: HTTP {status}")
+    return []
+
+
+def add_pr_label(owner, repo, pr_number, label, token, max_retries=1):
+    url = f"{PR_LABELS_URL.format(owner, repo, pr_number)}?access_token={token}"
+    for attempt in range(max_retries + 1):
+        status, body = api_request(url, token, "POST", [label])
+        if status == 201:
+            print(f"✅ 打标签 [{label}] 成功")
+            return True
+        if status == 429 and attempt < max_retries:
+            wait = 10
+            print(f"⚠️ 打标签触发限流，{wait}s 后重试 (attempt {attempt + 1}/{max_retries})")
+            time.sleep(wait)
+            continue
+        print(f"❌ 打标签 [{label}] 失败: HTTP {status}, {body}")
+        return False
+    return False
+
+
+def remove_pr_label(owner, repo, pr_number, label, token, max_retries=1):
+    url = f"{PR_LABELS_URL.format(owner, repo, pr_number)}/{label}?access_token={token}"
+    for attempt in range(max_retries + 1):
+        status, body = api_request(url, token, "DELETE")
+        if status == 204:
+            print(f"✅ 移除标签 [{label}] 成功")
+            return True
+        if status == 429 and attempt < max_retries:
+            wait = 10
+            print(f"⚠️ 移除标签触发限流，{wait}s 后重试 (attempt {attempt + 1}/{max_retries})")
+            time.sleep(wait)
+            continue
+        if status == 404:
+            print(f"ℹ️ 标签 [{label}] 不存在，无需移除")
+            return True
+        print(f"❌ 移除标签 [{label}] 失败: HTTP {status}, {body}")
+        return False
+    return False
+
+
+def apply_label_by_jobs(owner, repo, pr_number, jobs, token):
+    if not pr_number:
+        return
+    print(f"\n{'=' * 70}")
+    print("  根据任务执行结果打标签")
+    print(f"{'=' * 70}")
+    print(f"  PR: #{pr_number}  任务总数: {len(jobs)}")
+    failed_jobs = [j for j in jobs if j.get("status") in FAILED_STATUSES]
+    remove_pr_label(owner, repo, pr_number, LABEL_PASS, token)
+    remove_pr_label(owner, repo, pr_number, LABEL_FAIL, token)
+    if failed_jobs:
+        print(f"  失败任务数: {len(failed_jobs)}")
+        add_pr_label(owner, repo, pr_number, LABEL_FAIL, token)
+    else:
+        print(f"  失败任务数: 0")
+        add_pr_label(owner, repo, pr_number, LABEL_PASS, token)
+    print()
 
 
 def ts_to_str(ts):
@@ -67,11 +155,6 @@ def query_run_detail(owner, repo, run_id, token):
 
 def query_jobs(owner, repo, run_id, token):
     url = f"{API_BASE}/api/v8/repos/{owner}/{repo}/actions/runs/{run_id}/jobs"
-    return api_get(url, token)
-
-
-def query_job_detail(owner, repo, run_id, job_id, token):
-    url = f"{API_BASE}/api/v8/repos/{owner}/{repo}/actions/runs/{run_id}/jobs/{job_id}"
     return api_get(url, token)
 
 
@@ -182,38 +265,6 @@ def print_jobs(jobs_data, run_detail=None):
     return jobs
 
 
-def print_job_detail(job_data):
-    name = job_data.get("name", "N/A")
-    status = job_data.get("status", "N/A")
-    cost = job_data.get("execute_cost_time", 0)
-
-    print("=" * 70)
-    print(f"  Job 详情: {name}")
-    print("=" * 70)
-    print(f"  状态:     {status}")
-    print(f"  耗时:     {ms_to_str(cost)}")
-    print(f"  开始时间: {ts_to_str(job_data.get('start_time'))}")
-    print(f"  结束时间: {ts_to_str(job_data.get('end_time'))}")
-
-    steps = job_data.get("steps", [])
-    if steps:
-        print(f"\n  步骤执行明细 ({len(steps)} 个步骤):")
-        print(f"  {'步骤名称':<40} {'任务':<45} {'状态':<14} {'耗时'}")
-        print(f"  {'-' * 40} {'-' * 45} {'-' * 14} {'-' * 12}")
-        for step in steps:
-            s_name = step.get("name", "N/A")
-            s_task = step.get("task", "N/A")
-            s_status = step.get("status", "N/A")
-            s_start = step.get("start_time", 0)
-            s_end = step.get("end_time", 0)
-            s_cost = (s_end - s_start) if s_start and s_end and s_start > 0 and s_end > 0 else 0
-            icon = STATUS_ICON.get(s_status, "⏳")
-            # 截断过长的 task 名
-            s_task_short = s_task[:43] + "..." if len(s_task) > 43 else s_task
-            print(f"  {icon} {s_name:<37} {s_task_short:<45} {s_status:<14} {ms_to_str(s_cost)}")
-    print()
-
-
 def parse_url(url):
     """从流水线页面 URL 提取 owner/repo/run_id"""
     pattern = r"gitcode\.com/([^/]+)/([^/]+)/actions/runs/([a-f0-9]+)"
@@ -231,8 +282,9 @@ def main():
     parser.add_argument("--run-id", help="流水线运行 ID")
     parser.add_argument("--url", help="流水线页面 URL（与 owner/repo/run-id 二选一）")
     parser.add_argument("--token", required=True, help="GitCode 个人访问令牌")
-    parser.add_argument("--job-id", default=None, help="查看指定 Job 的步骤详情")
     parser.add_argument("--json", action="store_true", help="输出原始 JSON")
+    parser.add_argument("--pr-number", default=None, help="PR 编号，传入后根据任务执行结果打标签")
+    parser.add_argument("--apply-label", action="store_true", help="是否执行打标签逻辑")
 
     args = parser.parse_args()
 
@@ -240,14 +292,6 @@ def main():
         args.owner, args.repo, args.run_id = parse_url(args.url)
     elif not all([args.owner, args.repo, args.run_id]):
         parser.error("请提供 --url 或同时提供 --owner --repo --run-id")
-
-    if args.job_id:
-        data = query_job_detail(args.owner, args.repo, args.run_id, args.job_id, args.token)
-        if args.json:
-            print(json.dumps(data, indent=2, ensure_ascii=False))
-        else:
-            print_job_detail(data)
-        return
 
     run_detail = query_run_detail(args.owner, args.repo, args.run_id, args.token)
     jobs_data = query_jobs(args.owner, args.repo, args.run_id, args.token)
@@ -269,6 +313,10 @@ def main():
         for j in failed_jobs:
             print(f"    {j.get('name', 'N/A')}  ->  {j.get('id', 'N/A')}")
         print()
+
+    # 根据 PR 编号和任务执行结果打标签
+    if args.apply_label and args.pr_number:
+        apply_label_by_jobs(args.owner, args.repo, args.pr_number, jobs, args.token)
 
 
 if __name__ == "__main__":
