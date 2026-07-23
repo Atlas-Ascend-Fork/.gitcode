@@ -1,0 +1,122 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: configmap1980-${{vars.VCJOB_NAME}}-${{env.JOB_DISPATCH_TIMESTAMP}}     # 前缀使用“configmap1980-”不变，后接vcjob的名字
+  namespace: default                      # 命名空间自选，需要和下边的vcjob处在同一命名空间
+  labels:
+    ring-controller.cce: ascend-1980   # 保持不动
+data:                    #data内容保持不动，初始化完成，会被volcano插件自动修改
+  jobstart_hccl.json: |
+    {
+        "status":"initializing"
+    }
+---
+apiVersion: batch.volcano.sh/v1alpha1   # The value cannot be changed. The volcano API must be used.
+kind: Job                               # Only the job type is supported at present.
+metadata:
+  name: ${{vars.VCJOB_NAME}}-${{env.JOB_DISPATCH_TIMESTAMP}}                 # job名字，需要和configmap中名字保持一致
+  namespace: default                      # 和configmap保持一致
+  labels:
+    ring-controller.cce: ascend-1980   # 保持不动
+    fault-scheduling: "force"
+spec:
+  ttlSecondsAfterFinished: 60        #任务结束后删除容器，60s后删除，之后自动销毁
+  minAvailable: 1                       # The value of minAvailable is 1 in a single-node scenario and N in an N-node distributed scenario.
+  schedulerName: volcano                # 保持不动，Use the Volcano scheduler to schedule jobs.
+  policies:
+    - event: PodEvicted
+      action: RestartJob
+  plugins:
+    configmap1980:
+    - --rank-table-version=v2  # 保持不动，生成v2版本ranktablefile
+    env: []
+    svc:
+    - --publish-not-ready-addresses=true
+  maxRetry: 3
+  queue: default
+  tasks:
+  - name: "npu-${{vars.NPU_REQUEST}}"
+    replicas: 1                              # The value of replicas is 1 in a single-node scenario and N in an N-node scenario. The number of NPUs in the requests field is 8 in an N-node scenario.
+    template:
+      metadata:
+        labels:
+          app: mindspore
+          ring-controller.cce: ascend-1980  # 保持不动，The value must be the same as the label in ConfigMap and cannot be changed.
+      spec:
+        affinity:
+          podAntiAffinity:
+            requiredDuringSchedulingIgnoredDuringExecution:
+              - labelSelector:
+                  matchExpressions:
+                    - key: volcano.sh/job-name
+                      operator: In
+                      values:
+                        - ${{vars.VCJOB_NAME}}-${{env.JOB_DISPATCH_TIMESTAMP}}
+                topologyKey: kubernetes.io/hostname
+        containers:
+        - image: ${{ manifest_image }}             # swr.cn-north-4.myhuaweicloud.com/ci_cann/ubuntu20.04.05_arm:mindspore_v1.1011
+          imagePullPolicy: IfNotPresent
+          name: mindspore
+          env:
+          - name: name                               # The value must be the same as that of Jobname.
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.name
+          - name: ip                                       # IP address of the physical node, which is used to identify the node where the pod is running
+            valueFrom:
+              fieldRef:
+                fieldPath: status.hostIP
+          - name: framework
+            value: "MindSpore"
+          command: ["/bin/bash", "-c"]
+          args:
+          - |
+            echo "=== modelarts pod start run ===";
+            set -e;
+            ${{ env.INPUT_CUSTOM_SHELL_SCRIPT }}
+            exit $?
+          resources:
+            requests:
+             huawei.com/ascend-1980: ${{vars.NPU_REQUEST}}                 # 需求卡数，key保持不变。
+             memory: ${{vars.MEMORY}}     # 内存
+            limits:
+             huawei.com/ascend-1980: ${{vars.NPU_REQUEST}}                 # 限制卡数，key保持不变。The value must be consistent with that in requests.
+             memory: ${{vars.MEMORY}}     # 内存
+          volumeMounts:
+          - name: ascend-driver               #驱动挂载，保持不动
+            mountPath: /usr/local/Ascend/driver
+          - name: ascend-add-ons           #驱动挂载，保持不动
+            mountPath: /usr/local/Ascend/add-ons
+          - name: localtime
+            mountPath: /etc/localtime
+          - name: hccn                             #驱动hccn配置，保持不动
+            mountPath: /etc/hccn.conf
+          - name: npu-smi                             #npu-smi
+            mountPath: /usr/local/sbin/npu-smi
+          # 新增shm挂载
+          - name: dshm
+            mountPath: /dev/shm
+        nodeSelector:
+          accelerator/huawei-npu: ascend-snt9c
+        volumes:
+        - name: ascend-driver
+          hostPath:
+            path: /usr/local/Ascend/driver
+        - name: ascend-add-ons
+          hostPath:
+            path: /usr/local/Ascend/add-ons
+        - name: localtime
+          hostPath:
+            path: /etc/localtime                      # Configure the Docker time.
+        - name: hccn
+          hostPath:
+            path: /etc/hccn.conf
+        - name: npu-smi
+          hostPath:
+            path: /usr/local/sbin/npu-smi
+        # 新增共享内存卷
+        - name: dshm
+          emptyDir:
+            medium: Memory
+            sizeLimit: ${{vars.NPU_SHM}}
+        restartPolicy: OnFailure
