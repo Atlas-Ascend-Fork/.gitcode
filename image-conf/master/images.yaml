@@ -23,16 +23,16 @@ global:
         lv6_monitor_9_0_0: ubuntu20.04.05_x86:lv6_v1.1092
     ubuntu24.04:
       arm:
-        lv6: ubuntu24.04_arm:lv6_v1.1092
-        smoke: ubuntu24.04_arm:pre_mindspore_A2_conda_v1.1026
-        smoke_A3: ubuntu24.04_arm:pre_mindspore_A3_conda_v1.1021
+        lv6: ubuntu24.04_arm:lv6_v1.1095
+        smoke: ubuntu24.04_arm:pre_mindspore_A2_conda_v1.1029
+        smoke_A3: ubuntu24.04_arm:pre_mindspore_A3_conda_v1.1024
         asnumpy: ubuntu24.04_arm:asnumpy_v1.1001
         opencode: ubuntu24.04_arm:opencode_v1.1001
         lv6_monitor: ubuntu24.04_arm:lv6_v1.1085
         lv6_monitor_9_0_0: ubuntu24.04_arm:lv6_v1.1079
         lv6_monitor_9.1.0_beta.1: ubuntu24.04_arm:lv6_v1.1086
       x86:
-        lv6: ubuntu24.04_x86:lv6_v1.1094
+        lv6: ubuntu24.04_x86:lv6_v1.1097
         xla_npu: ubuntu_npu:v1.0
         asnumpy: ubuntu24.04_x86:asnumpy_v1.1002
         lv6_monitor: ubuntu24.04_x86:lv6_v1.1088
@@ -616,6 +616,10 @@ repos:
         x86:
           api_check: ubuntu24.04.3_x86:lv6_v1.1076
     stages:
+      Compile_Ascend_X86:
+        ubuntu24.04:x86:lv6
+      Compile_Ascend_ARM:
+        ubuntu24.04:arm:lv6
       Compile_X86_compiler:
         ubuntu24.04:x86:lv6
       Compile_X86_compiler_ubuntu24:
@@ -827,6 +831,14 @@ repos:
         ubuntu24.04:arm:lv6
       Compile_Ascend_ARM_ubuntu24:
         ubuntu24.04:arm:lv6
+      Compile_Ascend_X86_debug:
+        ubuntu24.04:x86:lv6
+      Compile_Ascend_X86_debug_ubuntu24:
+        ubuntu24.04:x86:lv6
+      Compile_Ascend_ARM_debug:
+        ubuntu24.04:arm:lv6
+      Compile_Ascend_ARM_debug_ubuntu24:
+        ubuntu24.04:arm:lv6
       API_Check:
         ubuntu24.04:x86:api_check
       UT_Test:
@@ -917,6 +929,12 @@ repos:
 
 
   pypto:
+    os_mirror:
+      ubuntu24.04:
+        x86:
+          lv6: ubuntu24.04_x86:lv6_v1.1094
+        arm:
+          lv6: ubuntu24.04_arm:lv6_v1.1092
     stages:
       Compile_Ascend_X86:
         ubuntu24.04:x86:lv6
@@ -1247,6 +1265,10 @@ repos:
         ubuntu20.04:x86:lv6
 
   cannbot-skills:
+    os_mirror:
+      ubuntu24.04:
+        x86:
+          UT_x86: ubuntu24.04_x86:lv6_v1.1094
     stages:
       Compile_Ascend_X86:
         ubuntu24.04:x86:lv6
@@ -1255,7 +1277,7 @@ repos:
       UT_Test_check_opencode:
         ubuntu24.04:arm:opencode
       UT_Test:
-        ubuntu24.04:x86:lv6
+        ubuntu24.04:x86:UT_x86
 
   ops-blas:
     os_mirror:
@@ -1326,6 +1348,8 @@ repos:
         arm:
           smoke: ubuntu24.04_arm:pre_mindspore_A2_conda_v1.1013
     stages:
+      UT_Test:
+        ubuntu24.04:x86:lv6
       PreSmoke_A900:
         ubuntu24.04:arm:smoke
   asc-comm:
