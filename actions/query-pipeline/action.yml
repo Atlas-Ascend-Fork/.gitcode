@@ -23,7 +23,7 @@ inputs:
     required: false
     default: 'false'
   pr_number:
-    description: 'PR 编号，传入后根据任务执行结果打标签（ci-pipeline-passed/ci-pipeline-failed）'
+    description: 'PR 编号，需配合 apply_label 使用，根据任务执行结果打标签（ci-pipeline-passed/ci-pipeline-failed）'
     required: false
   apply_label:
     description: '是否根据任务执行结果打标签，需同时传入 pr_number'

@@ -52,6 +52,7 @@ async function run() {
         // cov 模式专属
         const utProcess = core.getInput("ut_process");
         const utType = core.getInput("ut_type");
+        const language = core.getInput("language") || "cpp";
         // report 模式专属
         const utField = core.getInput("ut_field");
         const modules = core.getInput("modules");
@@ -62,6 +63,7 @@ async function run() {
         core.info(`coverage_num: ${coverageNum}`);
         core.info(`ut_process: ${utProcess}`);
         core.info(`ut_type: ${utType}`);
+        core.info(`language: ${language}`);
         core.info(`target_branch: ${targetBranch}`);
         core.info(`ut_field: ${utField}`);
         core.info(`modules: ${modules}`);
@@ -106,7 +108,8 @@ async function run() {
             env = {
                 ...baseEnv,
                 UT_PROCESS: utProcess,
-                UT_TYPE: utType
+                UT_TYPE: utType,
+                LANGUAGE: language
             };
         }
         await execShellScript(scriptPath, [], workspace, env);
