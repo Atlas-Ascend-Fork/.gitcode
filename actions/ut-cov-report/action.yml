@@ -28,6 +28,10 @@ inputs:
   ut_type:
     description: cov模式必填，UT分类
     required: false
+  language:
+    description: 代码语言类型（cpp/python），默认cpp
+    required: false
+    default: "cpp"
 
   # ========== report模式专属参数 ==========
   ut_field:
