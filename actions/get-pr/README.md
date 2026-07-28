@@ -19,6 +19,20 @@
 | `pr_filelist_precommit.txt` | 新增/修改（A/M）文件清单，供 `precommit` 使用 |
 | `update_file_detail.txt` | 变更明细 diff（`-U0 -w --no-renames`） |
 | `gitdiff.txt` | 所有 `.md` 变更文件的完整 diff |
+| `conflict_files.txt` | 与目标分支存在冲突的文件列表（无冲突时为空） |
+
+## 步骤输出
+
+| 输出 | 说明 |
+| --- | --- |
+| `CONFLICT_DETECTED` | `true` 表示存在冲突，`false` 表示无冲突 |
+
+## 步骤摘要
+
+执行完成后会向 `$ATOMGIT_STEP_SUMMARY` 写入冲突检测结果：
+
+- **无冲突**：显示 ✅ 提示
+- **有冲突**：显示 ⚠️ 提示并列出冲突文件列表
 
 ## 使用示例
 

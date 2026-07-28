@@ -66,6 +66,49 @@ async function run() {
         // 无位置参数，全部走环境变量传递
         await execShellScript(scriptPath, [], workspace, env);
         core.info("get_pr 脚本执行完成");
+        // 检测冲突并输出 summary
+        const conflictFilesPath = path_1.default.resolve(workspace, "conflict_files.txt");
+        try {
+            const conflictContent = await promises_1.default.readFile(conflictFilesPath, "utf-8");
+            const conflictFiles = conflictContent.trim().split("\n").filter(f => f.trim());
+            const summary = process.env.ATOMGIT_STEP_SUMMARY || "";
+            if (conflictFiles.length > 0) {
+                core.warning(`检测到 ${conflictFiles.length} 个冲突文件`);
+                const summaryLines = [
+                    "## ⚠️ PR 与目标分支存在冲突",
+                    "",
+                    `检测到 **${conflictFiles.length}** 个文件存在合并冲突，请先 rebase 或 merge 目标分支解决冲突：`,
+                    "",
+                    "| 冲突文件 |",
+                    "|---------|",
+                ];
+                for (const f of conflictFiles) {
+                    summaryLines.push(`| \`${f}\` |`);
+                }
+                summaryLines.push("");
+                const summaryText = summaryLines.join("\n");
+                if (summary) {
+                    const fs = __nccwpck_require__(147);
+                    fs.appendFileSync(summary, summaryText + "\n");
+                }
+                else {
+                    core.info(summaryText);
+                }
+            }
+            else {
+                const okSummary = "## ✅ PR 与目标分支无冲突\n\nPR 代码与目标分支 `${targetBranch}` 不存在合并冲突。\n";
+                if (summary) {
+                    const fs = __nccwpck_require__(147);
+                    fs.appendFileSync(summary, okSummary + "\n");
+                }
+                else {
+                    core.info(okSummary);
+                }
+            }
+        }
+        catch {
+            core.info("未找到 conflict_files.txt，跳过冲突检测 summary 输出");
+        }
     }
     catch (err) {
         const error = err;
