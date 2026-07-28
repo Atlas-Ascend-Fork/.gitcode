@@ -96,14 +96,7 @@ async function run() {
                 }
             }
             else {
-                const okSummary = "## ✅ PR 与目标分支无冲突\n\nPR 代码与目标分支 `${targetBranch}` 不存在合并冲突。\n";
-                if (summary) {
-                    const fs = __nccwpck_require__(147);
-                    fs.appendFileSync(summary, okSummary + "\n");
-                }
-                else {
-                    core.info(okSummary);
-                }
+                core.info("PR 与目标分支无冲突");
             }
         }
         catch {
