@@ -53,8 +53,8 @@ async function run() {
         core.info(`脚本所在目录SCRIPT_DIR：${scriptDir}`);
         core.info(`调度脚本完整路径：${scriptPath}`);
         core.info(`WORKSPACE：${workspace}`);
-        core.info(`org_name${org_name}`);
-        core.info(`入参 check_type=${checkType}, repo_name=${repoName}, target_branch=${targetBranch}, merge_id=${mergeId}, commit_id=${commitId}, org_name=${org_name}`);
+        core.info(`org_name${orgName}`);
+        core.info(`入参 check_type=${checkType}, repo_name=${repoName}, target_branch=${targetBranch}, merge_id=${mergeId}, commit_id=${commitId}, org_name=${orgName}`);
         // 透传环境变量给shell脚本
         const env = {
             ...process.env,
@@ -63,7 +63,7 @@ async function run() {
             SCRIPT_DIR: scriptDir
         };
         // shell脚本入参顺序：$1 sc_tool(check_type) $2 REPOSITORY_NAME $3 GIT_TARGET_BRANCH $4 GIT_PR_NUMBER(merge_id) $5 COMMIT_ID
-        const args = [checkType, repoName, targetBranch, mergeId, commitId, org_name];
+        const args = [checkType, repoName, targetBranch, mergeId, commitId, orgName];
         await execShellScript(scriptPath, args, scriptDir, env);
         core.info("静态检查调度脚本 run-static-check.sh 执行完成");
     }
