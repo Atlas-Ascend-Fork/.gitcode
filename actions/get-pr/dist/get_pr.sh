@@ -67,6 +67,18 @@ fi
 if [ -n "${conflict_files}" ]; then
   echo "CONFLICT_DETECTED=true" >> "${ATOMGIT_OUTPUT:-/dev/null}"
   echo "${conflict_files}" > conflict_files.txt
+  if [ -n "${ATOMGIT_STEP_SUMMARY}" ]; then
+    echo "## ⚠️ PR 与目标分支存在冲突" >> "${ATOMGIT_STEP_SUMMARY}"
+    echo "" >> "${ATOMGIT_STEP_SUMMARY}"
+    echo "检测到 **$(echo "${conflict_files}" | wc -l)** 个文件存在合并冲突，请先 rebase 或 merge 目标分支解决冲突：" >> "${ATOMGIT_STEP_SUMMARY}"
+    echo "" >> "${ATOMGIT_STEP_SUMMARY}"
+    echo "| 冲突文件 |" >> "${ATOMGIT_STEP_SUMMARY}"
+    echo "|---------|" >> "${ATOMGIT_STEP_SUMMARY}"
+    while IFS= read -r f; do
+      [ -n "$f" ] && echo "| \`$f\` |" >> "${ATOMGIT_STEP_SUMMARY}"
+    done <<< "${conflict_files}"
+    echo "" >> "${ATOMGIT_STEP_SUMMARY}"
+  fi
 else
   echo "CONFLICT_DETECTED=false" >> "${ATOMGIT_OUTPUT:-/dev/null}"
   echo "" > conflict_files.txt
