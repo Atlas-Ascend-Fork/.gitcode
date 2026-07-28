@@ -30,6 +30,7 @@ git branch -r
 
 # 检测 PR 与目标分支是否存在冲突
 conflict_files=""
+echo "111"
 merge_base=$(git merge-base origin/${target_branch} HEAD 2>/dev/null)
 if [ -n "${merge_base}" ]; then
   # 使用 merge-tree 检测冲突（不实际 merge）
