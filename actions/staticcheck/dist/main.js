@@ -46,13 +46,15 @@ async function run() {
         const targetBranch = core.getInput("target_branch", { required: true });
         const mergeId = core.getInput("merge_id", { required: true });
         const commitId = core.getInput("commit_id");
+        const orgName = core.getInput("org_name");
         const scriptDir = __dirname;
         const scriptPath = path_1.default.resolve(scriptDir, "./staticcheck.sh");
         await promises_1.default.access(scriptPath);
         core.info(`脚本所在目录SCRIPT_DIR：${scriptDir}`);
         core.info(`调度脚本完整路径：${scriptPath}`);
         core.info(`WORKSPACE：${workspace}`);
-        core.info(`入参 check_type=${checkType}, repo_name=${repoName}, target_branch=${targetBranch}, merge_id=${mergeId}, commit_id=${commitId}`);
+        core.info(`org_name${org_name}`);
+        core.info(`入参 check_type=${checkType}, repo_name=${repoName}, target_branch=${targetBranch}, merge_id=${mergeId}, commit_id=${commitId}, org_name=${org_name}`);
         // 透传环境变量给shell脚本
         const env = {
             ...process.env,
@@ -61,7 +63,7 @@ async function run() {
             SCRIPT_DIR: scriptDir
         };
         // shell脚本入参顺序：$1 sc_tool(check_type) $2 REPOSITORY_NAME $3 GIT_TARGET_BRANCH $4 GIT_PR_NUMBER(merge_id) $5 COMMIT_ID
-        const args = [checkType, repoName, targetBranch, mergeId, commitId];
+        const args = [checkType, repoName, targetBranch, mergeId, commitId, org_name];
         await execShellScript(scriptPath, args, scriptDir, env);
         core.info("静态检查调度脚本 run-static-check.sh 执行完成");
     }
@@ -668,8 +670,8 @@ class OidcClient {
             const res = yield httpclient
                 .getJson(id_token_url)
                 .catch(error => {
-                throw new Error(`Failed to get ID Token. \n 
-        Error Code : ${error.statusCode}\n 
+                throw new Error(`Failed to get ID Token. \n
+        Error Code : ${error.statusCode}\n
         Error Message: ${error.message}`);
             });
             const id_token = (_a = res.result) === null || _a === void 0 ? void 0 : _a.value;
@@ -27624,7 +27626,7 @@ module.exports = parseParams
 /************************************************************************/
 /******/ 	// The module cache
 /******/ 	var __webpack_module_cache__ = {};
-/******/ 	
+/******/
 /******/ 	// The require function
 /******/ 	function __nccwpck_require__(moduleId) {
 /******/ 		// Check if module is in cache
@@ -27638,7 +27640,7 @@ module.exports = parseParams
 /******/ 			// no module.loaded needed
 /******/ 			exports: {}
 /******/ 		};
-/******/ 	
+/******/
 /******/ 		// Execute the module function
 /******/ 		var threw = true;
 /******/ 		try {
@@ -27647,23 +27649,23 @@ module.exports = parseParams
 /******/ 		} finally {
 /******/ 			if(threw) delete __webpack_module_cache__[moduleId];
 /******/ 		}
-/******/ 	
+/******/
 /******/ 		// Return the exports of the module
 /******/ 		return module.exports;
 /******/ 	}
-/******/ 	
+/******/
 /************************************************************************/
 /******/ 	/* webpack/runtime/compat */
-/******/ 	
+/******/
 /******/ 	if (typeof __nccwpck_require__ !== 'undefined') __nccwpck_require__.ab = __dirname + "/";
-/******/ 	
+/******/
 /************************************************************************/
-/******/ 	
+/******/
 /******/ 	// startup
 /******/ 	// Load entry module and return exports
 /******/ 	// This entry module is referenced by other modules so it can't be inlined
 /******/ 	var __webpack_exports__ = __nccwpck_require__(1188);
 /******/ 	module.exports = __webpack_exports__;
-/******/ 	
+/******/
 /******/ })()
 ;

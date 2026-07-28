@@ -1,0 +1,5 @@
+StaticCheck:  #黑名单
+  ops-math-dev:  # 仓名
+    - test1/   # 例子1,目录
+    - test2/abc.md  #例子2，文件
+    - 'cmake/testtest.md:68'

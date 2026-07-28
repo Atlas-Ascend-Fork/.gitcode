@@ -5,10 +5,9 @@ import re
 import json
 
 
-def write_task_json(warn_num, tool_name, commit_id, res_dir):
+def write_task_json(warn_num, tool_name, res_dir):
     data = {
-        tool_name: warn_num,
-        "commit_id": commit_id
+        tool_name: warn_num
     }
     static_file = f"{res_dir}/StaticCheck_{tool_name}.json"
     with open(static_file, "w", encoding="utf-8") as f:
@@ -100,7 +99,7 @@ def get_git_diff_lines(repo_path, file_path, branch, md_output):
     return added_lines
 
 
-def analyse_output(file_name,tool_name):
+def analyse_output(file_name, tool_name='SC'):
     '''
     分析output.md文件内容，将数据转换为字典和列表[{},{}]
     '''
@@ -110,6 +109,7 @@ def analyse_output(file_name,tool_name):
     line_num_pattern = re.compile(r'.*错误位置]：第 (.*?)行<br>.*')
     info_pattern = re.compile(r'.*错误信息]：(.*?)<br>.*')
     data_pattern = re.compile(r'.*错误内容]：(.*?)\|.*')
+    chendu_pattern = re.compile(r'.*严重程度]：(.*?)<br>.*')
     with open(file_name, 'r', encoding="utf-8") as fr:
         lines = fr.readlines()
     for line in lines:
@@ -121,8 +121,8 @@ def analyse_output(file_name,tool_name):
             style_match = style_pattern.match(line)
             if not style_match: #过滤空
                 continue
-            if style_match.group(1) != tool_name.replace("_","-"): # 过滤工具,工具是-，不是_
-                continue
+            # if style_match.group(1) != tool_name.replace("_","-"): # 过滤工具,工具是-，不是_
+            #     continue
             file_path_match = file_path_pattern.match(line)
             if file_path_match:
                 file_path = file_path_match.group(1)
@@ -139,12 +139,25 @@ def analyse_output(file_name,tool_name):
             else:
                 tmp_dic["错误位置"] = ""
             #
+            chendu_match = chendu_pattern.match(line)
+            if chendu_match:
+                chendu = chendu_match.group(1)
+                tmp_dic["严重程度"] = chendu
+            else:
+                tmp_dic["严重程度"] = ""
+            #
             info_match = info_pattern.match(line)
             if info_match:
                 info = info_match.group(1)
                 tmp_dic["错误信息"] = info
             else:
-                tmp_dic["错误信息"] = ""
+                info2_pattern = re.compile(r'.*错误信息]：(.*)\|')
+                info2_match = info2_pattern.match(line)
+                if info2_match:
+                    info2 = info2_match.group(1)
+                    tmp_dic["错误信息"] = info2
+                else:
+                    tmp_dic["错误信息"] = ""
             #
             data_match = data_pattern.match(line)
             if data_match:
