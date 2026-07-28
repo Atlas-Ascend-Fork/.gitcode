@@ -28,24 +28,6 @@ fi
 git branch
 git branch -r
 
-git diff origin/${target_branch} HEAD --stat
-git -c core.quotePath=false diff origin/${target_branch} HEAD --name-status > pr_filelist_mod.txt
-git -c core.quotePath=false diff origin/${target_branch} HEAD --name-only > pr_filelist.txt
-git -c core.quotePath=false diff origin/${target_branch}...HEAD --name-only --diff-filter=AM > pr_filelist_precommit.txt
-git -c core.quotePath=false diff -U0 -w --no-renames origin/${target_branch}...HEAD > update_file_detail.txt
-
-cat pr_filelist_mod.txt
-cat pr_filelist.txt
-cat pr_filelist_precommit.txt
-
-touch gitdiff.txt
-while IFS= read -r line;do
-  if [[ -f "$line" && "$line" == *.md ]];then
-    echo "------${line}" >> gitdiff.txt
-    git diff origin/${target_branch} "$line" >> gitdiff.txt
-  fi
-done < pr_filelist.txt
-
 # 检测 PR 与目标分支是否存在冲突
 conflict_files=""
 merge_base=$(git merge-base origin/${target_branch} HEAD 2>/dev/null)
@@ -79,7 +61,27 @@ if [ -n "${conflict_files}" ]; then
     done <<< "${conflict_files}"
     echo "" >> "${ATOMGIT_STEP_SUMMARY}"
   fi
+  echo "ERROR: PR 与目标分支 ${target_branch} 存在冲突，跳过后续步骤"
+  exit 1
 else
   echo "CONFLICT_DETECTED=false" >> "${ATOMGIT_OUTPUT:-/dev/null}"
   echo "" > conflict_files.txt
 fi
+
+git diff origin/${target_branch} HEAD --stat
+git -c core.quotePath=false diff origin/${target_branch} HEAD --name-status > pr_filelist_mod.txt
+git -c core.quotePath=false diff origin/${target_branch} HEAD --name-only > pr_filelist.txt
+git -c core.quotePath=false diff origin/${target_branch}...HEAD --name-only --diff-filter=AM > pr_filelist_precommit.txt
+git -c core.quotePath=false diff -U0 -w --no-renames origin/${target_branch}...HEAD > update_file_detail.txt
+
+cat pr_filelist_mod.txt
+cat pr_filelist.txt
+cat pr_filelist_precommit.txt
+
+touch gitdiff.txt
+while IFS= read -r line;do
+  if [[ -f "$line" && "$line" == *.md ]];then
+    echo "------${line}" >> gitdiff.txt
+    git diff origin/${target_branch} "$line" >> gitdiff.txt
+  fi
+done < pr_filelist.txt
