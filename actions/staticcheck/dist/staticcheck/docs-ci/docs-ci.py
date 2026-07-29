@@ -14,8 +14,8 @@ import sc_public_module as git_diff
 # 当前模块日志对象
 logger = logging.getLogger(__name__)
 # 拦截项
-#LANJIE_TOOLS = ["link-validity-check", "resource-existence-check"]
-LANJIE_TOOLS = []
+#LANJIE_TOOLS = ["StaticCheck_markdownlint", "StaticCheck_link_validity"]
+LANJIE_TOOLS = ["StaticCheck_markdownlint", "StaticCheck_link_validity"]
 CHECK_TYPE_LST = ["StaticCheck_markdownlint", "StaticCheck_tag_closed", "StaticCheck_link_validity", "StaticCheck_resource_existence", "StaticCheck_codespell", "StaticCheck_compliance"]
 CD = {
     "MD028": "一般",
@@ -194,7 +194,7 @@ def output_to_result(code_dir, filter_lst, check_md_lst, branch, summary_info_di
         tmp_lst.append(chendu)
         tmp_lst.append(i.get(MSG_FILE_PATH, "无"))
         tmp_lst.append(i.get(MSG_ERR_POS, "无"))
-        if tool_name in LANJIE_TOOLS:
+        if tool_name_new.replace("_check", "") in LANJIE_TOOLS:
             lanjie_is = "拦截"
             lanjie_nums += 1
         else:
