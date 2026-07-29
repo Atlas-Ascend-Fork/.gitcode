@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 # 拦截项
 #LANJIE_TOOLS = ["link-validity-check", "resource-existence-check"]
 LANJIE_TOOLS = []
-CHECK_TYPE_LST = ["StaticCheck_markdownlint", "StaticCheck_tag_closed", "StaticChecklink_validity", "StaticCheck_resource_existence", "StaticCheck_codespell", "StaticCheck_compliance"]
+CHECK_TYPE_LST = ["StaticCheck_markdownlint", "StaticCheck_tag_closed", "StaticCheck_link_validity", "StaticCheck_resource_existence", "StaticCheck_codespell", "StaticCheck_compliance"]
 CD = {
     "MD028": "一般",
     "MD005": "一般",
