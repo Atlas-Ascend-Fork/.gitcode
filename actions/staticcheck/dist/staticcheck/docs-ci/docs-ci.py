@@ -436,6 +436,8 @@ if __name__ == "__main__":
         if len(check_info["summary_detail_lst"]) > 5:
             raw = check_info["summary_detail_lst"][:5]
             raw.append('...')
+        else:
+            raw = check_info["summary_detail_lst"]
         summary_lines.append(f"\n<details>")
         summary_lines.append(f"<summary> {check_status} {check_tool} 失败详情</summary>")
         summary_lines.append("")

@@ -28,7 +28,7 @@ output_file=${WORKSPACE}/output.md
 cp $output_file ${WORKSPACE}/StaticCheck_output.json
 #result_file=${WORKSPACE}/${tool_name}.md
 result_file=${WORKSPACE}/StaticCheck.csv
-cat ${output_file}
+# cat ${output_file}
 mkdir -p ${WORKSPACE}/build_out/
 if [ -f "$result_file" ];then
     # 告警大于0扫描有告警
