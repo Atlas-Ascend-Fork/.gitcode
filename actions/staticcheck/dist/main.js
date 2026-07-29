@@ -53,7 +53,7 @@ async function run() {
         core.info(`脚本所在目录SCRIPT_DIR：${scriptDir}`);
         core.info(`调度脚本完整路径：${scriptPath}`);
         core.info(`WORKSPACE：${workspace}`);
-        core.info(`org_name${orgName}`);
+        core.info(`org_name：${orgName}`);
         core.info(`入参 check_type=${checkType}, repo_name=${repoName}, target_branch=${targetBranch}, merge_id=${mergeId}, commit_id=${commitId}, org_name=${orgName}`);
         // 透传环境变量给shell脚本
         const env = {
