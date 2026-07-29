@@ -205,7 +205,7 @@ def output_to_result(code_dir, filter_lst, check_md_lst, branch, summary_info_di
         tmp_lst.append(i.get("错误内容", "无"))
         print(tmp_lst)
         data_lst.append(tmp_lst)
-        summary_info_dic[tool_name_new.replace("_check", "")].append(tmp_lst)
+        summary_info_dic[tool_name_new.replace("_check", "")].append(":".join([tmp_lst[2], tmp_lst[3], tmp_lst[5], tmp_lst[6]]))
     with open(result_csv_file, "w", encoding="utf-8-sig", newline="") as fw:
         writer = csv.writer(fw)
         writer.writerows(data_lst)
@@ -395,12 +395,17 @@ if __name__ == "__main__":
                 fa.write("\n" + item )
     # output.md生成最终的结果文件result.csv
     summary_info_dic = {}
+    mr_intercept_dic = {}
     for check_type in CHECK_TYPE_LST:
         summary_info_dic.setdefault(check_type, [])
+        mr_intercept_dic.setdefault(check_type, {
+            "intercept_status": "Passed",
+            "summary_detail_lst": []
+        })
     result_num = output_to_result(code_dir, filter_lst, check_md_lst, branch, summary_info_dic)
     git_diff.write_task_json(result_num, tool_name, code_dir)
     # 生成summary文件
-    passed = result_num == 1
+    passed = result_num != 1
     status_icon = "✅" if passed else "❌"
     summary_lines = [
         f"## {status_icon} MD-CHECK 检查结果\n",
@@ -408,15 +413,37 @@ if __name__ == "__main__":
     ]
     summary_lines.append("\n| 检查项 | 结果 |")
     summary_lines.append("|--------|------|")
+    mr_intercept_dic = {}
     for check_tool, check_info in summary_info_dic.items():
         if check_info:
             if check_tool in LANJIE_TOOLS:
                 hook_status = "❌ Failed"
+                intercept_status = 'Failed'
             else:
                 hook_status = "⏭️ Waring"
+                intercept_status = 'Waring'
+            mr_intercept_dic[check_tool]['intercept_status'] = hook_status
+            mr_intercept_dic[check_tool]['summary_detail_lst'].extend(check_info)
         else:
             hook_status = "✅ Passed"
         summary_lines.append(f"| {check_tool} | {hook_status} |")
+    for check_tool, check_info in mr_intercept_dic.items():
+        if check_info['intercept_status'] == "Passed":
+            continue
+        if check_info['intercept_status'] == "Failed":
+            check_status = "❌"
+        if check_info['intercept_status'] == "Waring":
+            check_status = "⏭️"
+        if len(check_info) > 5:
+            raw = check_info[:5]
+            raw.append('...')
+        summary_lines.append(f"\n<details>")
+        summary_lines.append(f"<summary>{check_status} {check_tool} 失败详情</summary>")
+        summary_lines.append("")
+        summary_lines.append("```")
+        summary_lines.append("\n".join(raw))
+        summary_lines.append("```")
+        summary_lines.append("</details>")
     summary_lines.append('⚠️ 详细告警信息请查看日志或 StaticCheck.csv 产物')
     git_diff.gen_summary_file(summary_lines)
     sys.exit(result_num)  # 输出告警个数
