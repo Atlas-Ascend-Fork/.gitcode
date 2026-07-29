@@ -16,6 +16,7 @@ logger = logging.getLogger(__name__)
 # 拦截项
 #LANJIE_TOOLS = ["link-validity-check", "resource-existence-check"]
 LANJIE_TOOLS = []
+CHECK_TYPE_LST = ["StaticCheck_markdownlint", "StaticCheck_tag_closed", "StaticChecklink_validity", "StaticCheck_resource_existence", "StaticCheck_codespell", "StaticCheck_compliance"]
 CD = {
     "MD028": "一般",
     "MD005": "一般",
@@ -119,7 +120,7 @@ def parse_file(file_path):
     return result
 
 
-def output_to_result(code_dir, filter_lst, check_md_lst, branch):
+def output_to_result(code_dir, filter_lst, check_md_lst, branch, summary_info_dic):
     """对output.md文件，进行如下操作，然后输出result.md
     1. 变更文件列表过滤
     2. 工具过滤
@@ -204,6 +205,7 @@ def output_to_result(code_dir, filter_lst, check_md_lst, branch):
         tmp_lst.append(i.get("错误内容", "无"))
         print(tmp_lst)
         data_lst.append(tmp_lst)
+        summary_info_dic[tool_name_new].append(tmp_lst)
     with open(result_csv_file, "w", encoding="utf-8-sig", newline="") as fw:
         writer = csv.writer(fw)
         writer.writerows(data_lst)
@@ -213,7 +215,7 @@ def output_to_result(code_dir, filter_lst, check_md_lst, branch):
     elif lanjie_nums == 0 and no_lanjie_nums < 0:
         print("no lanjie")
         return 99
-    return len(result_lst)
+
 
 
 def compliance(code_dir, script_dir, repo_name, check_md_lst):
@@ -392,6 +394,30 @@ if __name__ == "__main__":
             for item in no_utf8_lst:
                 fa.write("\n" + item )
     # output.md生成最终的结果文件result.csv
-    result_num = output_to_result(code_dir, filter_lst, check_md_lst, branch)
+    summary_info_dic = {}
+    for check_type in CHECK_TYPE_LST:
+        summary_info_dic.setdefault(check_type, [])
+    result_num = output_to_result(code_dir, filter_lst, check_md_lst, branch, summary_info_dic)
     git_diff.write_task_json(result_num, tool_name, code_dir)
+    # 生成summary文件
+    print_summary_lst = []
+    passed = result_num == 1
+    status_icon = "✅" if passed else "❌"
+    summary_lines = [
+        f"## {status_icon} MD-CHECK 检查结果\n",
+        f"**状态**: {'通过' if passed else '失败'}\n",
+    ]
+    summary_lines.append("\n| 检查项 | 结果 |")
+    summary_lines.append("|--------|------|")
+    for check_tool, check_info in summary_info_dic:
+        if check_info:
+            if check_tool in LANJIE_TOOLS:
+                hook_status = "❌ Failed"
+            else:
+                hook_status = "⏭️ Waring"
+        else:
+            hook_status = "✅ Passed"
+        summary_lines.append(f"| {check_tool} | {hook_status} |")
+    print_summary_lst.append('⚠️ 详细告警信息请查看日志或 StaticCheck.csv 产物')
+    git_diff.gen_summary_file(print_summary_lst)
     sys.exit(result_num)  # 输出告警个数
