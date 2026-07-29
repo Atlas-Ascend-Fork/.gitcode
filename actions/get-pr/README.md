@@ -8,8 +8,10 @@
 | --- | --- | --- |
 | `workspace` | 是 | 代码工作目录（已检出的仓库根目录） |
 | `target_branch` | 是 | 对比基准分支 |
-| `commit` | 否 | 指定 commit SHA，传入时与 target_branch 做冲突检测，冲突信息写入步骤摘要 |
-| `git_token` | 否 | 私有仓库访问 token，公开仓库无需传入 |
+| `owner` | 否 | 仓库所属组织/用户，传入时启用冲突检测 |
+| `repo` | 否 | 仓库名称，传入时启用冲突检测 |
+| `pr_number` | 否 | PR 编号，传入时调用 API 检测冲突状态 |
+| `git_token` | 否 | 私有仓库访问 token，冲突检测时必传 |
 
 ## 产物
 
@@ -23,13 +25,12 @@
 
 ## 冲突检测
 
-当传入 `commit` 参数时，会检测该 commit 与 `target_branch` 的关系：
+当同时传入 `owner`、`repo`、`pr_number`、`git_token` 时，通过 GitCode API（`GET /api/v5/repos/{owner}/{repo}/pulls/{number}`）获取 PR 信息，读取 `mergeable_state.conflict_passed` 字段判断冲突状态：
 
-| 场景 | 判定 | 说明 |
+| conflict_passed | 判定 | 说明 |
 | --- | --- | --- |
-| target_branch 是 commit 的祖先 | 无冲突 | commit 基于目标分支，diff 正常 |
-| commit 已合入 target_branch | 冲突 | diff 结果为空或反向 |
-| 两者已分叉 | 冲突 | diff 结果包含无关变更 |
+| `true` | 无冲突 | PR 可正常合并 |
+| `false` | 冲突 | PR 与目标分支存在冲突，无法自动合并 |
 
 冲突信息通过 `$ATOMGIT_STEP_SUMMARY` 写入步骤摘要，以 Markdown 表格形式展示。
 
@@ -48,6 +49,8 @@
   with:
     workspace: ${{ steps.process_checkout.outputs.path }}
     target_branch: ${{ env.TARGET_BRANCH }}
-    commit: ${{ atomgit.sha }}
+    owner: ${{ env.org_name }}
+    repo: ${{ env.repo_name }}
+    pr_number: ${{ atomgit.event.pull_request.number }}
     git_token: ${{ secrets.GIT_TOKEN }}
 ```

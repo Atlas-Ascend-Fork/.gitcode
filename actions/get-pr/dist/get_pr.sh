@@ -1,7 +1,9 @@
 #!/bin/bash
 
 target_branch="${TARGET_BRANCH}"
-COMMIT_SHA="${COMMIT_SHA:-}"
+OWNER="${OWNER:-}"
+REPO="${REPO:-}"
+PR_NUMBER="${PR_NUMBER:-}"
 GIT_TOKEN="${GIT_TOKEN:-}"
 cd "${WORKSPACE}"
 
@@ -29,46 +31,47 @@ fi
 git branch
 git branch -r
 
-# commit 与 target_branch 冲突检测
-if [[ -n "${COMMIT_SHA}" ]]; then
-  # 校验 commit 是否存在于本地仓库
-  if ! git rev-parse "${COMMIT_SHA}" >/dev/null 2>&1; then
-    echo "WARNING: commit ${COMMIT_SHA} 不存在于本地仓库，跳过冲突检测"
+# 通过 API 检测 PR 冲突状态
+if [[ -n "${OWNER}" && -n "${REPO}" && -n "${PR_NUMBER}" && -n "${GIT_TOKEN}" ]]; then
+  PR_API_URL="https://api.gitcode.com/api/v5/repos/${OWNER}/${REPO}/pulls/${PR_NUMBER}"
+  PR_INFO=$(curl -sf -H "Authorization: Bearer ${GIT_TOKEN}" "${PR_API_URL}" 2>/dev/null)
+  if [[ $? -ne 0 || -z "${PR_INFO}" ]]; then
+    echo "WARNING: 获取 PR 信息失败，跳过冲突检测"
   else
-    target_ref="origin/${target_branch}"
-    short_commit=$(git rev-parse --short "${COMMIT_SHA}")
-    target_short=$(git rev-parse --short "${target_ref}")
+    conflict_passed=$(echo "${PR_INFO}" | python3 -c "
+import sys, json
+try:
+    d = json.load(sys.stdin)
+    print(d.get('mergeable_state', {}).get('conflict_passed', ''))
+except Exception:
+    print('')
+" 2>/dev/null)
 
-    if git merge-base --is-ancestor "${COMMIT_SHA}" "${target_ref}" 2>/dev/null; then
-      # commit 已合入 target_branch
-      conflict_reason="commit \`${short_commit}\` 已合入目标分支 \`${target_branch}\`（${target_short}），diff 结果为空或反向"
-      has_conflict=1
-    elif ! git merge-base --is-ancestor "${target_ref}" "${COMMIT_SHA}" 2>/dev/null; then
-      # 两者已分叉，target_branch 不是 commit 的祖先
-      conflict_reason="commit \`${short_commit}\` 与目标分支 \`${target_branch}\`（${target_short}）已分叉，diff 结果包含无关变更"
-      has_conflict=1
-    else
-      echo "✅ commit ${short_commit} 是目标分支 ${target_branch} 的后代，无冲突"
-      has_conflict=0
-    fi
-
-    if [[ "${has_conflict}" == "1" ]]; then
-      echo "⚠️ 检测到冲突：${conflict_reason}"
+    if [[ "${conflict_passed}" == "False" ]]; then
+      echo "⚠️ PR #${PR_NUMBER} 存在冲突（conflict_passed=False）"
       if [[ -n "${ATOMGIT_STEP_SUMMARY}" ]]; then
         {
-          echo "## ⚠️ Commit 与 Target Branch 冲突"
+          echo "## ⚠️ PR 冲突检测"
           echo ""
           echo "| 参数 | 值 |"
           echo "|------|------|"
-          echo "| commit | \`${short_commit}\` |"
-          echo "| target_branch | \`${target_branch}\`（${target_short}） |"
+          echo "| PR | #${PR_NUMBER} |"
+          echo "| owner/repo | ${OWNER}/${REPO} |"
+          echo "| target_branch | \`${target_branch}\` |"
+          echo "| conflict_passed | ❌ False |"
           echo ""
-          echo "**冲突原因：** ${conflict_reason}"
+          echo "**冲突原因：** PR 与目标分支存在冲突，无法自动合并，请先解决冲突再重新触发流水线。"
           echo ""
         } >> "${ATOMGIT_STEP_SUMMARY}"
       fi
+    elif [[ "${conflict_passed}" == "True" ]]; then
+      echo "✅ PR #${PR_NUMBER} 无冲突（conflict_passed=True）"
+    else
+      echo "WARNING: 无法解析 conflict_passed 字段，跳过冲突检测"
     fi
   fi
+else
+  echo "未提供 owner/repo/pr_number/git_token，跳过冲突检测"
 fi
 
 git diff origin/${target_branch} HEAD --stat

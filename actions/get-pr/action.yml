@@ -1,14 +1,20 @@
 name: 'get-pr'
 author: 'CANN'
-version: '1.1.0'
+version: '1.2.0'
 description: 'this is a get pr filelist action'
 inputs:
   workspace:
     required: true
   target_branch:
     required: true
-  commit:
-    description: 指定 commit SHA，用于与 target_branch 做冲突检测
+  owner:
+    description: 仓库所属组织/用户
+    required: false
+  repo:
+    description: 仓库名称
+    required: false
+  pr_number:
+    description: PR 编号，传入时调用 API 检测冲突状态
     required: false
   git_token:
     description: 私有仓库访问token，公开仓库无需传入
