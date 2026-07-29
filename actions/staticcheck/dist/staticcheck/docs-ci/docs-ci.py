@@ -179,12 +179,12 @@ def output_to_result(code_dir, filter_lst, check_md_lst, branch, summary_info_di
         tool_name = i.get("检查类型", "无")
         tool_name_new = tool_name
         if "-" in tool_name:
-            tool_name_new = "StaticCheck_" +  "_".join(tool_name.split("-"))
+            tool_name_new = ("StaticCheck_" +  "_".join(tool_name.split("-"))).replace("_check", "")
         if tool_name == "markdownlint" :
             tool_name_new = "StaticCheck_markdownlint"
         if tool_name == "MD编码格式检查":
             tool_name_new = "StaticCheck_compliance"
-        tmp_lst.append(tool_name_new.replace("_check", ""))
+        tmp_lst.append(tool_name_new)
         err_info = i.get("错误信息", "无")  # 获取规则，但不修改
         chendu = ""
         if "markdownlint" in tool_name:
