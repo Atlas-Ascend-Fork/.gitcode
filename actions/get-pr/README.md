@@ -11,7 +11,7 @@
 | `owner` | 否 | 仓库所属组织/用户，传入时启用冲突检测 |
 | `repo` | 否 | 仓库名称，传入时启用冲突检测 |
 | `pr_number` | 否 | PR 编号，传入时调用 API 检测冲突状态 |
-| `git_token` | 否 | 私有仓库访问 token，冲突检测时必传 |
+| `git_token` | 否 | 私有仓库访问 token，公开仓库无需传入 |
 
 ## 产物
 
@@ -25,7 +25,7 @@
 
 ## 冲突检测
 
-当同时传入 `owner`、`repo`、`pr_number`、`git_token` 时，通过 GitCode API（`GET /api/v5/repos/{owner}/{repo}/pulls/{number}`）获取 PR 信息，读取 `mergeable_state.conflict_passed` 字段判断冲突状态：
+当同时传入 `owner`、`repo`、`pr_number` 时，通过 GitCode API（`GET /api/v5/repos/{owner}/{repo}/pulls/{number}`）获取 PR 信息，读取 `mergeable_state.conflict_passed` 字段判断冲突状态（公开仓库无需传 `git_token`）：
 
 | conflict_passed | 判定 | 说明 |
 | --- | --- | --- |

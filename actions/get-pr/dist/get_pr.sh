@@ -32,9 +32,13 @@ git branch
 git branch -r
 
 # 通过 API 检测 PR 冲突状态
-if [[ -n "${OWNER}" && -n "${REPO}" && -n "${PR_NUMBER}" && -n "${GIT_TOKEN}" ]]; then
+if [[ -n "${OWNER}" && -n "${REPO}" && -n "${PR_NUMBER}" ]]; then
   PR_API_URL="https://api.gitcode.com/api/v5/repos/${OWNER}/${REPO}/pulls/${PR_NUMBER}"
-  PR_INFO=$(curl -sf -H "Authorization: Bearer ${GIT_TOKEN}" "${PR_API_URL}" 2>/dev/null)
+  if [[ -n "${GIT_TOKEN}" ]]; then
+    PR_INFO=$(curl -sf -H "Authorization: Bearer ${GIT_TOKEN}" "${PR_API_URL}" 2>/dev/null)
+  else
+    PR_INFO=$(curl -sf "${PR_API_URL}" 2>/dev/null)
+  fi
   if [[ $? -ne 0 || -z "${PR_INFO}" ]]; then
     echo "WARNING: 获取 PR 信息失败，跳过冲突检测"
   else
