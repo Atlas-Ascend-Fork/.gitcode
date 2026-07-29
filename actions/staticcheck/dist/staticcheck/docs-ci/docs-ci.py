@@ -205,7 +205,7 @@ def output_to_result(code_dir, filter_lst, check_md_lst, branch, summary_info_di
         tmp_lst.append(i.get("错误内容", "无"))
         print(tmp_lst)
         data_lst.append(tmp_lst)
-        summary_info_dic[tool_name_new.replace("_check", "")].append(":".join([tmp_lst[2], tmp_lst[3], tmp_lst[5], tmp_lst[6]]))
+        summary_info_dic[tool_name_new.replace("_check", "")].append(":".join([tmp_lst[2], tmp_lst[3], tmp_lst[5], tmp_lst[6].replace('```', '')]))
     with open(result_csv_file, "w", encoding="utf-8-sig", newline="") as fw:
         writer = csv.writer(fw)
         writer.writerows(data_lst)
@@ -413,7 +413,6 @@ if __name__ == "__main__":
     ]
     summary_lines.append("\n| 检查项 | 结果 |")
     summary_lines.append("|--------|------|")
-    mr_intercept_dic = {}
     for check_tool, check_info in summary_info_dic.items():
         if check_info:
             if check_tool in LANJIE_TOOLS:
