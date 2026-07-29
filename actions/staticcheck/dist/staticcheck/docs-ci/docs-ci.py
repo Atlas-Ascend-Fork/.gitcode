@@ -421,7 +421,7 @@ if __name__ == "__main__":
             else:
                 hook_status = "⏭️ Waring"
                 intercept_status = 'Waring'
-            mr_intercept_dic[check_tool]['intercept_status'] = hook_status
+            mr_intercept_dic[check_tool]['intercept_status'] = intercept_status
             mr_intercept_dic[check_tool]['summary_detail_lst'].extend(check_info)
         else:
             hook_status = "✅ Passed"
@@ -433,11 +433,11 @@ if __name__ == "__main__":
             check_status = "❌"
         if check_info['intercept_status'] == "Waring":
             check_status = "⏭️"
-        if len(check_info) > 5:
-            raw = check_info[:5]
+        if len(check_info["summary_detail_lst"]) > 5:
+            raw = check_info["summary_detail_lst"][:5]
             raw.append('...')
         summary_lines.append(f"\n<details>")
-        summary_lines.append(f"<summary>{check_status} {check_tool} 失败详情</summary>")
+        summary_lines.append(f"<summary> {check_status} {check_tool} 失败详情</summary>")
         summary_lines.append("")
         summary_lines.append("```")
         summary_lines.append("\n".join(raw))
