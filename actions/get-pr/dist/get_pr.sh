@@ -52,7 +52,7 @@ except Exception:
 " 2>/dev/null)
 
     if [[ "${conflict_passed}" == "False" ]]; then
-      echo "⚠️ PR #${PR_NUMBER} 存在冲突（conflict_passed=False）"
+      echo "ERROR: PR #${PR_NUMBER} 存在冲突（conflict_passed=False）"
       if [[ -n "${ATOMGIT_STEP_SUMMARY}" ]]; then
         {
           echo "## ⚠️ PR 冲突检测"
@@ -68,6 +68,7 @@ except Exception:
           echo ""
         } >> "${ATOMGIT_STEP_SUMMARY}"
       fi
+      exit 1
     elif [[ "${conflict_passed}" == "True" ]]; then
       echo "✅ PR #${PR_NUMBER} 无冲突（conflict_passed=True）"
     else
