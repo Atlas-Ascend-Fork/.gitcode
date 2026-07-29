@@ -400,7 +400,6 @@ if __name__ == "__main__":
     result_num = output_to_result(code_dir, filter_lst, check_md_lst, branch, summary_info_dic)
     git_diff.write_task_json(result_num, tool_name, code_dir)
     # 生成summary文件
-    print_summary_lst = []
     passed = result_num == 1
     status_icon = "✅" if passed else "❌"
     summary_lines = [
@@ -418,6 +417,6 @@ if __name__ == "__main__":
         else:
             hook_status = "✅ Passed"
         summary_lines.append(f"| {check_tool} | {hook_status} |")
-    print_summary_lst.append('⚠️ 详细告警信息请查看日志或 StaticCheck.csv 产物')
-    git_diff.gen_summary_file(print_summary_lst)
+    summary_lines.append('⚠️ 详细告警信息请查看日志或 StaticCheck.csv 产物')
+    git_diff.gen_summary_file(summary_lines)
     sys.exit(result_num)  # 输出告警个数
