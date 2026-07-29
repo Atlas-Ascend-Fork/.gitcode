@@ -409,7 +409,7 @@ if __name__ == "__main__":
     ]
     summary_lines.append("\n| 检查项 | 结果 |")
     summary_lines.append("|--------|------|")
-    for check_tool, check_info in summary_info_dic:
+    for check_tool, check_info in summary_info_dic.items():
         if check_info:
             if check_tool in LANJIE_TOOLS:
                 hook_status = "❌ Failed"
