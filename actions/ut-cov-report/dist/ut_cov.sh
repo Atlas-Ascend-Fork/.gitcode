@@ -29,7 +29,13 @@ fi
 if [ "${COV_MODE}" = "report" ];then
     cd "${SCRIPT_DIR}/ut"
     chmod +x ./addlcov
-    python3 count_files.py "${WORKSPACE}/classify_rule.yaml" "${UT_FIELD}" "${WORKSPACE}" "${WORKSPACE}"
+    if [ "${UT_FIELD}" = "ops-transformer" ];then
+        python3 ${WORKSPACE}/cmake/scripts/convert_yaml.py ${WORKSPACE}/tests/test_config.yaml
+        yaml_path="${WORKSPACE}/tests/test_config.yaml"
+    else
+        yaml_path="${WORKSPACE}/classify_rule.yaml"
+    fi
+    python3 count_files.py "${yaml_path}" "${UT_FIELD}" "${WORKSPACE}" "${WORKSPACE}"
     bash generate_ut_report.sh
 else
     echo "${UT_PROCESS}"
