@@ -1,6 +1,7 @@
 #!/bin/bash
 
 target_branch="${TARGET_BRANCH}"
+COMMIT_SHA="${COMMIT_SHA:-}"
 GIT_TOKEN="${GIT_TOKEN:-}"
 cd "${WORKSPACE}"
 
@@ -27,6 +28,48 @@ fi
 
 git branch
 git branch -r
+
+# commit 与 target_branch 冲突检测
+if [[ -n "${COMMIT_SHA}" ]]; then
+  # 校验 commit 是否存在于本地仓库
+  if ! git rev-parse "${COMMIT_SHA}" >/dev/null 2>&1; then
+    echo "WARNING: commit ${COMMIT_SHA} 不存在于本地仓库，跳过冲突检测"
+  else
+    target_ref="origin/${target_branch}"
+    short_commit=$(git rev-parse --short "${COMMIT_SHA}")
+    target_short=$(git rev-parse --short "${target_ref}")
+
+    if git merge-base --is-ancestor "${COMMIT_SHA}" "${target_ref}" 2>/dev/null; then
+      # commit 已合入 target_branch
+      conflict_reason="commit \`${short_commit}\` 已合入目标分支 \`${target_branch}\`（${target_short}），diff 结果为空或反向"
+      has_conflict=1
+    elif ! git merge-base --is-ancestor "${target_ref}" "${COMMIT_SHA}" 2>/dev/null; then
+      # 两者已分叉，target_branch 不是 commit 的祖先
+      conflict_reason="commit \`${short_commit}\` 与目标分支 \`${target_branch}\`（${target_short}）已分叉，diff 结果包含无关变更"
+      has_conflict=1
+    else
+      echo "✅ commit ${short_commit} 是目标分支 ${target_branch} 的后代，无冲突"
+      has_conflict=0
+    fi
+
+    if [[ "${has_conflict}" == "1" ]]; then
+      echo "⚠️ 检测到冲突：${conflict_reason}"
+      if [[ -n "${ATOMGIT_STEP_SUMMARY}" ]]; then
+        {
+          echo "## ⚠️ Commit 与 Target Branch 冲突"
+          echo ""
+          echo "| 参数 | 值 |"
+          echo "|------|------|"
+          echo "| commit | \`${short_commit}\` |"
+          echo "| target_branch | \`${target_branch}\`（${target_short}） |"
+          echo ""
+          echo "**冲突原因：** ${conflict_reason}"
+          echo ""
+        } >> "${ATOMGIT_STEP_SUMMARY}"
+      fi
+    fi
+  fi
+fi
 
 git diff origin/${target_branch} HEAD --stat
 git -c core.quotePath=false diff origin/${target_branch} HEAD --name-status > pr_filelist_mod.txt

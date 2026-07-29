@@ -42,6 +42,8 @@ async function run() {
         // 读取输入
         const targetBranch = core.getInput("target_branch", { required: true });
         const workspace = core.getInput("workspace", { required: true });
+        // commit 非必填，传入时与 target_branch 做冲突检测
+        const commitSha = core.getInput("commit", { required: false });
         // git_token 非必填，公开仓不传即可
         const gitToken = core.getInput("git_token", { required: false });
         const scriptPath = path_1.default.resolve(__dirname, "./get_pr.sh");
@@ -55,12 +57,14 @@ async function run() {
         core.info(`脚本路径：${scriptPath}`);
         core.info(`目标分支 target_branch：${targetBranch}`);
         core.info(`工作目录 workspace：${workspace}`);
+        core.info(`指定 commit：${commitSha || "未指定"}`);
         core.info(`是否传入git_token：${gitToken ? "是" : "否"}`);
         // 组装环境变量，透传给shell脚本
         const env = {
             ...process.env,
             WORKSPACE: workspace,
             TARGET_BRANCH: targetBranch,
+            COMMIT_SHA: commitSha,
             GIT_TOKEN: gitToken,
         };
         // 无位置参数，全部走环境变量传递
