@@ -1,0 +1,451 @@
+const fs = require('fs');
+const path = require('path');
+
+class TagChecker {
+  constructor(configPath, mdFilePath, outputPath, repoName) {
+    this.config = JSON.parse(fs.readFileSync(configPath, 'utf8'));
+    this.mdFilePath = mdFilePath;
+    this.outputPath = outputPath;
+    this.repoName = repoName;
+    this.errors = [];
+    this.tags = [];
+    this.positionTags = [];
+    this.tagStack = [];
+    this.lines = [];
+    this.fileLinesMap = {};
+    this.suggestions = {
+      duplicate_id: '请使用唯一的ID标识符，避免在同一文档中重复使用相同的ID',
+      unmatched_end: '请确保每个结束标记都有对应的开始标记，检查标记的嵌套结构',
+      unmatched_start: '请确保每个开始标记都有对应的结束标记，检查标记是否正确闭合',
+      mismatched_id: '请确保开始标记和结束标记的ID序号保持一致',
+      duplicate_end: '请删除重复的结束标记，确保每个标记只闭合一次',
+      invalid_npu: '请使用配置文件中定义的有效NPU值，参考npus.json配置文件',
+      npu_hierarchy: '请确保父标记的npu值包含所有子标记的npu值，子标记的npu必须是父标记npu的子集',
+      invalid_ref_format: '请确保位置标签格式为 <!-- @ref: 仓名/res/.../xx_res.md#idxxxxx -->',
+      invalid_ref_repo: '请确保位置标签中的仓名与文档所在仓一致',
+      invalid_ref_path: '请确保位置标签中的路径以/res/开头，不包含相对路径".."，文件名以_res.md结尾',
+      invalid_ref_anchor: '请确保位置标签中锚点存在且符合id+数字格式（如id00001、id123）'
+    };
+  }
+
+  /**
+   * 递归遍历目录收集所有 .md 文件的绝对路径
+   * @param {string} dirPath
+   * @returns {string[]}
+   */
+  getMdFiles(dirPath) {
+    const mdFiles = [];
+    const entries = fs.readdirSync(dirPath, { withFileTypes: true });
+    for (const entry of entries) {
+      const fullPath = path.join(dirPath, entry.name);
+      if (entry.isDirectory()) {
+        mdFiles.push(...this.getMdFiles(fullPath));
+      } else if (entry.isFile() && entry.name.endsWith('.md')) {
+        mdFiles.push(path.resolve(fullPath));
+      }
+    }
+    return mdFiles;
+  }
+
+  checkFile() {
+    const resultFile = path.join(this.outputPath, 'tag_check_result.json');
+
+    if (fs.existsSync(resultFile)) {
+      fs.unlinkSync(resultFile);
+    }
+
+    // 识别路径类型并收集文件
+    let mdFiles = [];
+    if (fs.statSync(this.mdFilePath).isFile()) {
+      mdFiles = [path.resolve(this.mdFilePath)];
+    } else if (fs.statSync(this.mdFilePath).isDirectory()) {
+      mdFiles = this.getMdFiles(this.mdFilePath);
+    }
+
+    // 读取排除列表
+    let excludeList = [];
+    // const excludeFilePath = path.join(__dirname, '..', 'assets', 'exclude-files.json');
+    // try {
+    //   if (fs.existsSync(excludeFilePath)) {
+    //     excludeList = JSON.parse(fs.readFileSync(excludeFilePath, 'utf8'));
+    //   }
+    // } catch (e) {
+    //   // 无法读取排除列表，跳过排除逻辑
+    // }
+
+    // 过滤白名单文件
+    mdFiles = mdFiles.filter(filePath => {
+      const fileName = path.basename(filePath);
+      return !excludeList.includes(fileName);
+    });
+
+    // 逐一检查文件
+    this.errors = [];
+    this.fileLinesMap = {};
+
+    mdFiles.forEach(filePath => {
+      this.mdFilePath = filePath;
+      const content = fs.readFileSync(filePath, 'utf8');
+      this.lines = content.split('\n');
+      this.fileLinesMap[filePath] = this.lines;
+
+      this.tags = [];
+      this.positionTags = [];
+      this.tagStack = [];
+
+      const prevErrorCount = this.errors.length;
+
+      this.parseTags();
+      this.validateTags();
+
+      // 仅为本次新增的错误附加文件路径
+      for (let i = prevErrorCount; i < this.errors.length; i++) {
+        this.errors[i].filePath = filePath;
+      }
+    });
+
+    const results = this.formatResults();
+    fs.writeFileSync(resultFile, JSON.stringify(results, null, 2), 'utf8');
+
+    return results;
+  }
+
+  parseTags() {
+    this.lines.forEach((line, lineNum) => {
+      const startMatch = line.match(/<!--\s*npu\s*=\s*"([^"]+)"\s+(id\d+)\s*-->/);
+      const endMatch = line.match(/<!--\s*end\s+(id\d+)\s*-->/);
+
+      if (startMatch) {
+        this.tags.push({
+          type: 'start',
+          id: startMatch[2],
+          npu: startMatch[1],
+          line: lineNum + 1,
+          content: line.trim()
+        });
+      }
+
+      if (endMatch) {
+        this.tags.push({
+          type: 'end',
+          id: endMatch[1],
+          line: lineNum + 1,
+          content: line.trim()
+        });
+      }
+
+      const refMatch = line.match(/<!--\s*@ref:/);
+      if (refMatch) {
+        const strictMatch = line.match(/<!--\s*@ref:\s*(\S+?)(\/[^\s#]*)#(\S+?)\s*-->/);
+        this.positionTags.push({
+          line: lineNum + 1,
+          content: line.trim(),
+          extracted: !!strictMatch,
+          repoName: strictMatch ? strictMatch[1] : null,
+          refPath: strictMatch ? strictMatch[2] : null,
+          anchor: strictMatch ? strictMatch[3] : null
+        });
+      }
+    });
+  }
+
+  validateTags() {
+    this.checkDuplicateIds();
+    this.checkTagMatching();
+    this.checkNpuHierarchy();
+    this.checkPositionTags();
+  }
+
+  checkDuplicateIds() {
+    const startTags = this.tags.filter(t => t.type === 'start');
+    const idCounts = {};
+
+    startTags.forEach(tag => {
+      if (idCounts[tag.id]) {
+        this.errors.push({
+          type: 'duplicate_id',
+          message: `ID重复: ${tag.id} 在第 ${tag.line} 行和第 ${idCounts[tag.id]} 行重复出现`,
+          line: tag.line
+        });
+      } else {
+        idCounts[tag.id] = tag.line;
+      }
+    });
+  }
+
+  checkTagMatching() {
+    const processedIds = new Set();
+
+    this.tags.forEach(tag => {
+      if (tag.type === 'start') {
+        this.tagStack.push(tag);
+      } else if (tag.type === 'end') {
+        if (this.tagStack.length === 0) {
+          this.errors.push({
+            type: 'unmatched_end',
+            message: `结束标记 ${tag.id} 在第 ${tag.line} 行没有对应的开始标记`,
+            line: tag.line
+          });
+          return;
+        }
+
+        const lastStart = this.tagStack[this.tagStack.length - 1];
+
+        if (lastStart.id !== tag.id) {
+          this.errors.push({
+            type: 'mismatched_id',
+            message: `ID不匹配: 第 ${lastStart.line} 行的开始标记 ${lastStart.id} 和第 ${tag.line} 行的结束标记 ${tag.id} 不匹配`,
+            line: tag.line
+          });
+          return;
+        }
+
+        if (processedIds.has(tag.id)) {
+          this.errors.push({
+            type: 'duplicate_end',
+            message: `结束标记 ${tag.id} 在第 ${tag.line} 行重复出现`,
+            line: tag.line
+          });
+          this.tagStack.pop();
+          return;
+        }
+
+        processedIds.add(tag.id);
+        this.tagStack.pop();
+      }
+    });
+
+    this.tagStack.forEach(tag => {
+      this.errors.push({
+        type: 'unmatched_start',
+        message: `开始标记 ${tag.id} 在第 ${tag.line} 行没有对应的结束标记`,
+        line: tag.line
+      });
+    });
+  }
+
+  checkNpuHierarchy() {
+    const tagTree = this.buildTagTree();
+    this.validateNpuInTree(tagTree);
+  }
+
+  buildTagTree() {
+    const root = { children: [], npu: null, id: null };
+    const stack = [root];
+
+    this.tags.forEach(tag => {
+      if (tag.type === 'start') {
+        const node = {
+          id: tag.id,
+          npu: tag.npu,
+          line: tag.line,
+          children: []
+        };
+        stack[stack.length - 1].children.push(node);
+        stack.push(node);
+      } else if (tag.type === 'end') {
+        stack.pop();
+      }
+    });
+
+    return root;
+  }
+
+  validateNpuInTree(node) {
+    if (node.children.length === 0) return;
+
+    const validNpus = this.config.npus;
+
+    node.children.forEach(child => {
+      const childNpus = child.npu.split(',').map(n => n.trim());
+
+      childNpus.forEach(npu => {
+        if (!validNpus.includes(npu)) {
+          this.errors.push({
+            type: 'invalid_npu',
+            message: `无效的NPU值: ${npu} 在第 ${child.line} 行，不在配置的有效NPU列表中`,
+            line: child.line
+          });
+        }
+      });
+
+      if (node.npu && node.id) {
+        const parentNpus = node.npu.split(',').map(n => n.trim());
+        const childNpus = child.npu.split(',').map(n => n.trim());
+
+        const missingInParent = childNpus.filter(n => !parentNpus.includes(n));
+
+        if (missingInParent.length > 0) {
+          this.errors.push({
+            type: 'npu_hierarchy',
+            message: `NPU值不匹配: 第 ${child.line} 行的子标记包含 ${missingInParent.join(',')}，但父标记(第 ${node.line} 行)的npu="${node.npu}"中不包含这些值`,
+            line: child.line
+          });
+        }
+      }
+
+      this.validateNpuInTree(child);
+    });
+  }
+
+  checkPositionTags() {
+    this.positionTags.forEach(tag => {
+      if (!tag.extracted) {
+        this.errors.push({
+          type: 'invalid_ref_format',
+          message: `位置标签格式错误: 第 ${tag.line} 行的标签 "${tag.content}" 不符合位置标签格式要求，正确格式为 <!-- @ref: 仓名/res/.../xx_res.md#idxxxxx -->`,
+          line: tag.line,
+          ruleName: '位置标签的合法性检查'
+        });
+        return;
+      }
+
+      if (tag.repoName !== this.repoName) {
+        this.errors.push({
+          type: 'invalid_ref_repo',
+          message: `位置标签仓名不一致: 第 ${tag.line} 行的标签中仓名为"${tag.repoName}"，但文档所在仓为"${this.repoName}"`,
+          line: tag.line,
+          ruleName: '位置标签的合法性检查'
+        });
+      }
+
+      if (!tag.refPath.startsWith('/res/')) {
+        this.errors.push({
+          type: 'invalid_ref_path',
+          message: `位置标签路径错误: 第 ${tag.line} 行的标签中路径"${tag.refPath}"不以/res/开头`,
+          line: tag.line,
+          ruleName: '位置标签的合法性检查'
+        });
+      }
+
+      if (tag.refPath.includes('..')) {
+        this.errors.push({
+          type: 'invalid_ref_path',
+          message: `位置标签路径错误: 第 ${tag.line} 行的标签中路径包含相对路径".."`,
+          line: tag.line,
+          ruleName: '位置标签的合法性检查'
+        });
+      }
+
+      const fileName = tag.refPath.substring(tag.refPath.lastIndexOf('/') + 1);
+      if (!fileName.endsWith('_res.md')) {
+        this.errors.push({
+          type: 'invalid_ref_path',
+          message: `位置标签路径错误: 第 ${tag.line} 行的标签中文件名"${fileName}"不以_res.md结尾`,
+          line: tag.line,
+          ruleName: '位置标签的合法性检查'
+        });
+      }
+
+      if (!tag.anchor) {
+        this.errors.push({
+          type: 'invalid_ref_anchor',
+          message: `位置标签锚点错误: 第 ${tag.line} 行的标签缺少锚点`,
+          line: tag.line,
+          ruleName: '位置标签的合法性检查'
+        });
+      } else if (!/^id\d+$/.test(tag.anchor)) {
+        this.errors.push({
+          type: 'invalid_ref_anchor',
+          message: `位置标签锚点错误: 第 ${tag.line} 行的标签中锚点"${tag.anchor}"不符合id+数字格式`,
+          line: tag.line,
+          ruleName: '位置标签的合法性检查'
+        });
+      }
+    });
+  }
+
+  formatResults() {
+    return this.errors.map(error => {
+      const filePath = error.filePath || this.mdFilePath;
+      const fileName = path.basename(filePath);
+      const absolutePath = path.resolve(filePath);
+      const lines = this.fileLinesMap[filePath] || this.lines;
+      const lineContent = lines[error.line - 1] || '';
+      const location = `${filePath}`;
+
+      return {
+        rule_group: '通用规则',
+        rule_item: 'StaticCheck_compliance',
+        rule_type: '规范性',
+        rule_name: error.ruleName || '芯片标签的合法性检查',
+        snippet: lineContent.trim(),
+        description: error.message,
+        rule_level: '严重',
+        file_name: fileName,
+        line_number: error.line.toString(),
+        location: location,
+        suggestion: this.suggestions[error.type] || '请检查标记语法是否正确'
+      };
+    });
+  }
+
+  printReport() {
+    if (this.errors.length === 0) {
+      console.log('✅ 文档标记检查通过，没有发现错误！');
+      return;
+    }
+
+    console.log(`❌ 发现 ${this.errors.length} 个错误：\n`);
+
+    const groupedErrors = {};
+    this.errors.forEach(error => {
+      if (!groupedErrors[error.type]) {
+        groupedErrors[error.type] = [];
+      }
+      groupedErrors[error.type].push(error);
+    });
+
+    Object.keys(groupedErrors).forEach(type => {
+      console.log(`【${type}】`);
+      groupedErrors[type].forEach(error => {
+        const filePath = error.filePath || this.mdFilePath;
+        const fileName = path.basename(filePath);
+        console.log(`  - ${fileName} 第 ${error.line} 行: ${error.message}`);
+      });
+      console.log('');
+    });
+
+    const resultFile = path.join(this.outputPath, 'tag_check_result.json');
+    console.log(`检查结果已保存到: ${resultFile}`);
+  }
+}
+
+function main() {
+  const args = process.argv.slice(2);
+
+  if (args.length < 3) {
+    console.log('使用方法: node tag_checker.js <markdown文件/文件夹路径> <输出结果文件夹路径> <仓名>');
+    console.log('示例: node tag_checker.js ./markdown ./output my-repo');
+    process.exit(1);
+  }
+
+  const mdPath = args[0];
+  const outputPath = args[1];
+  const repoName = args[2];
+  const configPath = path.join(__dirname, 'npus.json');
+
+  if (!fs.existsSync(mdPath)) {
+    console.log(`错误: 路径 ${mdPath} 不存在`);
+    process.exit(1);
+  }
+
+  if (!fs.existsSync(configPath)) {
+    console.log(`错误: 配置文件 ${configPath} 不存在`);
+    process.exit(1);
+  }
+
+  if (!fs.existsSync(outputPath)) {
+    fs.mkdirSync(outputPath, { recursive: true });
+  }
+
+  const checker = new TagChecker(configPath, mdPath, outputPath, repoName);
+  checker.checkFile();
+  checker.printReport();
+
+  if (checker.errors.length > 0) {
+    process.exit(1);
+  }
+}
+
+main();
