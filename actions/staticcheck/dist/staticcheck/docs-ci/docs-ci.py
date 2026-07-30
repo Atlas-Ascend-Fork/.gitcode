@@ -433,8 +433,8 @@ if __name__ == "__main__":
             check_status = "❌"
         if check_info['intercept_status'] == "Waring":
             check_status = "⏭️"
-        if len(check_info["summary_detail_lst"]) > 10:
-            raw = check_info["summary_detail_lst"][:10]
+        if len(check_info["summary_detail_lst"]) > 2:
+            raw = check_info["summary_detail_lst"][:2]
             raw.append('...(已截断，完整内容请查看 StaticCheck.csv)')
         else:
             raw = check_info["summary_detail_lst"]
