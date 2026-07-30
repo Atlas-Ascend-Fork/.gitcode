@@ -33,6 +33,6 @@ sc_scan_cmd="$SCRIPT_DIR/staticcheck/docs-ci/docs-ci.sh $WORK_CODE_DIR $REPOSITO
 echo $sc_scan_cmd
 
 bash $sc_scan_cmd
-echo "run status $?"
+echo "run sc_scan_cmd status $?"
 exit $?
 

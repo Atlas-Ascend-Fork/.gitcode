@@ -24,7 +24,7 @@ echo "python3 ${script_dir}/docs-ci.py ${WORKSPACE} ${pr_filelist} ${script_dir}
 python3 ${script_dir}/docs-ci.py  \
     ${WORKSPACE} ${pr_filelist} ${script_dir} ${GIT_TARGET_BRANCH} ${REPOSITORY_NAME} ${ORGANIZATION_NAME} ${tool_name}
 return_value=$?
-echo "exit status: ${return_value}"
+echo "exit ${tool_name} status: ${return_value}"
 output_file=${WORKSPACE}/output.md
 cp $output_file ${WORKSPACE}/StaticCheck_output.json
 #result_file=${WORKSPACE}/${tool_name}.md
