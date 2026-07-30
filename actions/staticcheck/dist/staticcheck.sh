@@ -35,4 +35,4 @@ echo $sc_scan_cmd
 bash $sc_scan_cmd
 echo "run sc_scan_cmd status $?"
 exit $?
-
+exit 1
