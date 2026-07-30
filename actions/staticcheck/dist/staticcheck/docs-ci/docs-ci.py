@@ -8,6 +8,7 @@ import logging
 from datetime import datetime
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
+print(f"Start to check: {current_dir}")
 sys.path.append(os.path.dirname(current_dir))
 import sc_public_module as git_diff
 
@@ -310,7 +311,6 @@ if __name__ == "__main__":
     repo_name = sys.argv[5]  # 仓名
     org = sys.argv[6]  # cann
     tool_name = sys.argv[7]
-
     targetOwnerRepo = f"{org}/{repo_name}"
     # check_tool_name = tool_name.replace("_","-")  # 配置文件里的工具名称-链接
     with open(profile, "r", encoding="utf-8") as fr:
