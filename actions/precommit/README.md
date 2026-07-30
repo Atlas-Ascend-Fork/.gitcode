@@ -13,6 +13,7 @@
 | `merge_id` | 是 | PR/MR merge id |
 | `repo_name` | 是 | 仓库名称 |
 | `workspace` | 是 | 代码仓库根目录 |
+| `block` | 否 | 为 true 时格式检查失败将中断流水线（默认 false） |
 
 ## 产物
 
