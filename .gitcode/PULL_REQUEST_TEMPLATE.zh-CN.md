@@ -3,9 +3,26 @@ name: Pull Request Template (中文)
 about: 提交代码变更申请审核
 ---
 
-## 变更描述 / Description
+<!-- 感谢您的合入申请! -->
 
-<!-- 本 PR 做了什么，为什么需要 / What does this PR do and why -->
+### 当前PR是否有AI参与:   
+[x]  否     
+
+[ ]  是   
+__1.  AI Agent 平台:    
+__2.  AI 模型:  
+__3.  Prompt上下文 : 
+
+
+### PR功能描述 / 为什么需要这个合入**:  
+<!-- 本 PR 做了什么，为什么需要 / What does this PR do and why -->     
+       
+    
+### 该PR关联的issue   
+*(格式为fixes #<issue号>, 或者resolves #<issue号>)*: fixes #
+
+### 希望检视人员了解:
+
 
 ## 改动类型 / Change Type
 
@@ -17,12 +34,6 @@ about: 提交代码变更申请审核
 - [ ] 测试相关 / Test
 - [ ] 其它 / Other
 
-## 关联 Issue / Related Issues
-
-<!-- Closes #000 可自动关闭 / Closes #000 to auto-close -->
-
-- Closes #
-- References #
 
 ## 测试信息 / Testing
 

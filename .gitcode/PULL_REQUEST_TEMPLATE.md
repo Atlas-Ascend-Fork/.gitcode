@@ -3,9 +3,23 @@ name: Pull Request Template
 about: Submit your changes for review
 ---
 
-## Description / 变更描述
+<!-- Thanks for sending a pull request! -->
 
+### Was This PR authored or co-authored using generative AI tooling?
+[x]  No   
+[ ]  Yes   
+__1.  AI Agent :    
+__2.  AI Model :  
+__3.  Prompt : 
+
+### What this PR does / why we need it:
 <!-- What does this PR do and why / 本 PR 做了什么，为什么需要 -->
+
+### Which issue this PR fixes   
+*(optional, in `fixes #<issue number>(, fixes #<issue_number>, ...)` format, will close that issue when PR gets merged)*: fixes #
+
+### Special notes for your reviewer:
+
 
 ## Change Type / 改动类型
 
@@ -17,12 +31,6 @@ about: Submit your changes for review
 - [ ] Test / 测试相关
 - [ ] Other / 其它
 
-## Related Issues / 关联 Issue
-
-<!-- Closes #000 to auto-close / Closes #000 可自动关闭 -->
-
-- Closes #
-- References #
 
 ## Testing / 测试信息
 
