@@ -17,6 +17,7 @@ logger = logging.getLogger(__name__)
 # 拦截项
 #LANJIE_TOOLS = ["StaticCheck_markdownlint", "StaticCheck_link_validity"]
 LANJIE_TOOLS = []
+MAX_PRINT_NUM = 2
 CHECK_TYPE_LST = ["StaticCheck_markdownlint", "StaticCheck_tag_closed", "StaticCheck_link_validity", "StaticCheck_resource_existence", "StaticCheck_codespell", "StaticCheck_compliance"]
 CD = {
     "MD028": "一般",
@@ -433,9 +434,9 @@ if __name__ == "__main__":
             check_status = "❌"
         if check_info['intercept_status'] == "Waring":
             check_status = "⏭️"
-        if len(check_info["summary_detail_lst"]) > 2:
-            raw = check_info["summary_detail_lst"][:2]
-            raw.append('...(已截断，完整内容请查看 StaticCheck.csv)')
+        if len(check_info["summary_detail_lst"]) > MAX_PRINT_NUM:
+            raw = check_info["summary_detail_lst"][:MAX_PRINT_NUM]
+            raw.append(f'...(告警数量超过{MAX_PRINT_NUM},已截断，完整内容请查看 StaticCheck.csv)')
         else:
             raw = check_info["summary_detail_lst"]
         summary_lines.append(f"\n<details>")
