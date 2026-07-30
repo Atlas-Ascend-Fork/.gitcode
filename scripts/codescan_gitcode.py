@@ -306,7 +306,7 @@ def init_args():
         help="Gitxx API endpoint",
     )
     parser.add_argument("--pr_id", type=int, required=True, help="Pull Request ID")
-    parser.add_argument("--commit_id", type=str, default="", help="Commit ID")
+    parser.add_argument("--commit_id", type=str, required=True, help="Commit ID")
     parser.add_argument(
         "--online",
         type=lambda x: x.lower() in ("true", "1", "yes"),
