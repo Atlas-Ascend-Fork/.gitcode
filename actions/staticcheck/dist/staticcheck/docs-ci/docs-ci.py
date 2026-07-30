@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 # 拦截项
 #LANJIE_TOOLS = ["StaticCheck_markdownlint", "StaticCheck_link_validity"]
 LANJIE_TOOLS = []
-MAX_PRINT_NUM = 5
+MAX_PRINT_NUM = 10
 CHECK_TYPE_LST = ["StaticCheck_markdownlint", "StaticCheck_tag_closed", "StaticCheck_link_validity", "StaticCheck_resource_existence", "StaticCheck_codespell", "StaticCheck_compliance"]
 CD = {
     "MD028": "一般",
