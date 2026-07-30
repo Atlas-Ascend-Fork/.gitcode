@@ -22,10 +22,8 @@ cp ${script_dir}/package.json  .
 echo "${script_dir}/.npmrc"
 cp ${script_dir}/.npmrc  .
 ls -a ${WORKSPACE}
-npm_path=`which npm`
-echo $npm_path
-
-
+# npm_path=`which npm`
+# echo $npm_path
 npm i
 
 echo "python3 ${script_dir}/docs-ci.py ${WORKSPACE} ${pr_filelist} ${script_dir} ${GIT_TARGET_BRANCH} ${REPOSITORY_NAME} ${ORGANIZATION_NAME} ${tool_name}"
