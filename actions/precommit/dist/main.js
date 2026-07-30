@@ -43,6 +43,7 @@ async function run() {
         const mergeId = core.getInput("merge_id", { required: true });
         const repoName = core.getInput("repo_name", { required: true });
         const workspace = core.getInput("workspace", { required: true });
+        const block = core.getInput("block", { required: false }) || "false";
         // precommit.py 和打包后的 main.js 同放在 dist 目录
         const pyScriptPath = path_1.default.resolve(__dirname, "./precommit.py");
         // 校验脚本文件存在
@@ -51,8 +52,9 @@ async function run() {
         core.info(`PR MergeID：${mergeId}`);
         core.info(`仓库名称：${repoName}`);
         core.info(`执行工作目录(自动cd至此)：${workspace}`);
+        core.info(`block：${block}`);
         // cwd=workspace 代表执行命令前自动 cd workspace
-        await execPythonScript(pyScriptPath, ["--pr_id", mergeId, "--repository_name", repoName], workspace);
+        await execPythonScript(pyScriptPath, ["--pr_id", mergeId, "--repository_name", repoName, "--block", block], workspace);
         core.info("precommit python 脚本执行完成");
     }
     catch (err) {

@@ -1,0 +1,35 @@
+name: 'query-pipeline'
+author: 'CANN'
+version: '1.2.0'
+description: '查询 GitCode 流水线执行情况，展示运行详情和各 Job 结果，并根据执行结果给 PR 打标签'
+inputs:
+  owner:
+    description: '仓库所属组织/用户'
+    required: false
+  repo:
+    description: '仓库名称'
+    required: false
+  run_id:
+    description: '流水线运行 ID'
+    required: false
+  url:
+    description: '流水线页面 URL（与 owner/repo/run_id 二选一）'
+    required: false
+  token:
+    description: 'GitCode 个人访问令牌'
+    required: true
+  json:
+    description: '输出原始 JSON'
+    required: false
+    default: 'false'
+  pr_number:
+    description: 'PR 编号，需配合 apply_label 使用，根据任务执行结果打标签（ci-pipeline-passed/ci-pipeline-failed）'
+    required: false
+  apply_label:
+    description: '是否根据任务执行结果打标签，需同时传入 pr_number'
+    required: false
+    default: 'false'
+
+runs:
+  using: 'node16'
+  main: 'dist/main.js'
