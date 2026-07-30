@@ -31,8 +31,7 @@ echo "传入的参数: $sc_tool"
 # esac
 sc_scan_cmd="$SCRIPT_DIR/staticcheck/docs-ci/docs-ci.sh $WORK_CODE_DIR $REPOSITORY_NAME $GIT_TARGET_BRANCH $COMMIT_ID $sc_tool $ORG_NAME"
 echo $sc_scan_cmd
-
 bash $sc_scan_cmd
-echo "run sc_scan_cmd status $?"
-# exit $?
-exit 1
+return_value=$?
+echo "run sc_scan_cmd status ${return_value}"
+exit ${return_value}
