@@ -1,0 +1,25 @@
+name: 'pre-pipeline'
+author: 'CANN'
+version: '1.0.0'
+description: '流水线开始前给 PR 打上 ci-pipeline-running 标签'
+inputs:
+  owner:
+    description: '仓库所属组织/用户'
+    required: true
+  repo:
+    description: '仓库名称'
+    required: true
+  pr_number:
+    description: 'PR 编号'
+    required: true
+  token:
+    description: 'GitCode 个人访问令牌'
+    required: true
+  apply_label:
+    description: '是否执行打标签逻辑'
+    required: false
+    default: 'true'
+
+runs:
+  using: 'node16'
+  main: 'dist/main.js'
