@@ -24,7 +24,7 @@ cp ${script_dir}/.npmrc  .
 ls -a ${WORKSPACE}
 npm_path=`which npm`
 echo $npm_path
-export PATH=$PATH:$npm_path
+
 
 npm i
 
