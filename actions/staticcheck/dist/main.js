@@ -46,7 +46,7 @@ async function run() {
         const targetBranch = core.getInput("target_branch", { required: true });
         const mergeId = core.getInput("merge_id", { required: true });
         const commitId = core.getInput("commit_id");
-        const orgName = core.getInput("org_name");
+        const orgName = core.getInput("org_name", { required: false }) || "cann";
         const scriptDir = __dirname;
         const scriptPath = path_1.default.resolve(scriptDir, "./staticcheck.sh");
         await promises_1.default.access(scriptPath);
