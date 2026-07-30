@@ -439,7 +439,7 @@ if __name__ == "__main__":
             check_status = "⏭️"
         if len(check_info["summary_detail_lst"]) > MAX_PRINT_NUM:
             raw = check_info["summary_detail_lst"][:MAX_PRINT_NUM]
-            raw.append(f'...(该检查项告警数量超过{MAX_PRINT_NUM},已截断，完整内容请查看 StaticCheck.csv)')
+            raw.append(f'...(该检查项告警数量超过{MAX_PRINT_NUM},已截断，完整内容请查看日志或 StaticCheck.csv)')
         else:
             raw = check_info["summary_detail_lst"]
         summary_lines.append(f"\n<details>")
