@@ -7,14 +7,16 @@ import argparse
 import logging
 import json
 import yaml
+from urllib.parse import unquote
 from CodeCheckerBase import CodeCheckerBaseClass
 
 logging.basicConfig(level=logging.INFO,format="%(asctime)s - %(levelname)s %(message)s" )
 
 class PreCommitChecker(CodeCheckerBaseClass):
-    def __init__(self, repository_name, pr_id):
+    def __init__(self, repository_name, pr_id, block=False):
         self.repository_name = repository_name
         self.pr_id = pr_id
+        self.block = block
         self.env_dist = os.environ
         self.target_branch = self.env_dist.get("TARGET_BRANCH")
 
@@ -58,7 +60,7 @@ class PreCommitChecker(CodeCheckerBaseClass):
 
         check_result = self.run_cmd(f"cat pr_filelist_precommit.txt | xargs pre-commit run --show-diff-on-failure --file", os.getcwd(), shell=True, capture_output=True)
         
-        full_output = check_result.stdout
+        full_output = unquote(check_result.stdout)
         normal_output = ""
         for line in full_output.splitlines(keepends=True):
             if line.startswith("All changes"):
@@ -68,15 +70,22 @@ class PreCommitChecker(CodeCheckerBaseClass):
         logging.info(
             "------------------------------------4. pre-commit检测结果-----------------------------------")
         logging.info(normal_output)
+
+        oat_context = ""
+        oat_result = "oat_reports/result.txt"
+        if os.path.exists(oat_result):
+            with open(oat_result, "r", encoding="utf-8") as fr:
+                oat_context = fr.read()
+            logging.info(
+                "------------------------------------5. pre-commit - OAT 检测结果-----------------------------------")
+            logging.info(oat_context)
+
         diff_log_path = "pre-commit.txt"
         with open(diff_log_path, "w", encoding="utf-8") as f:
             f.write(full_output)
 
-        data = {"precommit_result": "pass" if check_result.returncode == 0 else "fail"}
-        if check_result.returncode != 0:
-            logging.info("❌ 存在部分文件格式错误")
-        else:
-            logging.info("✅ 所有文件格式检查通过！")
+        with open(diff_log_path, "a", encoding="utf-8") as fa:
+            fa.write(oat_context)
 
         # 写入步骤摘要到 ATOMGIT_STEP_SUMMARY
         summary_path = os.environ.get("ATOMGIT_STEP_SUMMARY", "")
@@ -176,6 +185,7 @@ class PreCommitChecker(CodeCheckerBaseClass):
             with open(summary_path, "a", encoding="utf-8") as f:
                 f.write("\n".join(summary_lines) + "\n")
 
+        data = {"precommit_result": "pass" if check_result.returncode == 0 else "fail"}
         if os.path.exists("codecheck.json"):
             with open("codecheck.json", 'r', encoding='utf-8') as f:
                 result=json.load(f)
@@ -188,6 +198,14 @@ class PreCommitChecker(CodeCheckerBaseClass):
         with open("codecheck.json", "r", encoding="utf-8") as f:
             result=json.load(f)
             print(f"write {result} success")
+
+        if check_result.returncode != 0:
+            logging.info("❌ 存在部分文件格式错误")
+            if self.block:
+                sys.exit(1)
+        else:
+            logging.info("✅ 所有文件格式检查通过！")
+
 
     def modify_pre_commit_config(self):
         # 替换映射
@@ -269,6 +287,8 @@ def init_args():
 
     parser.add_argument('--repository_name', help='repository_name', required=True, type=str)
     parser.add_argument('--pr_id', help='gitcode pr id', required=True, type=str)
+    parser.add_argument('--block', type=lambda x: x.lower() in ("true", "1", "yes"),
+                        default=False, help='为 true 时格式检查失败将中断流水线')
 
     return parser.parse_args()
 
@@ -276,5 +296,5 @@ def init_args():
 if __name__ == '__main__':
     args = init_args()
 
-    precommit = PreCommitChecker(args.repository_name, args.pr_id)
+    precommit = PreCommitChecker(args.repository_name, args.pr_id, args.block)
     precommit.run()

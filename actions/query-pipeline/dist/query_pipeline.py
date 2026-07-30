@@ -30,6 +30,7 @@ FAILED_STATUSES = {"FAILED", "FAILURE"}
 
 LABEL_PASS = "ci-pipeline-passed"
 LABEL_FAIL = "ci-pipeline-failed"
+LABEL_RUNNING = "ci-pipeline-running"
 
 
 def api_get(url, token):
@@ -118,14 +119,19 @@ def apply_label_by_jobs(owner, repo, pr_number, jobs, token):
     print("  根据任务执行结果打标签")
     print(f"{'=' * 70}")
     print(f"  PR: #{pr_number}  任务总数: {len(jobs)}")
+    success_statuses = {"COMPLETED", "SUCCEEDED", "SUCCESS"}
     failed_jobs = [j for j in jobs if j.get("status") in FAILED_STATUSES]
+    non_success_jobs = [j for j in jobs if j.get("status") not in success_statuses]
     remove_pr_label(owner, repo, pr_number, LABEL_PASS, token)
     remove_pr_label(owner, repo, pr_number, LABEL_FAIL, token)
-    if failed_jobs:
-        print(f"  失败任务数: {len(failed_jobs)}")
+    remove_pr_label(owner, repo, pr_number, LABEL_RUNNING, token)
+    if non_success_jobs:
+        print(f"  非成功任务数: {len(non_success_jobs)} (失败: {len(failed_jobs)})")
+        for j in non_success_jobs:
+            print(f"    {j.get('display_name', j.get('name', 'N/A'))}: {j.get('status', 'N/A')}")
         add_pr_label(owner, repo, pr_number, LABEL_FAIL, token)
     else:
-        print(f"  失败任务数: 0")
+        print(f"  全部任务成功")
         add_pr_label(owner, repo, pr_number, LABEL_PASS, token)
     print()
 
