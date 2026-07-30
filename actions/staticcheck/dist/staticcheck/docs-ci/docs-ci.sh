@@ -21,6 +21,7 @@ echo "${script_dir}/package.json"
 cp ${script_dir}/package.json  .
 echo "${script_dir}/.npmrc"
 cp ${script_dir}/.npmrc  .
+ls ${WORKSPACE}
 node -v
 npm -v
 npm i
