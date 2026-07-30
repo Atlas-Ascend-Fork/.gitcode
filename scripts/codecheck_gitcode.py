@@ -360,7 +360,7 @@ def init_args():
         default="default_project",
         help="Project name in Codecheck",
     )
-    parser.add_argument("--commit_id", type=str, required=True, help="Commit ID")
+    parser.add_argument("--commit_id", type=str, default="", help="Commit ID")
     parser.add_argument(
         "--online",
         type=lambda x: x.lower() in ("true", "1", "yes"),
