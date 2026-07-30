@@ -312,6 +312,9 @@ if __name__ == "__main__":
     repo_name = sys.argv[5]  # 仓名
     org = sys.argv[6]  # cann
     tool_name = sys.argv[7]
+    if tool_name != 'tool_name':
+        print(f'[Waring] skip check {tool_name}')
+        sys.exit(0)
     targetOwnerRepo = f"{org}/{repo_name}"
     # check_tool_name = tool_name.replace("_","-")  # 配置文件里的工具名称-链接
     with open(profile, "r", encoding="utf-8") as fr:

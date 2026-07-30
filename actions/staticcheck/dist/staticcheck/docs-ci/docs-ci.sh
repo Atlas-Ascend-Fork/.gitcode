@@ -14,7 +14,7 @@ COMMIT_ID=$4
 tool_name=$5
 ORGANIZATION_NAME=$6
 
-tool_name="md_check"
+
 # 工具检查前先安装npm依赖
 cd ${WORKSPACE}
 cp ${script_dir}/package.json  .
