@@ -21,7 +21,10 @@ echo "${script_dir}/package.json"
 cp ${script_dir}/package.json  .
 echo "${script_dir}/.npmrc"
 cp ${script_dir}/.npmrc  .
-ls ${WORKSPACE}
+ls -a ${WORKSPACE}
+npm_path=`which npm`
+echo $npm_path
+export PATH=$PATH:$npm_path
 node -v
 npm -v
 npm i
