@@ -306,12 +306,20 @@ def init_args():
         help="Project name in Codecheck",
     )
     parser.add_argument("--commit_id", type=str, required=True, help="Commit ID")
+    parser.add_argument(
+        "--online",
+        type=lambda x: x.lower() in ("true", "1", "yes"),
+        default=False,
+        help="Whether to run online scan (default: false)",
+    )
     return parser.parse_args()
 
 
 if __name__ == "__main__":
-    sys.exit(0)
     args = init_args()
+    if not args.online:
+        logging.info("online is false, skip anti virus scan")
+        sys.exit(0)
     codecheck = CodeCheck(
         args.access_key,
         args.secret_access_key,
