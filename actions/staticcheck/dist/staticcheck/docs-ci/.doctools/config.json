@@ -1,0 +1,43 @@
+{
+  "name": "基础检查配置",
+  "config": {
+    "base": {
+      "docPath": "^(a|b).md",
+      "markdownlintRemoteConfigUrl": "workspace/markdownlint-config.json",
+      "codespellCheckRemoteWhitelistUrl": "workspace/whitelist_words.txt",
+      "linkValidityCheckRemoteWhitelistUrl": "workspace/.doctools/url.whitelist.json",
+      "resourceExistenceCheckRemoteWhitelistUrl": "workspace/.doctools/url.whitelist.json",
+      "linkValidityCheckDisableExternalUrl": false,
+      "linkValidityCheckDisableInternalUrl": false,
+      "linkValidityCheckDisableAnchor": false,
+      "linkValidityCheckDisableOnly404Status": false,
+      "resourceExistenceCheckDisableExternalUrl": false,
+      "resourceExistenceCheckDisableInternalUrl": false,
+      "resourceExistenceCheckDisableOnly404Status": false,
+      "tocCheckDisableMdInToc": false,
+      "ci": [
+        "link-validity-check",
+        "resource-existence-check",
+        "markdownlint",
+        "tag-closed-check",
+        "codespell-check"
+      ]
+    }
+  },
+  "repo": {
+    "codespell_check": {
+      "extendConfig": "base",
+      "branches": {
+        "master": {
+          "ci": [
+            "codespell-check",
+            "link-validity-check",
+            "resource-existence-check",
+            "tag-closed-check",
+            "markdownlint"
+          ]
+        }
+      }
+    }
+  }
+}
