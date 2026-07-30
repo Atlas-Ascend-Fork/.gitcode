@@ -30,6 +30,7 @@ FAILED_STATUSES = {"FAILED", "FAILURE"}
 
 LABEL_PASS = "ci-pipeline-passed"
 LABEL_FAIL = "ci-pipeline-failed"
+LABEL_RUNNING = "ci-pipeline-running"
 
 
 def api_get(url, token):
@@ -123,6 +124,7 @@ def apply_label_by_jobs(owner, repo, pr_number, jobs, token):
     non_success_jobs = [j for j in jobs if j.get("status") not in success_statuses]
     remove_pr_label(owner, repo, pr_number, LABEL_PASS, token)
     remove_pr_label(owner, repo, pr_number, LABEL_FAIL, token)
+    remove_pr_label(owner, repo, pr_number, LABEL_RUNNING, token)
     if non_success_jobs:
         print(f"  非成功任务数: {len(non_success_jobs)} (失败: {len(failed_jobs)})")
         for j in non_success_jobs:
