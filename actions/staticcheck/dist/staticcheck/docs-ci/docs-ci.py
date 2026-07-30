@@ -312,7 +312,7 @@ if __name__ == "__main__":
     repo_name = sys.argv[5]  # 仓名
     org = sys.argv[6]  # cann
     tool_name = sys.argv[7]
-    if tool_name != 'tool_name':
+    if tool_name != 'md_check':
         print(f'[Waring] skip check {tool_name}')
         sys.exit(0)
     targetOwnerRepo = f"{org}/{repo_name}"
