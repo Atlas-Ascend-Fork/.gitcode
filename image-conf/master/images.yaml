@@ -1429,3 +1429,18 @@ repos:
         ubuntu24.04:x86:lv6
       Pre_smoke:
         ubuntu24.04:x86:lv6
+
+  catlass:
+    stages:
+      Compile_Ascend_ARM:
+        atb_version_build_arm:latest
+      PreSmoke:
+        ubuntu:20.04.arm.cann900.B095.torch290
+  ascend-boost-comm:
+    stages:
+      Compile_Ascend_ARM:
+        atb_version_build_arm:latest
+      Compile_Ascend_X86:
+        atb_version_build_x86:latest
+      UT:
+        atb_version_build_arm:latest
