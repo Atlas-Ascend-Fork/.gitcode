@@ -23,17 +23,16 @@ global:
         lv6_monitor_9_0_0: ubuntu20.04.05_x86:lv6_v1.1092
     ubuntu24.04:
       arm:
-        lv6: ubuntu24.04_arm:lv6_v1.1098
-        smoke: ubuntu24.04_arm:pre_mindspore_A2_conda_v1.1031
-        smoke_A3: ubuntu24.04_arm:pre_mindspore_A3_conda_v1.1026
+        lv6: ubuntu24.04_arm:lv6_v1.1100
+        smoke: ubuntu24.04_arm:pre_mindspore_A2_conda_v1.1032
+        smoke_A3: ubuntu24.04_arm:pre_mindspore_A3_conda_v1.1027
         asnumpy: ubuntu24.04_arm:asnumpy_v1.1001
         opencode: ubuntu24.04_arm:opencode_v1.1001
         lv6_monitor: ubuntu24.04_arm:lv6_v1.1085
         lv6_monitor_9_0_0: ubuntu24.04_arm:lv6_v1.1079
         lv6_monitor_9.1.0_beta.1: ubuntu24.04_arm:lv6_v1.1086
       x86:
-        lv6: ubuntu24.04_x86:lv6_v1.1101
-        lv6_0722: ubuntu24.04_x86:lv6_v1.1097
+        lv6: ubuntu24.04_x86:lv6_v1.1103
         xla_npu: ubuntu_npu:v1.0
         asnumpy: ubuntu24.04_x86:asnumpy_v1.1002
         lv6_monitor: ubuntu24.04_x86:lv6_v1.1088
@@ -143,7 +142,7 @@ repos:
       API_Check:
         ubuntu24.04:x86:api_check
       UT_Test:
-        ubuntu24.04:x86:lv6_0722
+        ubuntu24.04:x86:lv6
       UT_Test_ai-review:
         ubuntu24.04:arm:opencode
       UT_Test_experimental:
@@ -206,7 +205,7 @@ repos:
       UT_Test_opapi:
         ubuntu24.04:x86:lv6
       UT_Test_kernel:
-        ubuntu24.04:x86:lv6_0722
+        ubuntu24.04:x86:lv6
       UT_Test_opgraph:
         ubuntu24.04:x86:lv6
       PreSmoke_A900:
@@ -300,7 +299,7 @@ repos:
       API_Check:
         ubuntu24.04:x86:api_check
       UT_Test:
-        ubuntu24.04:x86:lv6_0722
+        ubuntu24.04:x86:lv6
       UT_Test_ai-review:
         ubuntu24.04:arm:opencode
       PreSmoke_A900:
@@ -1113,12 +1112,6 @@ repos:
         ubuntu24.04:x86:api_check
 
   pyasc:
-    os_mirror:
-      ubuntu24.04:
-        arm:
-          lv6: ubuntu24.04_arm:lv6_v1.1080
-        x86:
-          lv6: ubuntu24.04_x86:lv6_v1.1082
     stages:
       Compile_Ascend_X86:
         ubuntu24.04:x86:lv6
