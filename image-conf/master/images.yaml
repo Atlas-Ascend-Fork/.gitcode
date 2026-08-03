@@ -601,6 +601,10 @@ repos:
         ubuntu24.04:x86:xla_npu
 
   amct:
+    os_mirror:
+      ubuntu24.04:
+        x86:
+          lv6: ubuntu24.04_x86:lv6_v1.1104
     stages:
       Compile_Ascend_X86:
         ubuntu24.04:x86:lv6
