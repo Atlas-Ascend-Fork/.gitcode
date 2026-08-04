@@ -21,6 +21,7 @@ STATUS_ICON = {
     "CANCELED": "⏹️",
     "CANCELLED": "⏹️",
     "SKIPPED": "⏭️",
+    "IGNORED": "⏭️",
     "RUNNING": "⏳",
     "QUEUED": "⏸️",
     "PENDING": "⏸️",
@@ -120,8 +121,9 @@ def apply_label_by_jobs(owner, repo, pr_number, jobs, token):
     print(f"{'=' * 70}")
     print(f"  PR: #{pr_number}  任务总数: {len(jobs)}")
     success_statuses = {"COMPLETED", "SUCCEEDED", "SUCCESS"}
+    neutral_statuses = {"SKIPPED", "IGNORED"}
     failed_jobs = [j for j in jobs if j.get("status") in FAILED_STATUSES]
-    non_success_jobs = [j for j in jobs if j.get("status") not in success_statuses]
+    non_success_jobs = [j for j in jobs if j.get("status") not in success_statuses and j.get("status") not in neutral_statuses]
     remove_pr_label(owner, repo, pr_number, LABEL_PASS, token)
     remove_pr_label(owner, repo, pr_number, LABEL_FAIL, token)
     remove_pr_label(owner, repo, pr_number, LABEL_RUNNING, token)
@@ -131,6 +133,9 @@ def apply_label_by_jobs(owner, repo, pr_number, jobs, token):
             print(f"    {j.get('display_name', j.get('name', 'N/A'))}: {j.get('status', 'N/A')}")
         add_pr_label(owner, repo, pr_number, LABEL_FAIL, token)
     else:
+        skipped = [j for j in jobs if j.get("status") in neutral_statuses]
+        if skipped:
+            print(f"  跳过/忽略的任务数: {len(skipped)} (不影响标签)")
         print(f"  全部任务成功")
         add_pr_label(owner, repo, pr_number, LABEL_PASS, token)
     print()
@@ -260,7 +265,7 @@ def print_jobs(jobs_data, run_detail=None):
             success += 1
         elif status in ("FAILED", "FAILURE"):
             failed += 1
-        elif status in ("SKIPPED",):
+        elif status in ("SKIPPED", "IGNORED"):
             skipped += 1
         else:
             other += 1
