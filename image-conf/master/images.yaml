@@ -1437,3 +1437,36 @@ repos:
         atb_version_build_x86:latest
       UT:
         atb_version_build_arm:latest
+  ascend-transformer-boost:
+    os_mirror:
+      ubuntu20.04:
+        x86:
+          cann_20260429060022: ubuntu:20.04.x86.cann_20260429060022
+          cann900.B095.torch290: ubuntu:20.04.x86.cann900.B095.torch290
+        arm:
+          cann_20260429060022: ubuntu:20.04.arm.cann_20260429060022
+    stages:
+      Compile_Ascend_X86:
+        ubuntu20.04:x86:cann_20260429060022
+      Compile_Ascend_ARM:
+        ubuntu20.04:arm:cann_20260429060022
+      UT_Test_ARM:
+        ubuntu20.04:arm:cann_20260429060022
+      UT_Test_X86:
+        ubuntu20.04:x86:cann900.B095.torch290
+  sip:
+    os_mirror:
+      atb:
+        x86:
+          latest: atb_version_build_x86:latest
+        arm:
+          latest: atb_version_build_arm:latest
+    stages:
+      Compile_Ascend_X86:
+        atb:x86:latest
+      Compile_Ascend_ARM:
+        atb:arm:latest
+      UT_Test:
+        atb:arm:latest
+      PreSmoke:
+        atb:arm:latest
