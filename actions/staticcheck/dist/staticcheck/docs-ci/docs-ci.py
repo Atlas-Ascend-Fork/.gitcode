@@ -326,14 +326,19 @@ if __name__ == "__main__":
     check_md_lst = git_diff.load_modified_files(profile)
     if not check_md_lst:
         sys.exit(0)  # 变更md列表为空
-    check_md_lst = check_md_lst[int(len(check_md_lst)/2):]
+    print(f'check_md_lst account: ', {len(check_md_lst)})
+    check_re_lst = []
+    for md_info in check_md_lst:
+        if '/' in md_info:
+            check_re_lst.append(md_info.split('/')[-1])
+    check_re_lst = list(set(check_re_lst))
     # 修改配置文件
     config_json = os.path.join(script_dir, ".doctools/config.json")
     with open(config_json, "r", encoding="utf-8") as fr:
         context = json.load(fr)
     context["config"]["base"][
         "docPath"
-    ] = f"^({'|'.join([os.path.splitext(file)[0] for file in check_md_lst])}).md"
+    ] = f"^({'|'.join([os.path.splitext(file)[0] for file in check_re_lst])}).md"
     context["config"]["base"][
         "markdownlintRemoteConfigUrl"
     ] = f"{script_dir}/.doctools/markdownlint.config.json"
