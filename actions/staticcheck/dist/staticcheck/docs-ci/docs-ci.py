@@ -77,7 +77,7 @@ def run(code_dir, script_dir, targetOwnerRepo, targetBranch):
         "--detailUrl=Your Detail Url",
         # "--outputCount=20000",  # targetBranch 目标分支名，工具会用，不能乱写
         "--outputCount=20000",  # targetBranch 目标分支名，工具会用，不能乱写
-        f"--concurrency={MAX_CHECK_NUM}",
+        f"--concurrency=8",
         f"--ciConfigUrl={script_dir}/.doctools/config.json",
     ]
     #print("cmd:", cmd)
@@ -332,66 +332,66 @@ if __name__ == "__main__":
         sys.exit(0)  # 变更md列表为空
     check_re_lst = [check_md_lst[i:i + MAX_CHECK_NUM] for i in range(0, len(check_md_lst), MAX_CHECK_NUM)]
     res_file_lst = []
-    for idx, check_md_re_lst in enumerate(check_re_lst):
-        print(f'{idx} check_md_re_lst account:', {len(check_md_re_lst)})
-        # 修改配置文件
-        config_json = os.path.join(script_dir, ".doctools/config.json")
-        with open(config_json, "r", encoding="utf-8") as fr:
-            context = json.load(fr)
-        context["config"]["base"][
-            "docPath"
-        ] = f"^({'|'.join([os.path.splitext(file)[0] for file in check_md_re_lst])}).md"
-        context["config"]["base"][
-            "markdownlintRemoteConfigUrl"
-        ] = f"{script_dir}/.doctools/markdownlint.config.json"
-        context["config"]["base"][
-            "codespellCheckRemoteWhitelistUrl"
-        ] = f"{script_dir}/.doctools/whitelist_words.txt"
-        context["config"]["base"][
-            "linkValidityCheckRemoteWhitelistUrl"
-        ] = f"{script_dir}/.doctools/url.whitelist.json"
-        context["config"]["base"][
-            "resourceExistenceCheckRemoteWhitelistUrl"
-        ] = f"{script_dir}/.doctools/url.whitelist.json"
-        context["repo"] = {
-            targetOwnerRepo: {
-                "extendConfig": "base",
-                "branches": {
-                    branch: {
-                        "ci": [
-                            "markdownlint",
-                            # "codespell-check",
-                            "link-validity-check",
-                            "resource-existence-check",
-                            "tag-closed-check",
-                        ]
-                    }
-                },
-            }
+    # for idx, check_md_re_lst in enumerate(check_re_lst):
+    # print(f'{idx} check_md_re_lst account:', {len(check_md_re_lst)})
+    # 修改配置文件
+    config_json = os.path.join(script_dir, ".doctools/config.json")
+    with open(config_json, "r", encoding="utf-8") as fr:
+        context = json.load(fr)
+    context["config"]["base"][
+        "docPath"
+    ] = f"^({'|'.join([os.path.splitext(file)[0] for file in check_md_lst])}).md"
+    context["config"]["base"][
+        "markdownlintRemoteConfigUrl"
+    ] = f"{script_dir}/.doctools/markdownlint.config.json"
+    context["config"]["base"][
+        "codespellCheckRemoteWhitelistUrl"
+    ] = f"{script_dir}/.doctools/whitelist_words.txt"
+    context["config"]["base"][
+        "linkValidityCheckRemoteWhitelistUrl"
+    ] = f"{script_dir}/.doctools/url.whitelist.json"
+    context["config"]["base"][
+        "resourceExistenceCheckRemoteWhitelistUrl"
+    ] = f"{script_dir}/.doctools/url.whitelist.json"
+    context["repo"] = {
+        targetOwnerRepo: {
+            "extendConfig": "base",
+            "branches": {
+                branch: {
+                    "ci": [
+                        "markdownlint",
+                        # "codespell-check",
+                        "link-validity-check",
+                        "resource-existence-check",
+                        "tag-closed-check",
+                    ]
+                }
+            },
         }
+    }
 
-        # print("config.json:", context)
-        with open(config_json, "w", encoding="utf-8") as fw:
-            json.dump(context, fw, ensure_ascii=False)
+    # print("config.json:", context)
+    with open(config_json, "w", encoding="utf-8") as fw:
+        json.dump(context, fw, ensure_ascii=False)
 
-        # run check
-        status = run(code_dir, script_dir, targetOwnerRepo, branch)
-        output_file = os.path.join(code_dir, "output.md")
-        if not status:
-            print("running ERROR status: False")
-            sys.exit(0)  # 运行错误，返回0
-        rename_file = os.path.join(code_dir, f"output{idx}.md")
-        os.rename(output_file, rename_file)
-        res_file_lst.append(rename_file)
+    # run check
+    status = run(code_dir, script_dir, targetOwnerRepo, branch)
+    output_file = os.path.join(code_dir, "output.md")
+    if not status:
+        print("running ERROR status: False")
+        sys.exit(0)  # 运行错误，返回0
+    # rename_file = os.path.join(code_dir, f"output{idx}.md")
+    # os.rename(output_file, rename_file)
+    # res_file_lst.append(rename_file)
         # if idx > 3:
         #     sys.exit(0)
     # sys.exit(0)
     # 汇总结果扫描文件
-    with open(output_file, 'w', encoding='utf-8') as outfile:
-        for res_file in res_file_lst:
-            with open(res_file, 'r', encoding='utf-8') as infile:
-                outfile.write(infile.read())
-                outfile.write('\n\n')
+    # with open(output_file, 'w', encoding='utf-8') as outfile:
+    #     for res_file in res_file_lst:
+    #         with open(res_file, 'r', encoding='utf-8') as infile:
+    #             outfile.write(infile.read())
+    #             outfile.write('\n\n')
     # cann\pipeline\bin\common\docs-ci/StaticCheck_filter.yaml
     filter_file = os.path.join(os.path.dirname(script_dir), "StaticCheck_filter.yaml")
     with open(filter_file) as file:
