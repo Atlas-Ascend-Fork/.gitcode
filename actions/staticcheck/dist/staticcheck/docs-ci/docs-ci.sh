@@ -17,11 +17,11 @@ ORGANIZATION_NAME=$6
 
 # 工具检查前先安装npm依赖
 cd ${WORKSPACE}
-echo "${script_dir}/package.json"
+# echo "${script_dir}/package.json"
 cp ${script_dir}/package.json  .
-echo "${script_dir}/.npmrc"
+# echo "${script_dir}/.npmrc"
 cp ${script_dir}/.npmrc  .
-ls -a ${WORKSPACE}
+# ls -a ${WORKSPACE}
 npm i
 
 echo "python3 ${script_dir}/docs-ci.py ${WORKSPACE} ${pr_filelist} ${script_dir} ${GIT_TARGET_BRANCH} ${REPOSITORY_NAME} ${ORGANIZATION_NAME} ${tool_name}"

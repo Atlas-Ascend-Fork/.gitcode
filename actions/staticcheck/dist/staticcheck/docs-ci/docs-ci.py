@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 #LANJIE_TOOLS = ["StaticCheck_markdownlint", "StaticCheck_link_validity"]
 LANJIE_TOOLS = ['StaticCheck_link_validity', 'StaticCheck_resource_existence', 'StaticCheck_tag_closed']
 MAX_PRINT_NUM = 10
-MAX_CHECK_NUM = 80
+MAX_CHECK_NUM = 50
 CHECK_TYPE_LST = ["StaticCheck_markdownlint", "StaticCheck_tag_closed", "StaticCheck_link_validity", "StaticCheck_resource_existence", "StaticCheck_codespell", "StaticCheck_compliance"]
 CD = {
     "MD028": "一般",
@@ -337,7 +337,7 @@ if __name__ == "__main__":
             context = json.load(fr)
         context["config"]["base"][
             "docPath"
-        ] = f"({'|'.join([os.path.splitext(file)[0] for file in check_md_re_lst])}).md"
+        ] = f"^({'|'.join([os.path.splitext(file)[0] for file in check_md_re_lst])}).md"
         context["config"]["base"][
             "markdownlintRemoteConfigUrl"
         ] = f"{script_dir}/.doctools/markdownlint.config.json"
@@ -380,9 +380,10 @@ if __name__ == "__main__":
         rename_file = os.path.join(code_dir, f"output{idx}.md")
         os.rename(output_file, rename_file)
         res_file_lst.append(rename_file)
-        break
+        if idx > 2 :
+            break
     # 汇总结果扫描文件
-    with open(output_file, 'w', encoding='uft-8') as outfile:
+    with open(output_file, 'w', encoding='utf-8') as outfile:
         for res_file in res_file_lst:
             with open(res_file, 'r', encoding='utf-8') as infile:
                 outfile.write(infile.read)
