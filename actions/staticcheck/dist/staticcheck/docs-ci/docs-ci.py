@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 #LANJIE_TOOLS = ["StaticCheck_markdownlint", "StaticCheck_link_validity"]
 LANJIE_TOOLS = ['StaticCheck_link_validity', 'StaticCheck_resource_existence', 'StaticCheck_tag_closed']
 MAX_PRINT_NUM = 10
-MAX_CHECK_NUM = 100
+MAX_CHECK_NUM = 80
 CHECK_TYPE_LST = ["StaticCheck_markdownlint", "StaticCheck_tag_closed", "StaticCheck_link_validity", "StaticCheck_resource_existence", "StaticCheck_codespell", "StaticCheck_compliance"]
 CD = {
     "MD028": "一般",
@@ -327,17 +327,17 @@ if __name__ == "__main__":
     check_md_lst = git_diff.load_modified_files(profile)
     if not check_md_lst:
         sys.exit(0)  # 变更md列表为空
-    print(f'check_md_lst account:', {len(check_md_lst)})
     check_re_lst = [check_md_lst[i:i + MAX_CHECK_NUM] for i in range(0, len(check_md_lst), MAX_CHECK_NUM)]
-    # res_file_lst = []
+    res_file_lst = []
     for idx, check_md_re_lst in enumerate(check_re_lst):
+        print(f'{idx} check_md_re_lst account:', {len(check_md_re_lst)})
         # 修改配置文件
         config_json = os.path.join(script_dir, ".doctools/config.json")
         with open(config_json, "r", encoding="utf-8") as fr:
             context = json.load(fr)
         context["config"]["base"][
             "docPath"
-        ] = f"({'|'.join([os.path.splitext(file)[0] for file in check_md_lst])}).md"
+        ] = f"({'|'.join([os.path.splitext(file)[0] for file in check_md_re_lst])}).md"
         context["config"]["base"][
             "markdownlintRemoteConfigUrl"
         ] = f"{script_dir}/.doctools/markdownlint.config.json"
