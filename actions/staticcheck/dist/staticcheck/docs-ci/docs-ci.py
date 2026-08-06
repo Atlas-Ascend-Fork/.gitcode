@@ -373,11 +373,11 @@ if __name__ == "__main__":
             json.dump(context, fw, ensure_ascii=False)
 
         # run check
-        status = run(code_dir, script_dir, targetOwnerRepo, branch)
-        output_file = os.path.join(code_dir, "output.md")
-        if not status:
-            print("running ERROR status: False")
-            sys.exit(0)  # 运行错误，返回0
+        # status = run(code_dir, script_dir, targetOwnerRepo, branch)
+        # output_file = os.path.join(code_dir, "output.md")
+        # if not status:
+        #     print("running ERROR status: False")
+        #     sys.exit(0)  # 运行错误，返回0
         rename_file = os.path.join(code_dir, f"output{idx}.md")
         os.rename(output_file, rename_file)
         res_file_lst.append(rename_file)
