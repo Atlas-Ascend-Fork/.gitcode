@@ -12,6 +12,7 @@ global:
         smoke_A3: ubuntu20.04.05_arm:mindspore_A3_v1.1041
         lv6_monitor: ubuntu20.04.05_arm:lv6_v1.1067
         lv6_monitor_9_0_0: ubuntu20.04.05_arm:lv6_v1.1089
+        boost_component: ubuntu:20.04.arm.cann_20260429060022
       x86:
         lv1: ubuntu20.04.05_x86:lv1_v1.1003
         lv2: ubuntu20.04.05_x86:lv2_v1.1010
@@ -21,6 +22,7 @@ global:
         lv6: ubuntu20.04.05_x86:lv6_v1.1095
         lv6_monitor: ubuntu20.04.05_x86:lv6_v1.1069
         lv6_monitor_9_0_0: ubuntu20.04.05_x86:lv6_v1.1092
+        boost_component: ubuntu:20.04.x86.cann_20260429060022
     ubuntu24.04:
       arm:
         lv6: ubuntu24.04_arm:lv6_v1.1100
@@ -31,6 +33,8 @@ global:
         lv6_monitor: ubuntu24.04_arm:lv6_v1.1085
         lv6_monitor_9_0_0: ubuntu24.04_arm:lv6_v1.1079
         lv6_monitor_9.1.0_beta.1: ubuntu24.04_arm:lv6_v1.1086
+        boost_component: ubuntu:24.04.CANN900.arm.260730
+        boost_component_2: atb_version_build_arm:latest
       x86:
         lv6: ubuntu24.04_x86:lv6_v1.1103
         xla_npu: ubuntu_npu:v1.0
@@ -38,6 +42,7 @@ global:
         lv6_monitor: ubuntu24.04_x86:lv6_v1.1088
         lv6_monitor_9_0_0: ubuntu24.04_x86:lv6_v1.1081
         lv6_monitor_9.1.0_beta.1: ubuntu24.04_x86:lv6_v1.1089
+        boost_component_2: atb_version_build_x86:latest
     openeuler24.03:
       arm:
         lv6: openeuler24.03_arm:lv6_v1.1001
@@ -1426,14 +1431,50 @@ repos:
   catlass:
     stages:
       Compile_Ascend_ARM:
-        atb_version_build_arm:latest
+        ubuntu24.04:arm:boost_component_2
       PreSmoke:
-        ubuntu:20.04.arm.cann900.B095.torch290
+        ubuntu20.04:arm:boost_component
   ascend-boost-comm:
     stages:
       Compile_Ascend_ARM:
-        atb_version_build_arm:latest
+        ubuntu24.04:arm:boost_component_2
       Compile_Ascend_X86:
-        atb_version_build_x86:latest
+        ubuntu24.04:x86:boost_component_2
       UT:
-        atb_version_build_arm:latest
+        ubuntu24.04:arm:boost_component_2
+  ascend-transformer-boost:
+    stages:
+      Compile_Ascend_X86:
+        ubuntu20.04:x86:boost_component
+      Compile_Ascend_ARM:
+        ubuntu20.04:arm:boost_component
+      UT_Test_ARM:
+        ubuntu20.04:arm:boost_component
+      UT_Test_X86:
+        ubuntu20.04:x86:boost_component
+  sip:
+    stages:
+      Compile_Ascend_X86:
+        ubuntu20.04:x86:boost_component
+      Compile_Ascend_ARM:
+        ubuntu20.04:arm:boost_component
+      UT_Test:
+        ubuntu20.04:arm:boost_component
+      PreSmoke:
+        ubuntu20.04:arm:boost_component
+  shmem:
+    stages:
+      Compile_Ascend_ARM:
+        ubuntu24.04:arm:boost_component
+      UT_Test:
+        ubuntu24.04:arm:boost_component
+  catccos:
+    stages:
+      UT_Test:
+        ubuntu24.04:arm:boost_component
+  ops-collections:
+    stages:
+      Compile_Ascend_ARM:
+        ubuntu24.04:arm:boost_component
+      UT_Test:
+        ubuntu24.04:arm:boost_component
