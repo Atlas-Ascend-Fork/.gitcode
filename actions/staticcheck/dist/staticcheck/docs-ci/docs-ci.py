@@ -76,7 +76,7 @@ def run(code_dir, script_dir, targetOwnerRepo, targetBranch):
         f"--targetBranch={targetBranch}",
         "--detailUrl=Your Detail Url",
         # "--outputCount=20000",  # targetBranch 目标分支名，工具会用，不能乱写
-        "--outputCount=500",  # targetBranch 目标分支名，工具会用，不能乱写
+        "--outputCount=20000",  # targetBranch 目标分支名，工具会用，不能乱写
         f"--concurrency={MAX_CHECK_NUM}",
         f"--ciConfigUrl={script_dir}/.doctools/config.json",
     ]
