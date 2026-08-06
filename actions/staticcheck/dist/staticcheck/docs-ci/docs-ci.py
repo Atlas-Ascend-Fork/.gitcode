@@ -327,13 +327,7 @@ if __name__ == "__main__":
     if not check_md_lst:
         sys.exit(0)  # 变更md列表为空
     print(f'check_md_lst account: ', {len(check_md_lst)})
-    check_re_lst = []
-    for md_info in check_md_lst:
-        if '/' in md_info:
-            check_re_lst.append(md_info.split('/')[-1])
-        else:
-            check_re_lst.append(md_info)
-    check_re_lst = list(set(check_re_lst))
+    check_re_lst = check_md_lst[:int(len(check_md_lst)/2)]
     # 修改配置文件
     config_json = os.path.join(script_dir, ".doctools/config.json")
     with open(config_json, "r", encoding="utf-8") as fr:
