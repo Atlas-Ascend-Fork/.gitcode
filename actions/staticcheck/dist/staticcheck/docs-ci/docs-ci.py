@@ -386,7 +386,7 @@ if __name__ == "__main__":
     with open(output_file, 'w', encoding='utf-8') as outfile:
         for res_file in res_file_lst:
             with open(res_file, 'r', encoding='utf-8') as infile:
-                outfile.write(infile.read)
+                outfile.write(infile.read())
                 outfile.write('\n\n')
     # cann\pipeline\bin\common\docs-ci/StaticCheck_filter.yaml
     filter_file = os.path.join(os.path.dirname(script_dir), "StaticCheck_filter.yaml")
