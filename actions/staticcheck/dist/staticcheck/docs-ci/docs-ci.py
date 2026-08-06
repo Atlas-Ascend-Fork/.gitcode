@@ -320,6 +320,7 @@ if __name__ == "__main__":
         sys.exit(0)  # 变更列表为空
     # md文件列表
     check_md_lst = git_diff.load_modified_files(profile)
+    print(f'[INFO] check_md_lst:', len(check_md_lst))
     if not check_md_lst:
         sys.exit(0)  # 变更md列表为空
     # 修改配置文件
