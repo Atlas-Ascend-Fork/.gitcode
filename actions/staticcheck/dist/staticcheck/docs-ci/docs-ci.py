@@ -75,7 +75,8 @@ def run(code_dir, script_dir, targetOwnerRepo, targetBranch):
         f"--targetOwnerRepo={targetOwnerRepo}",  # targetOwnerRepo 仓名，工具会用，不能乱写， 例子：cann/ops-nn
         f"--targetBranch={targetBranch}",
         "--detailUrl=Your Detail Url",
-        "--outputCount=20000",  # targetBranch 目标分支名，工具会用，不能乱写
+        # "--outputCount=20000",  # targetBranch 目标分支名，工具会用，不能乱写
+        "--outputCount=500",  # targetBranch 目标分支名，工具会用，不能乱写
         f"--ciConfigUrl={script_dir}/.doctools/config.json",
     ]
     #print("cmd:", cmd)
