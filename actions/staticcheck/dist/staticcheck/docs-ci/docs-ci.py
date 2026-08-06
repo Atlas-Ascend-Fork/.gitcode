@@ -331,6 +331,8 @@ if __name__ == "__main__":
     for md_info in check_md_lst:
         if '/' in md_info:
             check_re_lst.append(md_info.split('/')[-1])
+        else:
+            check_re_lst.append(md_info)
     check_re_lst = list(set(check_re_lst))
     # 修改配置文件
     config_json = os.path.join(script_dir, ".doctools/config.json")
