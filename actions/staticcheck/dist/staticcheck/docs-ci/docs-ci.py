@@ -326,7 +326,7 @@ if __name__ == "__main__":
     check_md_lst = git_diff.load_modified_files(profile)
     if not check_md_lst:
         sys.exit(0)  # 变更md列表为空
-    check_md_lst = check_md_lst[:int(len(check_md_lst)/2)]
+    check_md_lst = check_md_lst[int(len(check_md_lst)/2):]
     # 修改配置文件
     config_json = os.path.join(script_dir, ".doctools/config.json")
     with open(config_json, "r", encoding="utf-8") as fr:
