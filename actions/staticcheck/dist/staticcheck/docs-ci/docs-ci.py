@@ -19,7 +19,7 @@ logger = logging.getLogger(__name__)
 #LANJIE_TOOLS = ["StaticCheck_markdownlint", "StaticCheck_link_validity"]
 LANJIE_TOOLS = ['StaticCheck_link_validity', 'StaticCheck_resource_existence', 'StaticCheck_tag_closed']
 MAX_PRINT_NUM = 10
-MAX_CHECK_NUM = 10
+MAX_CHECK_NUM = 100
 CHECK_TYPE_LST = ["StaticCheck_markdownlint", "StaticCheck_tag_closed", "StaticCheck_link_validity", "StaticCheck_resource_existence", "StaticCheck_codespell", "StaticCheck_compliance"]
 CD = {
     "MD028": "一般",
