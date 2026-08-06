@@ -368,7 +368,7 @@ if __name__ == "__main__":
         }
     }
 
-    #print("config.json:", context)
+    print("config.json:", context)
     with open(config_json, "w", encoding="utf-8") as fw:
         json.dump(context, fw, ensure_ascii=False)
 
