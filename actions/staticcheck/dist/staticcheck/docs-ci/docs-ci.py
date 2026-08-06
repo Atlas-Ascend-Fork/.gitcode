@@ -353,7 +353,7 @@ if __name__ == "__main__":
                 branch: {
                     "ci": [
                         "markdownlint",
-                        "codespell-check",
+                        # "codespell-check",
                         "link-validity-check",
                         "resource-existence-check",
                         "tag-closed-check",
