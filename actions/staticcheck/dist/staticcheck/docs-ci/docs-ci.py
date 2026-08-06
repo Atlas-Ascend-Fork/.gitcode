@@ -18,6 +18,7 @@ logger = logging.getLogger(__name__)
 #LANJIE_TOOLS = ["StaticCheck_markdownlint", "StaticCheck_link_validity"]
 LANJIE_TOOLS = ['StaticCheck_link_validity', 'StaticCheck_resource_existence', 'StaticCheck_tag_closed']
 MAX_PRINT_NUM = 10
+MAX_CHECK_NUM = 100
 CHECK_TYPE_LST = ["StaticCheck_markdownlint", "StaticCheck_tag_closed", "StaticCheck_link_validity", "StaticCheck_resource_existence", "StaticCheck_codespell", "StaticCheck_compliance"]
 CD = {
     "MD028": "一般",
@@ -76,13 +77,13 @@ def run(code_dir, script_dir, targetOwnerRepo, targetBranch):
         "--outputCount=20000",  # targetBranch 目标分支名，工具会用，不能乱写
         f"--ciConfigUrl={script_dir}/.doctools/config.json",
     ]
-    print("cmd:", cmd)
+    #print("cmd:", cmd)
     start_time = datetime.now()
     output = subprocess.run(cmd, capture_output=True, text=True, encoding="utf-8")
     end_time = datetime.now()
     elapsed_time = (end_time - start_time).total_seconds()
     print(f"running time: {elapsed_time}s")
-    print(f"run {output.stderr}")
+    #print(f"run {output.stderr}")
 
     if output.returncode != 0:
         print("ERROR", output)
@@ -205,7 +206,7 @@ def output_to_result(code_dir, filter_lst, check_md_lst, branch, summary_info_di
         tmp_lst.append(lanjie_is)
         tmp_lst.append(err_info)
         tmp_lst.append(i.get("错误内容", "无"))
-        print(tmp_lst)
+        #print(tmp_lst)
         data_lst.append(tmp_lst)
         summary_info_dic[tool_name_new.replace("_check", "")].append(":".join([tmp_lst[2], tmp_lst[3], tmp_lst[5], tmp_lst[6].replace('```', '')]))
     with open(result_csv_file, "w", encoding="utf-8-sig", newline="") as fw:
@@ -270,7 +271,7 @@ def md_utf8(check_md_lst):
     #utf8_result_json = os.path.join(code_dir, "utf8_result.json")
     start_time = datetime.now()
     cmd = f"echo \"{' '.join(check_md_lst)}\" | xargs file -i"
-    print("utf cmd:", cmd)
+    #print("utf cmd:", cmd)
     cont = subprocess.run(cmd, shell=True, capture_output=True, text=True, encoding="utf-8")
     #print("md_utf-8 output:", cont.stdout)
     if cont.returncode != 0:
@@ -326,15 +327,17 @@ if __name__ == "__main__":
     check_md_lst = git_diff.load_modified_files(profile)
     if not check_md_lst:
         sys.exit(0)  # 变更md列表为空
-    print(f'check_md_lst account: ', {len(check_md_lst)})
-    check_re_lst = check_md_lst[:int(len(check_md_lst)/2)]
-    # 修改配置文件
+    # print(f'check_md_lst account:', {len(check_md_lst)})
+    # check_re_lst = [check_md_lst[i:i + MAX_CHECK_NUM] for i in range(0, len(check_md_lst), MAX_CHECK_NUM)]
+    # res_file_lst = []
+    # for idx, check_md_re_lst in enumerate(check_re_lst):
+        # 修改配置文件
     config_json = os.path.join(script_dir, ".doctools/config.json")
     with open(config_json, "r", encoding="utf-8") as fr:
         context = json.load(fr)
     context["config"]["base"][
         "docPath"
-    ] = f"({'|'.join([os.path.splitext(file)[0] for file in check_re_lst])}).md"
+    ] = f"({'|'.join([os.path.splitext(file)[0] for file in check_md_lst])}).md"
     context["config"]["base"][
         "markdownlintRemoteConfigUrl"
     ] = f"{script_dir}/.doctools/markdownlint.config.json"
@@ -364,7 +367,7 @@ if __name__ == "__main__":
         }
     }
 
-    print("config.json:", context)
+    # print("config.json:", context)
     with open(config_json, "w", encoding="utf-8") as fw:
         json.dump(context, fw, ensure_ascii=False)
 
@@ -374,6 +377,15 @@ if __name__ == "__main__":
     if not status:
         print("running ERROR status: False")
         sys.exit(0)  # 运行错误，返回0
+    #     rename_file = os.path.join(code_dir, f"output{idx}.md")
+    #     os.rename(output_file, rename_file)
+    #     res_file_lst.append(rename_file)
+    # # 汇总结果扫描文件
+    # with open(output_file, 'w', encoding='uft-8') as outfile:
+    #     for res_file in res_file_lst:
+    #         with open(res_file, 'r', encoding='utf-8') as infile:
+    #             outfile.write(infile.read)
+    #             outfile.write('\n\n')
     # cann\pipeline\bin\common\docs-ci/StaticCheck_filter.yaml
     filter_file = os.path.join(os.path.dirname(script_dir), "StaticCheck_filter.yaml")
     with open(filter_file) as file:
