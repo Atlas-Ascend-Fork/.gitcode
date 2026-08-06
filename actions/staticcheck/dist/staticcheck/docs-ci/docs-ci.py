@@ -338,7 +338,7 @@ if __name__ == "__main__":
         context = json.load(fr)
     context["config"]["base"][
         "docPath"
-    ] = f"^({'|'.join([os.path.splitext(file)[0] for file in check_re_lst])}).md"
+    ] = f"({'|'.join([os.path.splitext(file)[0] for file in check_re_lst])}).md"
     context["config"]["base"][
         "markdownlintRemoteConfigUrl"
     ] = f"{script_dir}/.doctools/markdownlint.config.json"
