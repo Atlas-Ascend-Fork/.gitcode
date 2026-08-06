@@ -1437,3 +1437,13 @@ repos:
         atb_version_build_x86:latest
       UT:
         atb_version_build_arm:latest
+  ops-collections:
+    stages:
+      Compile_Ascend_X86_ubuntu24:
+        ubuntu24.04:x86:lv6
+      Compile_Ascend_ARM_ubuntu24:
+        ubuntu24.04:arm:lv6
+      UT_Test:
+        ubuntu24.04:x86:lv6
+      Pre_smoke:
+        ubuntu24.04:x86:lv6
