@@ -378,9 +378,9 @@ if __name__ == "__main__":
         # if not status:
         #     print("running ERROR status: False")
         #     sys.exit(0)  # 运行错误，返回0
-        rename_file = os.path.join(code_dir, f"output{idx}.md")
-        os.rename(output_file, rename_file)
-        res_file_lst.append(rename_file)
+        # rename_file = os.path.join(code_dir, f"output{idx}.md")
+        # os.rename(output_file, rename_file)
+        # res_file_lst.append(rename_file)
     sys.exit(0)
     # 汇总结果扫描文件
     with open(output_file, 'w', encoding='utf-8') as outfile:
