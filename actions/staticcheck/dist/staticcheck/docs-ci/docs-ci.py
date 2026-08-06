@@ -380,8 +380,6 @@ if __name__ == "__main__":
         rename_file = os.path.join(code_dir, f"output{idx}.md")
         os.rename(output_file, rename_file)
         res_file_lst.append(rename_file)
-        if idx > 2 :
-            break
     # 汇总结果扫描文件
     with open(output_file, 'w', encoding='utf-8') as outfile:
         for res_file in res_file_lst:
