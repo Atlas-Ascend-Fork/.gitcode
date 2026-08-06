@@ -79,13 +79,11 @@ def run(code_dir, script_dir, targetOwnerRepo, targetBranch):
         f"--concurrency=8",
         f"--ciConfigUrl={script_dir}/.doctools/config.json",
     ]
-    #print("cmd:", cmd)
     start_time = datetime.now()
     output = subprocess.run(cmd, capture_output=True, text=True, encoding="utf-8")
     end_time = datetime.now()
     elapsed_time = (end_time - start_time).total_seconds()
     print(f"running time: {elapsed_time}s")
-    #print(f"run {output.stderr}")
 
     if output.returncode != 0:
         print("ERROR", output)
@@ -157,7 +155,6 @@ def output_to_result(code_dir, filter_lst, check_md_lst, branch, summary_info_di
         md_output = gitdiff_dic.get(check_md, "")  # 该文件git diff的内容
         line_lst = git_diff.get_git_diff_lines(code_dir, check_md, branch, md_output)
         tmp_dic[check_md] = git_diff.convert_to_ranges(line_lst)
-    #print("change file lines:", tmp_dic)
     warn_lst = [
         x
         for x in warning_lst
@@ -179,7 +176,6 @@ def output_to_result(code_dir, filter_lst, check_md_lst, branch, summary_info_di
     lanjie_nums = 0
     no_lanjie_nums = 0
     for i in result_lst:
-        #print("start: ", i)
         tmp_lst = []
         tool_name = i.get("检查类型", "无")
         tool_name_new = tool_name
@@ -208,7 +204,6 @@ def output_to_result(code_dir, filter_lst, check_md_lst, branch, summary_info_di
         tmp_lst.append(lanjie_is)
         tmp_lst.append(err_info)
         tmp_lst.append(i.get("错误内容", "无"))
-        #print(tmp_lst)
         data_lst.append(tmp_lst)
         summary_info_dic[tool_name_new.replace("_check", "")].append(":".join([tmp_lst[2], tmp_lst[3], tmp_lst[5], tmp_lst[6].replace('```', '')]))
     with open(result_csv_file, "w", encoding="utf-8-sig", newline="") as fw:
@@ -273,9 +268,7 @@ def md_utf8(check_md_lst):
     #utf8_result_json = os.path.join(code_dir, "utf8_result.json")
     start_time = datetime.now()
     cmd = f"echo \"{' '.join(check_md_lst)}\" | xargs file -i"
-    #print("utf cmd:", cmd)
     cont = subprocess.run(cmd, shell=True, capture_output=True, text=True, encoding="utf-8")
-    #print("md_utf-8 output:", cont.stdout)
     if cont.returncode != 0:
         return data_lst
     for info in cont.stdout.split("\n"):
@@ -329,10 +322,6 @@ if __name__ == "__main__":
     check_md_lst = git_diff.load_modified_files(profile)
     if not check_md_lst:
         sys.exit(0)  # 变更md列表为空
-    # check_re_lst = [check_md_lst[i:i + MAX_CHECK_NUM] for i in range(0, len(check_md_lst), MAX_CHECK_NUM)]
-    # res_file_lst = []
-    # for idx, check_md_re_lst in enumerate(check_re_lst):
-    # print(f'{idx} check_md_re_lst account:', {len(check_md_re_lst)})
     # 修改配置文件
     config_json = os.path.join(script_dir, ".doctools/config.json")
     with open(config_json, "r", encoding="utf-8") as fr:
@@ -369,7 +358,6 @@ if __name__ == "__main__":
         }
     }
 
-    # print("config.json:", context)
     with open(config_json, "w", encoding="utf-8") as fw:
         json.dump(context, fw, ensure_ascii=False)
 
@@ -379,19 +367,6 @@ if __name__ == "__main__":
     if not status:
         print("running ERROR status: False")
         sys.exit(0)  # 运行错误，返回0
-    # rename_file = os.path.join(code_dir, f"output{idx}.md")
-    # os.rename(output_file, rename_file)
-    # res_file_lst.append(rename_file)
-        # if idx > 3:
-        #     sys.exit(0)
-    # sys.exit(0)
-    # 汇总结果扫描文件
-    # with open(output_file, 'w', encoding='utf-8') as outfile:
-    #     for res_file in res_file_lst:
-    #         with open(res_file, 'r', encoding='utf-8') as infile:
-    #             outfile.write(infile.read())
-    #             outfile.write('\n\n')
-    # cann\pipeline\bin\common\docs-ci/StaticCheck_filter.yaml
     filter_file = os.path.join(os.path.dirname(script_dir), "StaticCheck_filter.yaml")
     with open(filter_file) as file:
         filter_data = yaml.safe_load(file)
@@ -403,8 +378,6 @@ if __name__ == "__main__":
     # compliance tag检测和utf-8检测，md文件
     compliance_lst = compliance(code_dir, script_dir, repo_name, check_md_lst)  # md标签检测
     no_utf8_lst = md_utf8(check_md_lst)  # utf-8检测
-    #print("compliance_lst:", compliance_lst)
-    #print("no_utf8_lst:", no_utf8_lst)
     # 追加到output.md
     output_file = os.path.join(code_dir, "output.md")
     if compliance_lst:

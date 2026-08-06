@@ -88,7 +88,6 @@ def get_git_diff_lines(repo_path, file_path, branch, md_output):
         # 本地diff
         cmd = ["git", "diff", f"origin/{branch}", file_path]
         result = subprocess.run(cmd, capture_output=True, text=True, encoding='utf-8')
-        # print(cmd, 1111111111111111111111111, result.stdout)
         if result.returncode != 0:
             os.chdir(original_cwd)
             return []
