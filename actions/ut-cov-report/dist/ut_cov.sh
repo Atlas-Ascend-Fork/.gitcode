@@ -29,7 +29,13 @@ fi
 if [ "${COV_MODE}" = "report" ];then
     cd "${SCRIPT_DIR}/ut"
     chmod +x ./addlcov
-    python3 count_files.py "${WORKSPACE}/classify_rule.yaml" "${UT_FIELD}" "${WORKSPACE}" "${WORKSPACE}"
+    if [ "${UT_FIELD}" = "ops-transformer" ];then
+        python3 ${WORKSPACE}/cmake/scripts/convert_yaml.py ${WORKSPACE}/tests/test_config.yaml
+        yaml_path="${WORKSPACE}/tests/test_config.yaml"
+    else
+        yaml_path="${WORKSPACE}/classify_rule.yaml"
+    fi
+    python3 count_files.py "${yaml_path}" "${UT_FIELD}" "${WORKSPACE}" "${WORKSPACE}"
     bash generate_ut_report.sh
 else
     echo "${UT_PROCESS}"
@@ -37,11 +43,15 @@ else
       cd "${SCRIPT_DIR}/ut"
       chmod +x ./addlcov
       python3 count_files.py "${WORKSPACE}/classify_rule.yaml" "${UT_TYPE}" "${WORKSPACE}" "${WORKSPACE}"
-      bash generate_ut_cov.sh "${UT_TYPE}" "${TARGET_BRANCH}" "${WORKSPACE}" True "${WORKSPACE}/cov/coverage.info" "${COVERAGE_NUM}" "${WORKSPACE}/pr_filelist_mod.txt"
-      coverage_path=$(find "${WORKSPACE}" -name "cov" | head -n1)
-      cd "${coverage_path}"
-      tar -zcf ut_cov_${UT_TYPE}.tar.gz *
-      cp -rf ut_cov_${UT_TYPE}.tar.gz "${WORKSPACE}"
+      if [ "${LANGUAGE}" = "cpp" ];then
+          bash generate_ut_cov.sh "${UT_TYPE}" "${TARGET_BRANCH}" "${WORKSPACE}" True "${WORKSPACE}/cov/coverage.info" "${COVERAGE_NUM}" "${WORKSPACE}/pr_filelist_mod.txt"
+          coverage_path=$(find "${WORKSPACE}" -name "cov" | head -n1)
+          cd "${coverage_path}"
+          tar -zcf ut_cov_${UT_TYPE}.tar.gz *
+          cp -rf ut_cov_${UT_TYPE}.tar.gz "${WORKSPACE}"
+      elif [ "${LANGUAGE}" = "python" ];then
+          bash generate_ut_cov_python.sh
+      fi
     elif [ "${UT_PROCESS}" = "coverage" ];then
       cd "${WORKSPACE}"
       # 打印环境变量，确认工作目录

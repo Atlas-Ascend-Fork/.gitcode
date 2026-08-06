@@ -1,6 +1,6 @@
 name: 'precommit'
 author: 'CANN'
-version: '1.0.0'
+version: '1.1.0'
 description: 'this is a precommit action'
 inputs:
   merge_id:
@@ -12,6 +12,10 @@ inputs:
   workspace:
     description: "代码仓库根目录"
     required: true
+  block:
+    description: "为 true 时格式检查失败将中断流水线"
+    required: false
+    default: 'false'
 
 runs:
   using: 'node16'
