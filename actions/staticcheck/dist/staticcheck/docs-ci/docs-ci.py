@@ -75,7 +75,6 @@ def run(code_dir, script_dir, targetOwnerRepo, targetBranch):
         f"--targetOwnerRepo={targetOwnerRepo}",  # targetOwnerRepo 仓名，工具会用，不能乱写， 例子：cann/ops-nn
         f"--targetBranch={targetBranch}",
         "--detailUrl=Your Detail Url",
-        # "--outputCount=20000",  # targetBranch 目标分支名，工具会用，不能乱写
         "--outputCount=20000",  # targetBranch 目标分支名，工具会用，不能乱写
         f"--concurrency=8",
         f"--ciConfigUrl={script_dir}/.doctools/config.json",
@@ -330,8 +329,8 @@ if __name__ == "__main__":
     check_md_lst = git_diff.load_modified_files(profile)
     if not check_md_lst:
         sys.exit(0)  # 变更md列表为空
-    check_re_lst = [check_md_lst[i:i + MAX_CHECK_NUM] for i in range(0, len(check_md_lst), MAX_CHECK_NUM)]
-    res_file_lst = []
+    # check_re_lst = [check_md_lst[i:i + MAX_CHECK_NUM] for i in range(0, len(check_md_lst), MAX_CHECK_NUM)]
+    # res_file_lst = []
     # for idx, check_md_re_lst in enumerate(check_re_lst):
     # print(f'{idx} check_md_re_lst account:', {len(check_md_re_lst)})
     # 修改配置文件
