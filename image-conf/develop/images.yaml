@@ -366,7 +366,7 @@ repos:
         ubuntu20.04:x86:lv6
       UT_Test_3:
         ubuntu20.04:x86:lv6
-      UT_Test_reprot:
+      UT_Test_report:
         ubuntu20.04:x86:lv6
       API_Check:
         ubuntu24.04:x86:api_check
