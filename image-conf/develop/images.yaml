@@ -279,7 +279,7 @@ repos:
         ubuntu24.04:x86:lv6
       UT_Test_report:
         ubuntu24.04:x86:lv6
-      ST_Test_Python_superkenel:
+      ST_Test_Python_superkernel:
         ubuntu24.04:x86:lv6
       ST_Test_autofuse_framework:
         ubuntu24.04:x86:lv6
