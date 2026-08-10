@@ -87,28 +87,17 @@ jobs:
   JOB_sca:
     name: SCA
     steps:
-      -
-        name: Checkout
-        identifier: process_checkout
-        uses: checkout
-        with:
-          ref: ${{ atomgit.event.pull_request.merge_commit_sha }}
-          token: ${{secrets.GIT_TOKEN}}
-          path: "./runner"
-      -
-        name: Checkout
-        uses: checkout
-        with:
-          repository: ${{ vars.CI_PATH }}
-          ref: refs/heads/master
-          path: "./runner/CI"
-      -
+      - 
         name: sca
-        run: |
-          cd ${{ steps.process_checkout.outputs.path }}
-          cd CI/scripts
-          python3 codescan_gitcode.py --access_key ${{secrets.SCA_AK}} --secret_access_key ${{secrets.SCA_SK}} --access_key_get ${{secrets.SCA_AK_GET}} --secret_access_key_get ${{secrets.SCA_SK_GET}} --org_name ${org_name} --pr_id ${MERGE_ID} --repo ${repo_name} --commit_id ${{ atomgit.event.pull_request.merge_commit_sha }} --online ${{ vars.APPLY_LABEL }}    
-    if: env.online == 'true'  
+        id: sca-pr-scan
+        uses: sca-pr-scan
+        with:
+          scan-access-key: ${{ secrets.SCAN_ACCESS_KEY }}
+          scan-secret-key: ${{ secrets.SCAN_SECRET_KEY }}
+          pr-id: ${{ atomgit.event.pull_request.number }}
+          repository-name: ${{ atomgit.repository }}
+          project-name: "CANN"
+    if: env.online == 'true'
     runs-on: [dedicate-hosted, x64, small]
     container:
       image: swr.cn-north-4.myhuaweicloud.com/ci_cann/${{ inputs.codecheck_image_version }}
