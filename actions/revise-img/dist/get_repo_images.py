@@ -46,9 +46,9 @@ def main():
                 print(f"WARNING: No image for {target_repo}.{stage_name} ({ref})", file=sys.stderr)
 
     results += [
-        "precommit:ubuntu20.04.05_x86:alpha113",
+        "precommit:ubuntu24.04.03:v1.1",
         "codecheck:ubuntu24.04_x86:lv1_v1.1032",
-        "staticcheck:ubuntu24.04.03:v1.0"
+        "staticcheck:ubuntu24.04.03:v1.1"
     ]
     # 输出：每行一个 "stage:image"
     for line in results:

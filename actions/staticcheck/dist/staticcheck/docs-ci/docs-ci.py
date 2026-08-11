@@ -210,10 +210,10 @@ def output_to_result(code_dir, filter_lst, check_md_lst, branch, summary_info_di
         writer = csv.writer(fw)
         writer.writerows(data_lst)
     if lanjie_nums > 0:
-        print("lanjie")
+        print("MR NO PASS")
         return 1
     elif lanjie_nums == 0 and no_lanjie_nums < 0:
-        print("no lanjie")
+        print("MR PASS")
         return 99
 
 
@@ -253,7 +253,6 @@ def compliance(code_dir, script_dir, repo_name, check_md_lst):
                 )
                 data_lst.append(mode_str)
         else:
-            print(f"compliance scan {mdfile} not resultfile")
             continue
     end_time = datetime.now()
     elapsed_time = (end_time - start_time).total_seconds()
@@ -348,7 +347,7 @@ if __name__ == "__main__":
                 branch: {
                     "ci": [
                         "markdownlint",
-                        # "codespell-check",
+                        "codespell-check",
                         "link-validity-check",
                         "resource-existence-check",
                         "tag-closed-check",

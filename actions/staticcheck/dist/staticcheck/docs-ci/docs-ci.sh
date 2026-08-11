@@ -19,7 +19,8 @@ ORGANIZATION_NAME=$6
 cd ${WORKSPACE}
 cp ${script_dir}/package.json  .
 cp ${script_dir}/.npmrc  .
-npm i
+cp -r /opt/node_modules .
+# npm i
 
 echo "python3 ${script_dir}/docs-ci.py ${WORKSPACE} ${pr_filelist} ${script_dir} ${GIT_TARGET_BRANCH} ${REPOSITORY_NAME} ${ORGANIZATION_NAME} ${tool_name}"
 python3 -u ${script_dir}/docs-ci.py  \
@@ -48,8 +49,6 @@ else
     touch ${WORKSPACE}/build_out/StaticCheck.csv
     return_value=0
 fi
-# 写入 StaticCheck.js 告警个数，上传到OBS（流水新增OBS上传）
-# python3  ${WORKSPACE}/CI/cann/pipeline/bin/common/docs-ci/StaticCheck.py ${return_value} ${tool_name}
 # 退出码
 if [ ${return_value} -eq 1 ];then
     echo "[ERROR]: ${tool_name} result: NO PASS!!!"

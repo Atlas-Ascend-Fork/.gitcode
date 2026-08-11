@@ -43,6 +43,7 @@ class PreCommitChecker(CodeCheckerBaseClass):
         self.run_cmd('pip3 config set global.index-url https://mirrors.huaweicloud.com/repository/pypi/simple', os.getcwd(), shell=True)
         self.run_cmd('pip3 install --upgrade pip', os.getcwd(), shell=True)
         self.run_cmd('pip3 install -q pre-commit>=4.0.0', os.getcwd(), shell=True)
+        self.run_cmd('''sudo ln -sf /opt/gitleaks /usr/local/bin/gitleaks''', os.getcwd(), shell=True)
 
         # 3. pre-commit检测changes files
         logging.info(
@@ -58,8 +59,8 @@ class PreCommitChecker(CodeCheckerBaseClass):
             logging.info("✅ 没有需要检查的文件")
             return
 
-        check_result = self.run_cmd(f"cat pr_filelist_precommit.txt | xargs pre-commit run --show-diff-on-failure --file", os.getcwd(), shell=True, capture_output=True)
-        
+        check_result = self.run_cmd(f"cat pr_filelist_precommit.txt | xargs pre-commit run --show-diff-on-failure -v --files", os.getcwd(), shell=True, capture_output=True)
+
         full_output = unquote(check_result.stdout)
         normal_output = ""
         for line in full_output.splitlines(keepends=True):
@@ -201,8 +202,8 @@ class PreCommitChecker(CodeCheckerBaseClass):
 
         if check_result.returncode != 0:
             logging.info("❌ 存在部分文件格式错误")
-            if self.block:
-                sys.exit(1)
+            #if self.block:
+            sys.exit(1)
         else:
             logging.info("✅ 所有文件格式检查通过！")
 
@@ -230,15 +231,15 @@ class PreCommitChecker(CodeCheckerBaseClass):
             modified = False
             repos = config_data.get("repos", [])
             new_repos = []
-            
+
             for repo in repos:
                 hooks = repo.get("hooks", [])
                 # 过滤掉 id 为 oat-check 的 hook
                 new_hooks = [h for h in hooks if h.get("id") != "oat-check"]
-                
+
                 if len(new_hooks) != len(hooks):
                     modified = True
-                
+
                 # 如果还有其他 hook 保留，没有就删掉整个 repo
                 if new_hooks:
                     repo["hooks"] = new_hooks
