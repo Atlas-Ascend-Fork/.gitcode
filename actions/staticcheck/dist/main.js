@@ -77,7 +77,7 @@ function execShellScript(script, args, cwd, env) {
         const child = (0, child_process_1.execFile)("bash", [script, ...args], {
             cwd,
             env,
-            timeout: 120000
+            timeout: 1800000
         });
         child.stdout?.on("data", (data) => {
             core.info(data.toString().trimEnd());
