@@ -322,7 +322,7 @@ if __name__ == "__main__":
     check_md_lst = git_diff.load_modified_files(profile)
     check_md_lst = ['a/b/c/d/112421452154.md']
     print(f'[INFO] check_md_lst:', len(check_md_lst), check_md_lst)
-    time.sleep(120)
+    time.sleep(100)
     if not check_md_lst:
         sys.exit(0)  # 变更md列表为空
     # 修改配置文件
@@ -444,5 +444,6 @@ if __name__ == "__main__":
         summary_lines.append("```")
         summary_lines.append("</details>")
     summary_lines.append('⚠️ 详细告警信息请查看日志或 StaticCheck.csv 产物')
+    time.sleep(60)
     git_diff.gen_summary_file(summary_lines)
     sys.exit(result_num)  # 输出告警个数
