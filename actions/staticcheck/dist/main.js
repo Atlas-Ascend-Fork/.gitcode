@@ -77,7 +77,7 @@ function execShellScript(script, args, cwd, env) {
         const child = (0, child_process_1.execFile)("bash", [script, ...args], {
             cwd,
             env,
-            timeout: 120000
+            timeout: 1800000
         });
         child.stdout?.on("data", (data) => {
             core.info(data.toString().trimEnd());
@@ -85,13 +85,18 @@ function execShellScript(script, args, cwd, env) {
         child.stderr?.on("data", (data) => {
             core.info("[shell stderr] " + data.toString().trimEnd());
         });
-        child.on("close", (code) => {
-            if (code === 0)
+        child.on("close", (code, signal) => {
+            if (code === 0) {
                 resolve();
-            else
-                reject(new Error(`run-static-check.sh 异常退出，exit code: ${code}`));
+            } else {
+                core.error(`run-staticcheck.sh failed: exit code=${code}, signal=${signal}`);
+                reject(new Error(`run-staticcheck.sh 异常退出, exit code: ${code}, signal: ${signal}`));
+            }
         });
-        child.on("error", (err) => reject(err));
+        child.on("error", (err) => {
+            core.error(`run-staticcheck.sh spawn error: ${err.message}`);
+            reject(err);
+        });
     });
 }
 run();

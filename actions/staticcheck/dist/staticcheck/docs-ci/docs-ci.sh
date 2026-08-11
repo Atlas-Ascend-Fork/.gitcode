@@ -20,10 +20,12 @@ cd ${WORKSPACE}
 cp ${script_dir}/package.json  .
 cp ${script_dir}/.npmrc  .
 npm i
+
 echo "python3 ${script_dir}/docs-ci.py ${WORKSPACE} ${pr_filelist} ${script_dir} ${GIT_TARGET_BRANCH} ${REPOSITORY_NAME} ${ORGANIZATION_NAME} ${tool_name}"
-python3 ${script_dir}/docs-ci.py  \
+python3 -u ${script_dir}/docs-ci.py  \
     ${WORKSPACE} ${pr_filelist} ${script_dir} ${GIT_TARGET_BRANCH} ${REPOSITORY_NAME} ${ORGANIZATION_NAME} ${tool_name}
 return_value=$?
+
 echo "exit ${tool_name} status: ${return_value}"
 output_file=${WORKSPACE}/output.md
 cp $output_file ${WORKSPACE}/StaticCheck_output.json
