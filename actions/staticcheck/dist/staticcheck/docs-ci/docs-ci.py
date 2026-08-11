@@ -322,7 +322,7 @@ if __name__ == "__main__":
     check_md_lst = git_diff.load_modified_files(profile)
     check_md_lst = ['a/b/c/d/112421452154.md']
     print(f'[INFO] check_md_lst:', len(check_md_lst), check_md_lst)
-
+    time.sleep(120)
     if not check_md_lst:
         sys.exit(0)  # 变更md列表为空
     # 修改配置文件
