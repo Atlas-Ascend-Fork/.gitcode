@@ -22,7 +22,7 @@ cp ${script_dir}/.npmrc  .
 npm i
 
 echo "python3 ${script_dir}/docs-ci.py ${WORKSPACE} ${pr_filelist} ${script_dir} ${GIT_TARGET_BRANCH} ${REPOSITORY_NAME} ${ORGANIZATION_NAME} ${tool_name}"
-python3 ${script_dir}/docs-ci.py  \
+python3 -u ${script_dir}/docs-ci.py  \
     ${WORKSPACE} ${pr_filelist} ${script_dir} ${GIT_TARGET_BRANCH} ${REPOSITORY_NAME} ${ORGANIZATION_NAME} ${tool_name}
 return_value=$?
 
