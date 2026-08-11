@@ -320,8 +320,6 @@ if __name__ == "__main__":
         sys.exit(0)  # 变更列表为空
     # md文件列表
     check_md_lst = git_diff.load_modified_files(profile)
-    check_md_lst = ['a/b/c/d/112421452154.md']
-    print(f'[INFO] check_md_lst:', len(check_md_lst), check_md_lst)
     time.sleep(100)
     if not check_md_lst:
         sys.exit(0)  # 变更md列表为空
@@ -360,7 +358,6 @@ if __name__ == "__main__":
             },
         }
     }
-    print(context)
     with open(config_json, "w", encoding="utf-8") as fw:
         json.dump(context, fw, ensure_ascii=False)
 
