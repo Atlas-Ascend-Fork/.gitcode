@@ -421,6 +421,8 @@ if __name__ == "__main__":
         else:
             hook_status = "✅ Passed"
         summary_lines.append(f"| {check_tool} | {hook_status} |")
+    check_status = ''
+    ends_info_tag = False
     for check_tool, check_info in mr_intercept_dic.items():
         if check_info['intercept_status'] == "Passed":
             continue
@@ -440,6 +442,8 @@ if __name__ == "__main__":
         summary_lines.append("\n".join(raw))
         summary_lines.append("```")
         summary_lines.append("</details>")
-    summary_lines.append('⚠️ 详细告警信息请查看日志或 StaticCheck.csv 产物')
+        ends_info_tag = True
+    if ends_info_tag:
+        summary_lines.append('⚠️ 详细告警信息请查看日志或 StaticCheck.csv 产物')
     git_diff.gen_summary_file(summary_lines)
     sys.exit(result_num)  # 输出告警个数
