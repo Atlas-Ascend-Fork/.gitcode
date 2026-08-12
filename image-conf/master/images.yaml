@@ -1118,24 +1118,24 @@ repos:
 
   pyasc:
     os_mirror:
-      ubuntu24.04:
+      ubuntu22.04:
         x86:
           lv6: ubuntu22.04_x86:pyasc_2026
         arm:
           lv6: ubuntu22.04_arm:pyasc_2026
     stages:
       Compile_Ascend_X86:
-        ubuntu24.04:x86:lv6
+        ubuntu22.04:x86:lv6
       Compile_Ascend_X86_ubuntu24:
-        ubuntu24.04:x86:lv6
+        ubuntu22.04:x86:lv6
       Compile_Ascend_ARM:
-        ubuntu24.04:arm:lv6
+        ubuntu22.04:arm:lv6
       Compile_Ascend_ARM_ubuntu24:
-        ubuntu24.04:arm:lv6
+        ubuntu22.04:arm:lv6
       UT_Test:
-        ubuntu24.04:x86:lv6
+        ubuntu22.04:x86:lv6
       UT_Test_Python:
-        ubuntu24.04:x86:lv6
+        ubuntu22.04:x86:lv6
 
   tensorflow:
     stages:
