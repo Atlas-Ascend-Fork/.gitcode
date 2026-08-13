@@ -25,9 +25,9 @@ global:
         boost_component: ubuntu:20.04.x86.cann_20260429060022
     ubuntu24.04:
       arm:
-        lv6: ubuntu24.04_arm:lv6_v1.1103
-        smoke: ubuntu24.04_arm:pre_mindspore_A2_conda_v1.1035
-        smoke_A3: ubuntu24.04_arm:pre_mindspore_A3_conda_v1.1028
+        lv6: ubuntu24.04_arm:lv6_v1.1110
+        smoke: ubuntu24.04_arm:pre_mindspore_A2_conda_v1.1036
+        smoke_A3: ubuntu24.04_arm:pre_mindspore_A3_conda_v1.1029
         asnumpy: ubuntu24.04_arm:asnumpy_v1.1001
         opencode: ubuntu24.04_arm:opencode_ai_check_v1.1001
         lv6_monitor: ubuntu24.04_arm:lv6_v1.1085
@@ -36,7 +36,7 @@ global:
         boost_component: ubuntu:24.04.CANN900.arm.260730
         boost_component_2: atb_version_build_arm:latest
       x86:
-        lv6: ubuntu24.04_x86:lv6_v1.1107
+        lv6: ubuntu24.04_x86:lv6_v1.1113
         xla_npu: ubuntu_npu:v1.0
         asnumpy: ubuntu24.04_x86:asnumpy_v1.1002
         lv6_monitor: ubuntu24.04_x86:lv6_v1.1088
@@ -45,9 +45,9 @@ global:
         boost_component_2: atb_version_build_x86:latest
     openeuler24.03:
       arm:
-        lv6: openeuler24.03_arm:lv6_v1.1015
+        lv6: openeuler24.03_arm:lv6_v1.1019
       x86:
-        lv6: openeuler24.03_x86:lv6_v1.1014
+        lv6: openeuler24.03_x86:lv6_v1.1018
 
 gray_global:
   os_mirror:
@@ -402,7 +402,6 @@ repos:
       ubuntu24.04:
         x86:
           api_check: ubuntu24.04.3_x86:lv6_v1.1076
-          lv6: ubuntu24.04_x86:lv6_v1.1098
     stages:
       Compile_Ascend_X86:
         ubuntu24.04:x86:lv6
@@ -764,7 +763,6 @@ repos:
       ubuntu24.04:
         x86:
           api_check: ubuntu24.04.3_x86:lv6_v1.1076
-          lv6: ubuntu24.04_x86:lv6_v1.1098
     stages:
       Compile_Ascend_X86:
         ubuntu24.04:x86:lv6
@@ -940,12 +938,6 @@ repos:
 
 
   pypto:
-    os_mirror:
-      ubuntu24.04:
-        x86:
-          lv6: ubuntu24.04_x86:lv6_v1.1094
-        arm:
-          lv6: ubuntu24.04_arm:lv6_v1.1092
     stages:
       Compile_Ascend_X86:
         ubuntu24.04:x86:lv6
@@ -1134,23 +1126,15 @@ repos:
   tensorflow:
     stages:
       Compile_Ascend_X86:
-        ubuntu20.04:x86:lv6
-      Compile_Ascend_X86_ubuntu24:
         ubuntu24.04:x86:lv6
       Compile_Ascend_X86_TF:
-        ubuntu20.04:x86:lv6
-      Compile_Ascend_X86_TF_ubuntu24:
         ubuntu24.04:x86:lv6
       Compile_Ascend_ARM:
-        ubuntu20.04:arm:lv6
-      Compile_Ascend_ARM_ubuntu24:
-        ubuntu24.04:arm:lv6
-      Compile_Ascend_ARM_TF_ubuntu24:
         ubuntu24.04:arm:lv6
       UT_Test:
-        ubuntu20.04:x86:lv6
+        ubuntu24.04:x86:lv6
       ST_Test:
-        ubuntu20.04:x86:lv6
+        ubuntu24.04:x86:lv6
 
   torchtitan-npu:
     os_mirror:
