@@ -72,7 +72,7 @@ function execPythonScript(script, args, cwd) {
     return new Promise((resolve, reject) => {
         const child = (0, child_process_1.execFile)("python3", [script, ...args], {
             cwd,
-            timeout: 180000,
+            timeout: 600000,
         });
         child.stdout?.on("data", (data) => {
             core.info(data.toString().trimEnd());
@@ -81,13 +81,18 @@ function execPythonScript(script, args, cwd) {
         child.stderr?.on("data", (data) => {
             core.info("[py stderr] " + data.toString().trimEnd());
         });
-        child.on("close", (code) => {
-            if (code === 0)
+        child.on("close", (code, signal) => {
+            if (code === 0) {
                 resolve();
-            else
-                reject(new Error(`precommit.py 执行异常，退出码：${code}`));
+            } else {
+                core.error(`precommit.py 异常退出: exit code=${code}, signal=${signal}`);
+                reject(new Error(`precommit.py 执行异常, 退出码：${code}, signal: ${signal}`));
+            }
         });
-        child.on("error", (err) => reject(err));
+        child.on("error", (err) => {
+            core.error(`precommit.py 执行错误: ${err.message}`);
+            reject(err);
+        });
     });
 }
 run();
