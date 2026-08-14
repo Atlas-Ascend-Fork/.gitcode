@@ -93,7 +93,7 @@ function execShellScript(script, args, cwd, env) {
     return new Promise((resolve, reject) => {
         const child = (0, child_process_1.execFile)("bash", [script, ...args], {
             cwd,
-            timeout: 120000,
+            timeout: 600000,
             env,
         });
         child.stdout?.on("data", (data) => {
@@ -102,13 +102,18 @@ function execShellScript(script, args, cwd, env) {
         child.stderr?.on("data", (data) => {
             core.info(data.toString().trimEnd());
         });
-        child.on("close", (code) => {
-            if (code === 0)
+        child.on("close", (code, signal) => {
+            if (code === 0) {
                 resolve();
-            else
-                reject(new Error(`shell脚本异常退出，exit code: ${code}`));
+            } else {
+                core.error(`shell脚本异常退出: exit code=${code}, signal=${signal}`);
+                reject(new Error(`shell脚本异常退出, exit code: ${code}, signal: ${signal}`));
+            }
         });
-        child.on("error", (err) => reject(err));
+        child.on("error", (err) => {
+            core.error(`shell脚本执行错误: ${err.message}`);
+            reject(err);
+        });
     });
 }
 run();
