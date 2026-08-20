@@ -1,0 +1,33 @@
+name: 'docker-login'
+author: 'CANN'
+version: '2.0.0'
+description: '登录 Docker 镜像仓库，一比一复刻 docker/login-action 能力'
+inputs:
+  registry:
+    description: '镜像仓库地址 (如 swr.cn-north-4.myhuaweicloud.com)，不填则默认 Docker Hub'
+    required: false
+  username:
+    description: '用户名'
+    required: false
+  password:
+    description: '密码或 Token'
+    required: false
+  ecr:
+    description: '是否为 AWS ECR 仓库 (auto, true 或 false)'
+    required: false
+    default: 'auto'
+  scope:
+    description: '认证 token 的作用域 (需 Buildx 0.31.0+)'
+    required: false
+  logout:
+    description: 'job 结束时是否自动登出 (默认 true)'
+    required: false
+    default: 'true'
+  registry-auth:
+    description: '多仓库登录，YAML 格式，每项可含 registry/username/password/ecr/scope'
+    required: false
+
+runs:
+  using: 'node16'
+  main: 'dist/main.js'
+  post: 'dist/main.js'
