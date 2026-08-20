@@ -23,10 +23,10 @@ global:
         lv6_last: ubuntu20.04.05_x86:lv6_v1.1035
     ubuntu24.04:
       arm:
-        lv6: ubuntu24.04_arm:lv6_v1.1111
+        lv6: ubuntu24.04_arm:lv6_v1.1114
         smoke: ubuntu24.04_arm:pre_mindspore_A2_conda_v1.1037
       x86:
-        lv6: ubuntu24.04_x86:lv6_v1.1114
+        lv6: ubuntu24.04_x86:lv6_v1.1118
         xla_npu: ubuntu_npu:v1.0
     ubuntu22.04:
       x86:
