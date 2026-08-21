@@ -76,6 +76,14 @@ else
 fi
 cd ${SCRIPT_DIR}
 
+
+if [[ "${REPOSITORY_NAME}" == @(metadef|driver|driver-dev|amct|asc-devkit|pypto|ge|oam-tools|runtime|graph-autofusion|hixl|tensorflow|ops-gnn|hcomm|hccl|ops-ras|asc-tools) ]] && \
+   [ "${GIT_TARGET_BRANCH}" != "feature/community-tasks" ] && \
+   [ "${GIT_TARGET_BRANCH}" != "feature/tensor_api_from_9.0.0" ];then
+    echo "check md files"
+    python3  ${SCRIPT_DIR}/check_md_files.py ${REPOSITORY_NAME} ${SCRIPT_DIR}/repo_md_files.yaml ${WORKSPACE}/pr_filelist_mod.txt ${WORKSPACE}
+    DP_ASSERT_EQUAL "$?" "0" "Check ${REPOSITORY_NAME} md files " "true"
+fi
 # if [[ "${GIT_TARGET_BRANCH}" != @(8.5.0|9.0.0|r1.25.0|8.5.0-beta.1|9.0.0-beta.1|9.0.0-beta.2) && "${REPOSITORY_NAME}" == @(ops-nn|ops-cv|ops-math|ops-transformer) && "${sub_pipeline}x" != "truex" ]];then
 #     bash -x ${WORKSPACE}/CI/pipeline/scripts/check_sensitive_words.sh
 # fi
