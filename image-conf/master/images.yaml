@@ -1112,7 +1112,7 @@ repos:
     os_mirror:
       ubuntu24.04:
         x86:
-          lv6: ubuntu24.04_x86:master-910b-llvm19.1.7-ubuntu24.04
+          lv6: ubuntu24.04_x86:pyasc_20260820
     stages:
       Compile_Ascend_X86:
         ubuntu24.04:x86:lv6
