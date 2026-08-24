@@ -9,7 +9,9 @@ inputs:
   repo_name:
     description: 仓库名称
     required: true
-
+  target_branch:
+    required: false
+    default: 'master'
 
 runs:
   using: 'node16'
