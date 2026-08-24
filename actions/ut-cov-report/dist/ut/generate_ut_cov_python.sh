@@ -18,9 +18,9 @@ cd "${coverageDir}" || exit
 echo "coverage is exist"
 python3 -m coverage html -i -d cov_report
 if [ -d cov_report ]; then
-    tar -zcf ut_cov_${UT_TYPE}.tar.gz *
+    tar -zcf ut_cov_python_${UT_TYPE}.tar.gz *
     if [ "$(cd "${coverageDir}" && pwd)" != "$(cd "${WORKSPACE}" && pwd)" ]; then
-        cp -rf ut_cov_${UT_TYPE}.tar.gz "${WORKSPACE}"
+        cp -rf ut_cov_python_${UT_TYPE}.tar.gz "${WORKSPACE}"
     fi
 fi
 cd "${coverageDir}" || exit
