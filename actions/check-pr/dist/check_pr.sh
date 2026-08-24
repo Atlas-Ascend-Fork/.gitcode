@@ -36,7 +36,7 @@ while IFS= read -r line; do
     fi
 done < "${WORKSPACE}/pr_filelist.txt"
 
-python3 ${SCRIPT_DIR}/check_md_files.py ${WORKSPACE} ${WORKSPACE}/pr_filelist.txt
+python3 ${SCRIPT_DIR}/check_empty_file.py ${WORKSPACE} ${WORKSPACE}/pr_filelist.txt
 DP_ASSERT_EQUAL "$?" "0" "check empty file"
 
 
