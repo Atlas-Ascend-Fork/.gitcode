@@ -25,7 +25,7 @@ global:
         boost_component: ubuntu:20.04.x86.cann_20260429060022
     ubuntu24.04:
       arm:
-        lv6: ubuntu24.04_arm:lv6_v1.1114
+        lv6: ubuntu24.04_arm:lv6_v1.1111
         smoke: ubuntu24.04_arm:pre_mindspore_A2_conda_v1.1037
         smoke_A3: ubuntu24.04_arm:pre_mindspore_A3_conda_v1.1031
         asnumpy: ubuntu24.04_arm:asnumpy_v1.1001
