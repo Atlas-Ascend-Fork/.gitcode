@@ -1113,6 +1113,8 @@ repos:
       ubuntu24.04:
         x86:
           lv6: ubuntu24.04_x86:pyasc_20260820
+        arm:
+          lv6: ubuntu24.04_arm:pyasc_20260820
     stages:
       Compile_Ascend_X86:
         ubuntu24.04:x86:lv6
