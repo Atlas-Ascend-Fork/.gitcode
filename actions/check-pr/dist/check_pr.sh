@@ -19,6 +19,9 @@ type_flag=0
 while IFS= read -r line; do
     line=${line%$'\r'}
     decoded_line=$(printf '%b' "$line")
+    if [[ "$decoded_line" == *.md ]]; then
+        continue
+    fi
     full_path="${WORKSPACE}/${decoded_line}"
     echo "Checking: $full_path"
     if [ ! -f "$full_path" ]; then
