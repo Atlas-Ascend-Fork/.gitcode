@@ -18,6 +18,9 @@ export LC_ALL=en_US.UTF-8
 type_flag=0
 while IFS= read -r line; do
     line=${line%$'\r'}
+    if [[ "$decoded_line" == *.md ]]; then
+        continue
+    fi
     decoded_line=$(printf '%b' "$line")
     full_path="${WORKSPACE}/${decoded_line}"
     echo "Checking: $full_path"
