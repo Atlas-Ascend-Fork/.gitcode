@@ -20,10 +20,11 @@ while IFS= read -r line; do
     line=${line%$'\r'}
     decoded_line=$(printf '%b' "$line")
     full_path="${WORKSPACE}/${decoded_line}"
-    echo "Checking: $full_path"
+    
     if [[ "$decoded_line" == *.md ]]; then
         continue
     fi
+    echo "Checking: $full_path"
     if [ ! -f "$full_path" ]; then
         echo "Warning: File not found: $full_path"
         continue
