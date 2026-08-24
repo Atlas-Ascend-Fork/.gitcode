@@ -1,0 +1,99 @@
+common:
+  - .claude
+  - .opencode
+  - AGENTS.md
+  - .codex
+  - .agents
+
+asc-devkit:
+  - docs/zh/api
+  - docs/zh/guide
+  - docs/zh/vitepress
+  - .agent
+  - .claude
+  - .codex
+  - .opencode
+
+amct:
+  - docs
+  - .claude
+  - .opencode
+  - AGENTS.md
+  - skills
+  - .agents
+
+driver:
+  - docs/zh/Ascend_910B_DCMI_API
+  - docs/zh/Ascend_910_93_DCMI_API
+  - docs/zh/msnpureport
+  - docs/en/msnpureport
+  - docs/zh/Ascend_950_DCMI_API
+  - docs/zh/Ascend_950_HCCN_Tool
+  - docs/zh/Ascend_950_npu-smi
+  - docs/zh/Ascend_950_upgrade-tool
+
+driver-dev:
+  - docs/zh/Ascend_910B_DCMI_API
+  - docs/zh/Ascend_910_93_DCMI_API
+  - docs/zh/msnpureport
+  - docs/en/msnpureport
+  - docs/zh/Ascend_950_DCMI_API
+  - docs/zh/Ascend_950_HCCN_Tool
+  - docs/zh/Ascend_950_npu-smi
+  - docs/zh/Ascend_950_upgrade-tool
+
+runtime:
+  - docs
+  - .claude
+
+ge:
+  - .claude
+  - .opencode
+  - docs/zh/api
+  - docs/zh/user_guides/graph_dev
+  - docs/zh/user_guides/env_vars
+  - docs/zh/user_guides/atc_tools
+  - docs/zh/user_guides/llm_datadist
+  - docs/zh/user_guides/dflow
+
+pypto:
+  - docs/zh
+  - .opencode
+  - .agents
+  - AGENTS.md
+
+oam-tools:
+  - docs/zh/asys
+  - docs/zh/env-vars
+  - docs/zh/hccl_test
+  - docs/zh/msaicerr
+  - docs/zh/profiling
+  - docs/zh/design
+
+graph-autofusion:
+  - .claude
+  - .opencode
+  - AGENTS.md
+
+hixl:
+  - docs/zh/api
+  - docs/zh/guide
+  - .agents
+  - .claude
+  - .codex
+  - .opencode
+  - AGENTS.md
+  - CLAUDE.md 
+
+hccl:
+  - docs/zh/api_ref
+  - docs/zh/user_guide
+  - docs/zh/architecture
+
+hcomm:
+  - docs/zh/api_ref
+  - docs/zh/comm_op_dev_guide
+  - docs/zh/architecture
+
+metadef:
+  - docs/api
