@@ -81,6 +81,7 @@ jobs:
         with:
           repo_name: ${{ env.repo_name }}
           workspace: ${{ steps.process_checkout.outputs.path }}
+          target_branch: ${{ env.target_branch }}
     runs-on: [dedicate-hosted, x64, small]
     container:
       image: swr.cn-north-4.myhuaweicloud.com/ci_cann/${{ inputs.codecheck_image_version }}
