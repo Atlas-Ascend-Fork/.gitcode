@@ -36,7 +36,7 @@ global:
         boost_component: ubuntu:24.04.CANN900.arm.260730
         boost_component_2: atb_version_build_arm:latest
       x86:
-        lv6: ubuntu24.04_x86:lv6_v1.1118
+        lv6: ubuntu24.04_x86:lv6_v1.1121
         xla_npu: ubuntu_npu:v1.0
         asnumpy: ubuntu24.04_x86:asnumpy_v1.1002
         lv6_monitor: ubuntu24.04_x86:lv6_v1.1088
