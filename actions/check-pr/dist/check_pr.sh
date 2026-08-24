@@ -36,6 +36,10 @@ while IFS= read -r line; do
     fi
 done < "${WORKSPACE}/pr_filelist.txt"
 
+python3 ${SCRIPT_DIR}/check_md_files.py ${WORKSPACE} ${WORKSPACE}/pr_filelist.txt
+DP_ASSERT_EQUAL "$?" "0" "check empty file"
+
+
 # if [ "${REPOSITORY_NAME}" == "canndev" ];then
 #     LOG_HEAD "Build check Check_TBE_interface"
 #     LOG_DO bash ${WORKSPACE}/CI/cann/pipeline/ascend/canndev/scripts/canndev_compile.sh -b master -p check_tbe_interface -t ubuntu_x86
