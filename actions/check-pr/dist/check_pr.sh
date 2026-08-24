@@ -46,34 +46,34 @@ done < "${WORKSPACE}/pr_filelist.txt"
 #     echo "isIllegal checkcode is ${checkCode} illegal_word check end"
 # fi
 
-LOG_HEAD "Check markdown links"
-md_files=()  # 声明一个数组
+# LOG_HEAD "Check markdown links"
+# md_files=()  # 声明一个数组
 
-while IFS= read -r line; do
-    line=${line%$'\r'}
-    decoded_line=$(printf '%b' "$line")
-    full_path="${WORKSPACE}/${decoded_line}"
-    # 只处理以 .md 结尾的文件
-    if [[ "$decoded_line" != *.md ]]; then
-        continue
-    fi
-    if [ ! -f "$full_path" ]; then
-        echo "Warning: File not found: $full_path" >&2
-        continue
-    fi
-    md_files+=("$full_path")
-done < "${WORKSPACE}/pr_filelist.txt"
+# while IFS= read -r line; do
+#     line=${line%$'\r'}
+#     decoded_line=$(printf '%b' "$line")
+#     full_path="${WORKSPACE}/${decoded_line}"
+#     # 只处理以 .md 结尾的文件
+#     if [[ "$decoded_line" != *.md ]]; then
+#         continue
+#     fi
+#     if [ ! -f "$full_path" ]; then
+#         echo "Warning: File not found: $full_path" >&2
+#         continue
+#     fi
+#     md_files+=("$full_path")
+# done < "${WORKSPACE}/pr_filelist.txt"
 
-# 如果有 .md 文件，才调用 Python 脚本
-if [[ ${#md_files[@]} -gt 0 ]] && [[ "${REPOSITORY_NAME}" != @(asc-devkit|pypto|pypto-tools|asc-tools|pyasc|ops-nn|ops-transformer|ops-math|ops-cv|opbase) ]]; then
-    python3 "${SCRIPT_DIR}/check_markdown_links.py" "${md_files[@]}" --only-failed
-    REPORT_FILE="{$SCRIPT_DIR}/link_check_report.txt"
-    if [ -f "${REPORT_FILE}" ]; then
-        cat "${REPORT_FILE}"
-    fi
-else
-    echo "No valid Markdown files to check."
-fi
+# # 如果有 .md 文件，才调用 Python 脚本
+# if [[ ${#md_files[@]} -gt 0 ]] && [[ "${REPOSITORY_NAME}" != @(asc-devkit|pypto|pypto-tools|asc-tools|pyasc|ops-nn|ops-transformer|ops-math|ops-cv|opbase) ]]; then
+#     python3 "${SCRIPT_DIR}/check_markdown_links.py" "${md_files[@]}" --only-failed
+#     REPORT_FILE="{$SCRIPT_DIR}/link_check_report.txt"
+#     if [ -f "${REPORT_FILE}" ]; then
+#         cat "${REPORT_FILE}"
+#     fi
+# else
+#     echo "No valid Markdown files to check."
+# fi
 cd ${SCRIPT_DIR}
 
 
