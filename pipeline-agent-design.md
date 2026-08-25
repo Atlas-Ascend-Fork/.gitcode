@@ -534,7 +534,7 @@ PR 变更文件（pr_filelist.txt + git diff）
 
 自动在 PR 下评论完整定界报告：
 
-```markdown
+````markdown
 ## 🔍 Pipeline Agent — 失败定界报告
 
 **流水线**: [PR-pipeline_pypto #1657](https://gitcode.com/cann/pypto/actions/runs/xxx)
@@ -573,7 +573,7 @@ line 9604: subprocess.CalledProcessError: ... returned non-zero exit status 1.
 
 ---
 🤖 由 Pipeline Agent 自动生成 | [查看详情](https://gitcode.com/cann/pypto/actions/runs/xxx)
-```
+````
 
 ### 6.2 Label 打标
 
