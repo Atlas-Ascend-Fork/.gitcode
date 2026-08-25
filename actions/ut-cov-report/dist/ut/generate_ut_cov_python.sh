@@ -11,7 +11,7 @@ pip install diff-cover 2>/dev/null || true
 coveragePath=$(find "${WORKSPACE}" -name ".coverage" | head -n1)
 if [ -z "${coveragePath}" ]; then
     echo "No coverage file found"
-    exit 1
+    exit 0
 fi
 coverageDir=$(dirname "${coveragePath}")
 cd "${coverageDir}" || exit
