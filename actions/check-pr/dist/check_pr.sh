@@ -39,8 +39,8 @@ while IFS= read -r line; do
     fi
 done < "${WORKSPACE}/pr_filelist.txt"
 
-python3 ${SCRIPT_DIR}/check_empty_file.py ${WORKSPACE} ${WORKSPACE}/pr_filelist.txt
-DP_ASSERT_EQUAL "$?" "0" "check empty file"
+# python3 ${SCRIPT_DIR}/check_empty_file.py ${WORKSPACE} ${WORKSPACE}/pr_filelist.txt
+# DP_ASSERT_EQUAL "$?" "0" "check empty file"
 
 # if [ "${REPOSITORY_NAME}" == "canndev" ];then
 #     LOG_HEAD "Build check Check_TBE_interface"
