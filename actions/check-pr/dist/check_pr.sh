@@ -23,13 +23,16 @@ while IFS= read -r line; do
     fi
     decoded_line=$(printf '%b' "$line")
     full_path="${WORKSPACE}/${decoded_line}"
-    echo "Checking: $full_path"
+    
+    if [[ "$decoded_line" == *.md ]]; then
+        continue
+    fi
     if [ ! -f "$full_path" ]; then
+        echo "Checking: $full_path"
         echo "Warning: File not found: $full_path"
         continue
     fi
     file_type=$(file -b "$full_path")
-    echo "Type: $file_type"
     if [[ "$file_type" == "data" || "$file_type" == *"image data"* ]]; then
         if ! [[ "$decoded_line" =~ ^docs?/([^/]*/)*[^/]*\.(png|jpg)$ ]]; then
             LOG_ERROR "Binary image file not allowed in this path: $decoded_line"
