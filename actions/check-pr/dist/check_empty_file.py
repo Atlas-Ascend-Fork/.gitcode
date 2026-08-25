@@ -14,7 +14,6 @@ sys.path.append(os.path.join(THIS_FILE_PATH, ".."))
 def scanfile(file_name, empty_total_file_tmp, empty_total_file):
     """单个文件扫描"""
     cmd = f'file -i {file_name} | fgrep inode/x-empty > {empty_total_file_tmp}'
-    CI_LOG.loginfo(THIS_FILE_NAME, "emptyfile cmd: %s", cmd)
     os.system(command=cmd)
     os.system(command=f"cat {empty_total_file_tmp} >> {empty_total_file}")
 
