@@ -197,7 +197,7 @@ Job 名称：{job_name}  仓库：{repo_name}  分支：{branch}
 
 ---
 
-## 5. 智能定界核心能力（5 大创新点）
+## 5. 智能定界核心能力
 
 ### 5.1 变更-失败因果关联
 
@@ -338,58 +338,7 @@ PR 变更文件（pr_filelist.txt + git diff）
 - 按文件名/模块名/函数名做上下文关联（同一上下文的日志才算同一错误链）
 - 回溯深度可配置（默认 200 行）
 
-### 5.4 最小重现路径提取
-
-> 回答"**给我一条能本地复现的命令**"
-
-#### 问题
-
-当前定界输出"tiling_13 失败，tilingRet=-1"，但开发者要在本地复现还需自己找：用例输入是什么？怎么执行？
-
-#### 方案
-
-```
-失败日志中提取:
-  │
-  ├─ 用例名: SparseFlashAttentionTiling.SparseFlashAttention_910b_tiling_13
-  │   → 从测试数据文件中找到对应的 input shape/params
-  │
-  ├─ 执行命令:
-  │   从日志中提取实际执行的 build_ci.py 命令行
-  │   "python3 build_ci.py --frontend=cpp --utest ... --utest_module=codegen:operator"
-  │
-  ├─ 关键环境变量:
-  │   ASCEND_HOME_PATH, CANN_3RD_LIB_PATH, etc.
-  │
-  └─ 生成复现命令:
-      bash build.sh -u --case "SparseFlashAttention*tiling_13" -j1
-      或:
-      python3 -m pytest tests/ut/.../test_sparse_flash_attention.py -k "tiling_13" -v
-```
-
-#### 输出示例
-
-```
-🛠️ 本地复现命令:
-  # 编译并执行单个失败用例
-  source /usr/local/Ascend/cann/bin/setenv.bash
-  cd <repo_root>
-  python3 build_ci.py --frontend=cpp --build_type=Debug \
-    --utest --utest_module=codegen:operator \
-    --case_filter="*SparseFlashAttention*tiling_13*" -j1 --verbose
-
-  # 或直接运行测试二进制
-  ./build_out/tests/transformer_op_host_ut \
-    --gtest_filter="*SparseFlashAttention_910b_tiling_13*"
-```
-
-#### 实现关键
-
-- 从日志中正则提取 `build_ci.py`、`pytest`、`gtest_filter` 等执行命令
-- 从测试数据文件（CSV/JSON）中匹配用例名对应的输入参数
-- 按仓库类型（pypto/hccl/ops-transformer）生成不同的复现命令模板
-
-### 5.5 相似故障推荐
+### 5.4 相似故障推荐
 
 > 回答"**以前怎么解决的**"
 
