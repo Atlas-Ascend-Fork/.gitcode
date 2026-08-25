@@ -5,7 +5,6 @@ import subprocess
 import csv
 import json
 import logging
-import time
 from datetime import datetime
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -16,10 +15,8 @@ import sc_public_module as git_diff
 # 当前模块日志对象
 logger = logging.getLogger(__name__)
 # 拦截项
-#LANJIE_TOOLS = ["StaticCheck_markdownlint", "StaticCheck_link_validity"]
-LANJIE_TOOLS = ['StaticCheck_link_validity', 'StaticCheck_resource_existence', 'StaticCheck_tag_closed']
+LANJIE_TOOLS = ['StaticCheck_link_validity', 'StaticCheck_resource_existence', 'StaticCheck_tag_closed', "StaticCheck_compliance"]
 MAX_PRINT_NUM = 10
-MAX_CHECK_NUM = 100
 CHECK_TYPE_LST = ["StaticCheck_markdownlint", "StaticCheck_tag_closed", "StaticCheck_link_validity", "StaticCheck_resource_existence", "StaticCheck_codespell", "StaticCheck_compliance"]
 CD = {
     "MD028": "一般",
@@ -173,8 +170,10 @@ def output_to_result(code_dir, filter_lst, check_md_lst, branch, summary_info_di
     if not result_lst:  # 无告警，返回0
         return 0
     data_lst = [["检查类型", "严重程度", MSG_FILE_PATH, MSG_ERR_POS,"是否拦截",   "错误信息", "错误内容"]]
+    data_lst = [["检查类型", "检测结果", "是否拦截", "严重程度", MSG_FILE_PATH, MSG_ERR_POS, "错误信息", "错误内容"]]
     lanjie_nums = 0
     no_lanjie_nums = 0
+    hiva_warn_tool_set = set()
     for i in result_lst:
         tmp_lst = []
         tool_name = i.get("检查类型", "无")
@@ -185,27 +184,40 @@ def output_to_result(code_dir, filter_lst, check_md_lst, branch, summary_info_di
             tool_name_new = "StaticCheck_markdownlint"
         if tool_name == "MD编码格式检查":
             tool_name_new = "StaticCheck_compliance"
-        tmp_lst.append(tool_name_new.replace("_check", ""))
-        err_info = i.get("错误信息", "无")  # 获取规则，但不修改
-        chendu = ""
-        if "markdownlint" in tool_name:
-            chendu = CD.get(err_info.split("：")[0], "")  # markdownlint程度
-        else:
-            chendu = i.get("严重程度", "无")
-        tmp_lst.append(chendu)
-        tmp_lst.append(i.get(MSG_FILE_PATH, "无"))
-        tmp_lst.append(i.get(MSG_ERR_POS, "无"))
+        hiva_warn_tool_set.add(tool_name_new.replace("_check", ""))
+        tmp_lst.append(tool_name_new.replace("_check", ""))  # 检查类型
+        tmp_lst.append("不通过")  # 检测结果
         if tool_name_new.replace("_check", "") in LANJIE_TOOLS:
             lanjie_is = "拦截"
             lanjie_nums += 1
         else:
-            lanjie_is = ""
+            lanjie_is = "不拦截"
             no_lanjie_nums -= 1
-        tmp_lst.append(lanjie_is)
-        tmp_lst.append(err_info)
-        tmp_lst.append(i.get("错误内容", "无"))
+        tmp_lst.append(lanjie_is)  # 是否拦截
+        err_info = i.get("错误信息", "无")
+        chendu = ""
+        if "markdownlint" in tool_name:
+            chendu = CD.get(err_info.split("：")[0], "")
+        elif "codespell" in tool_name:
+            chendu = "提示"
+        elif "compliance" in tool_name:
+            chendu = i.get("严重程度", "严重")
+        else:
+            chendu = "严重"
+        tmp_lst.append(chendu)  # 严重程度
+        tmp_lst.append(i.get(MSG_FILE_PATH, "无"))  # 文件路径
+        tmp_lst.append(i.get(MSG_ERR_POS, "无"))  # 错误位置
+
+        tmp_lst.append(err_info)  # 错误信息
+        tmp_lst.append(i.get("错误内容", "无"))  # 错误内容
         data_lst.append(tmp_lst)
-        summary_info_dic[tool_name_new.replace("_check", "")].append(":".join([tmp_lst[2], tmp_lst[3], tmp_lst[5], tmp_lst[6].replace('```', '')]))
+        summary_info_dic[tool_name_new.replace("_check", "")].append(":".join([tmp_lst[4], tmp_lst[5], tmp_lst[6], tmp_lst[7].replace('```', '')]))
+    # 无告警的工具做PASS提示
+    un_warn_tool_lst = [tool for tool in CHECK_TYPE_LST if tool not in list(hiva_warn_tool_set)]
+    if un_warn_tool_lst:
+        for untool in un_warn_tool_lst:
+            data_lst.append([untool,"通过","","","","","",""])
+    # 无告警的工具做PASS提示
     with open(result_csv_file, "w", encoding="utf-8-sig", newline="") as fw:
         writer = csv.writer(fw)
         writer.writerows(data_lst)
@@ -215,6 +227,7 @@ def output_to_result(code_dir, filter_lst, check_md_lst, branch, summary_info_di
     elif lanjie_nums == 0 and no_lanjie_nums < 0:
         print("no lanjie")
         return 99
+    return len(result_lst)
 
 
 
@@ -261,11 +274,88 @@ def compliance(code_dir, script_dir, repo_name, check_md_lst):
     return data_lst
 
 
-def md_utf8(check_md_lst):
+
+def compliance(code_dir, script_dir, repo_name, check_md_lst):
     """芯片标签的合法性检查"""
     data_lst = []
-    #tag_check_js = os.path.join(script_dir, "js/tag_check.js")
-    #utf8_result_json = os.path.join(code_dir, "utf8_result.json")
+    tag_check_js = os.path.join(script_dir, "js/tag_check.js")
+    tag_check_result_json = os.path.join(code_dir, "tag_check_result.json")
+    start_time = datetime.now()
+    for mdfile in check_md_lst:
+        if os.path.exists(tag_check_result_json):
+            os.remove(tag_check_result_json)
+        # node tag_checker.js <markdown文件/文件夹路径> <输出结果文件夹路径> <仓名>
+        cmd = ["node", tag_check_js, os.path.join(code_dir, mdfile), code_dir, repo_name]
+        subprocess.run(cmd, capture_output=True, text=True, encoding="utf-8")
+        if os.path.exists(tag_check_result_json):
+            tmp_data = []
+            with open(tag_check_result_json, "r", encoding="utf-8") as fr:
+                tmp_data = json.load(fr)
+            if not tmp_data:
+                continue
+            for info in tmp_data:
+                localtion = info.get("location", "N/A")
+                line_number = info.get("line_number", "N/A")
+                rule_item = info.get("rule_item", "N/A")
+                description = info.get("description", "N/A")
+                snippet = info.get("snippet", "N/A")
+                rule_level = info.get("rule_level", "N/A")
+                mode_str = (
+                    f"| 999 | [文件路径]：{localtion.replace(code_dir + '/', '')}<br>"
+                    f"[错误位置]：第 {line_number} 行<br>"
+                    f"[检查类型]：{rule_item}<br>"
+                    f"[严重程度]：{rule_level}<br>"
+                    f"[错误信息]：{description}<br>"
+                    f"[错误内容]：{snippet}|"
+                )
+                data_lst.append(mode_str)
+    end_time = datetime.now()
+    elapsed_time = (end_time - start_time).total_seconds()
+    print(f"running compliance time: {elapsed_time}s")
+    return data_lst
+
+def md_utf8(code_dir, script_dir, check_md_lst):
+    """编码格式检测utf-8检查"""
+    start_time = datetime.now()
+    data_lst = []
+    encoding_check_js = os.path.join(script_dir, "js/encoding_format_checker.js")
+    encoding_check_result_json = os.path.join(code_dir, "encoding_format_check_result.json")
+    for mdfile in check_md_lst:
+        if os.path.exists(encoding_check_result_json):
+            os.remove(encoding_check_result_json)
+        # node encoding_format_checker.js <markdown文件/文件夹路径> <输出结果文件夹路径>
+        cmd = ["node", encoding_check_js, os.path.join(code_dir, mdfile), code_dir]
+        subprocess.run(cmd, capture_output=True, text=True, encoding="utf-8")
+        if os.path.exists(encoding_check_result_json):
+            tmp_data = []
+            with open(encoding_check_result_json, "r", encoding="utf-8") as fr:
+                tmp_data = json.load(fr)
+            if not tmp_data:
+                continue
+            for info in tmp_data:
+                localtion = info.get("location", "N/A")
+                localtion = localtion.replace("vscode://file/", '')
+                localtion = localtion.replace(code_dir + "/", '')
+                localtion = localtion.replace(':1', '')
+                line_number = info.get("line_number", "N/A")
+                suggestion = info.get("suggestion", "N/A")
+                snippet = info.get("snippet", "N/A")
+                rule_level = info.get("rule_level", "N/A")
+                mode_str = (
+                    f"| 999 | [文件路径]：{localtion}<br>"
+                    f"[错误位置]：第 {line_number} 行<br>"
+                    f"[检查类型]：MD编码格式检查<br>"
+                    f"[严重程度]：{rule_level}<br>"
+                    f"[错误信息]：{suggestion}<br>"
+                    f"[错误内容]：{snippet}|"
+                )
+                data_lst.append(mode_str)
+    end_time = datetime.now()
+    elapsed_time = (end_time - start_time).total_seconds()
+    print(f"running utf-8 check time: {elapsed_time}s")
+    return data_lst
+    """芯片标签的合法性检查"""
+    data_lst = []
     start_time = datetime.now()
     cmd = f"echo \"{' '.join(check_md_lst)}\" | xargs file -i"
     cont = subprocess.run(cmd, shell=True, capture_output=True, text=True, encoding="utf-8")
@@ -291,6 +381,7 @@ def md_utf8(check_md_lst):
     elapsed_time = (end_time - start_time).total_seconds()
     print(f"running utf-8 check time: {elapsed_time}s")
     return data_lst
+
 
 if __name__ == "__main__":
     # tool_name = sys.argv[1]  # 工具名称
@@ -348,7 +439,7 @@ if __name__ == "__main__":
                 branch: {
                     "ci": [
                         "markdownlint",
-                        # "codespell-check",
+                        "codespell-check",
                         "link-validity-check",
                         "resource-existence-check",
                         "tag-closed-check",
@@ -377,7 +468,7 @@ if __name__ == "__main__":
         filter_lst = []
     # compliance tag检测和utf-8检测，md文件
     compliance_lst = compliance(code_dir, script_dir, repo_name, check_md_lst)  # md标签检测
-    no_utf8_lst = md_utf8(check_md_lst)  # utf-8检测
+    no_utf8_lst = md_utf8(code_dir, script_dir, check_md_lst)  # utf-8检测
     # 追加到output.md
     output_file = os.path.join(code_dir, "output.md")
     if compliance_lst:
