@@ -758,4 +758,166 @@ Pipeline Agent 不仅做单次失败定界，还需对流水线整体健康度�
 
 ---
 
+## 8. 团队分工与 AI Agent 团队诉求
+
+### 8.1 整体定位
+
+Pipeline Agent 由**工程团队**和 **AI Agent 团队**协同建设。工程团队负责流水线基础设施、数据采集和规则引擎；AI Agent 团队负责 LLM 智能分析、知识库语义匹配和持续学习能力。
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    Pipeline Agent 能力分层                    │
+│                                                             │
+│  ┌─────────────────────────────────────────────────┐        │
+│  │  AI Agent 团队负责                                │        │
+│  │                                                   │        │
+│  │  ┌──────────┐  ┌──────────┐  ┌──────────┐       │        │
+│  │  │ LLM 分析  │  │ 知识库    │  │ 持续学习  │       │        │
+│  │  │ Prompt   │  │ Embedding│  │ 反馈闭环  │       │        │
+│  │  │ 工程      │  │ 匹配     │  │ 精度提升  │       │        │
+│  │  └──────────┘  └──────────┘  └──────────┘       │        │
+│  └───────────────────────┬─────────────────────────┘        │
+│                          │ 接口                              │
+│  ┌───────────────────────┴─────────────────────────┐        │
+│  │  工程团队负责                                      │        │
+│  │                                                   │        │
+│  │  ┌──────────┐  ┌──────────┐  ┌──────────┐       │        │
+│  │  │ 日志获取  │  │ 规则引擎  │  │ 反馈执行  │       │        │
+│  │  │ API 调用  │  │ 正则匹配  │  │ PR 评论   │       │        │
+│  │  │ 数据采集  │  │ 分类定界  │  │ Label     │       │        │
+│  │  └──────────┘  └──────────┘  └──────────┘       │        │
+│  └─────────────────────────────────────────────────┘        │
+│                                                             │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### 8.2 工程团队职责
+
+| 模块 | 职责 | 交付物 |
+|------|------|--------|
+| Action 插件 | `ai-triage` 插件开发、触发机制、执行流程 | `action.yml` + `dist/main.js` |
+| 日志获取 | GitCode API 调用、失败 Job 筛选、日志下载解压 | 复用 `download-logs` |
+| 规则引擎 | 30+ 正则模式维护、分类定界、配置项溯源 | `rules.json` + `ai_triage.py` |
+| 反馈执行 | PR 评论、Label 打标、通知、去重抑制 | GitCode API 调用 |
+| 增量对比 | 同 PR 历史 Run 查询、状态对比 | 复用 `query-pipeline` |
+| 健康度评估 | 数据采集、评分计算、周报/月报生成 | 离线脚本 + OBS 存储 |
+
+### 8.3 AI Agent 团队职责
+
+| 模块 | 职责 | 交付物 |
+|------|------|--------|
+| LLM 分析 | 规则未命中时的兜底分析，Prompt 工程设计与优化 | Prompt 模板 + LLM 调用接口 |
+| 知识库语义匹配 | 历史失败 case 的向量化存储与相似度检索 | Embedding 模型选型 + 向量库方案 |
+| 代码-用例语义关联 | PR 变更文件与失败用例名的语义匹配（超越关键词重叠） | 语义匹配模型/方案 |
+| 错误链因果推理 | 从 error 回溯 warning 时，判断因果关联性（非简单行距匹配） | 因果推理 Prompt/模型 |
+| 持续学习 | 开发者反馈（"定界准确/不准确"）回流，持续优化 LLM 精度 | 反馈闭环机制 + few-shot 样本积累 |
+| 复现命令生成 | 从日志中智能提取和组装复现命令（非简单正则） | LLM 生成 + 校验 |
+
+### 8.4 两团队接口约定
+
+工程团队与 AI Agent 团队通过标准化接口协作，解耦开发：
+
+#### 接口 1：日志分析请求（工程 → AI）
+
+工程团队在规则引擎未命中时，调用 AI Agent 团队的分析接口：
+
+```json
+// 请求（工程团队构造）
+{
+  "job_name": "UT_ops-transformer",
+  "repo_name": "ops-transformer",
+  "branch": "sfa_lse",
+  "log_context": "前后 ±50 行 error 上下文",
+  "pr_changed_files": ["op_host/arch35/sparse_flash_attention_tiling.cpp"],
+  "failed_test_case": "SparseFlashAttentionTiling.SparseFlashAttention_910b_tiling_13",
+  "previous_runs": [{"run_id": "xxx", "failed_jobs": ["UT_tiling_12"]}]
+}
+
+// 响应（AI Agent 团队返回）
+{
+  "category": "code",           // code | config | environment
+  "root_cause": "LSE 分支处理 tiling_13 输入时 boundary_input_idx 范围判断缺失",
+  "evidence": "tiling_case_executor.cpp:334 tilingRet=4294967295",
+  "code_correlation": {          // 代码问题专属
+    "changed_file": "op_host/arch35/sparse_flash_attention_tiling.cpp",
+    "changed_line": 87,
+    "match_score": 0.95,
+    "explanation": "新增 LSE 分支处理，tiling_13 的输入走到该分支后返回 -1"
+  },
+  "reproduce_command": "python3 build_ci.py --frontend=cpp ... --case_filter='*tiling_13*'",
+  "suggestion": "检查 LSE 分支的 boundary_input_idx 范围判断",
+  "confidence": 0.92,
+  "similar_cases": [             // 知识库匹配
+    {"case_id": "case_006", "similarity": 0.85, "solution_pr": "https://..."}
+  ]
+}
+```
+
+#### 接口 2：知识库更新（工程 → AI）
+
+每次定界完成后，工程团队将结果写入知识库，AI Agent 团队负责向量化与检索：
+
+```json
+{
+  "case_id": "case_010",
+  "timestamp": "2026-08-25T14:30:00+08:00",
+  "repo": "ops-transformer",
+  "pr_id": 10274,
+  "job": "UT_ops-transformer",
+  "category": "code",
+  "pattern": "SparseFlashAttention tiling returned -1",
+  "root_cause": "LSE 分支 boundary_input_idx 范围判断缺失",
+  "solution": "增加 boundary_input_idx < input_size 的判断",
+  "resolved": false,
+  "resolver": null
+}
+```
+
+#### 接口 3：反馈回流（开发者 → AI）
+
+开发者对定界结果反馈（准确/不准确），AI Agent 团队用于持续优化：
+
+```json
+{
+  "case_id": "case_010",
+  "feedback": "accurate",       // accurate | inaccurate | partial
+  "comment": "定位准确，确实是 LSE 分支的问题",
+  "actual_root_cause": null      // 如果反馈不准确，开发者填写真实根因
+}
+```
+
+### 8.5 对 AI Agent 团队的核心诉求
+
+| # | 诉求 | 优先级 | 说明 |
+|---|------|--------|------|
+| R1 | **LLM 分析接口**：提供 REST API，输入日志上下文，输出结构化定界 JSON | P0 | Phase 1 兜底需要，规则未命中时调用 |
+| R2 | **Prompt 工程**：针对 CANN 流水线日志特点优化 Prompt，支持 few-shot | P0 | 通用 LLM 直接用效果差，需领域适配 |
+| R3 | **知识库向量化**：将历史失败 case 向量化存储，支持语义检索 | P1 | Phase 2，超越关键词匹配 |
+| R4 | **代码-用例语义关联**：PR 变更文件与失败用例的语义匹配（非关键词重叠） | P1 | Phase 2，提升因果关联准确率 |
+| R5 | **错误链因果推理**：从 error 回溯到 warning 时，判断因果关联性 | P2 | Phase 2，超越简单行距匹配 |
+| R6 | **复现命令生成**：从日志中智能提取和组装可执行的复现命令 | P2 | Phase 2，非简单正则提取 |
+| R7 | **反馈闭环**：开发者反馈回流，持续优化 LLM 精度 | P2 | Phase 3，few-shot 样本积累 |
+| R8 | **多语言日志支持**：部分日志含中文（CANN 安装脚本），LLM 需兼容 | P1 | CANN 日志中英文混合 |
+
+### 8.6 协作里程碑对齐
+
+| 阶段 | 工程团队 | AI Agent 团队 | 集成点 |
+|------|---------|--------------|--------|
+| **Phase 1** (2周) | 规则引擎 + 插件 + PR 评论 + Label | LLM 分析接口 + Prompt 模板 | 接口 1：规则未命中时调 LLM |
+| **Phase 2** (3周) | 增量对比 + 配置溯源 + 健康度评分 | 知识库向量化 + 语义关联 + 复现命令生成 | 接口 2：知识库更新 + 接口 1 增强 |
+| **Phase 3** (4周+) | 多仓库适配 + 趋势看板 | 反馈闭环 + 持续学习 + 精度优化 | 接口 3：反馈回流 |
+
+### 8.7 验收标准（AI Agent 团队）
+
+| 指标 | Phase 1 目标 | Phase 2 目标 | Phase 3 目标 |
+|------|-------------|-------------|-------------|
+| LLM 分析准确率 | 70% | 80% | 90% |
+| LLM 响应时间 | < 10s | < 5s | < 3s |
+| 知识库语义匹配命中率 | — | 50% | 70% |
+| 代码-用例关联准确率 | — | 70% | 85% |
+| 复现命令可用率 | — | 80% | 95% |
+| 开发者反馈准确率 | — | 70% positive | 85% positive |
+
+---
+
 *本方案用于串讲评估，欢迎反馈意见。*
