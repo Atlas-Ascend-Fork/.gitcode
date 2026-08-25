@@ -1,10 +1,5 @@
 # Pipeline Agent — 门禁流水线智能定界与定位需求方案
 
-> **文档状态**：串讲评估稿
-> **版本**：v0.2
-> **日期**：2026-08-25
-> **作者**：CANN CI 团队
-
 ---
 
 ## 1. 背景与问题
@@ -20,19 +15,7 @@ CANN 门禁流水线（GitCode Action）覆盖编译、UT、ST、静态检查、
 
 **平均定位耗时 15-30 分钟**，且高度依赖经验。
 
-### 1.2 已分析的真实失败案例
-
-| # | 仓库 | 失败 Job | 根因 | 失败类型 | 日志量 |
-|---|------|---------|------|---------|--------|
-| 1 | cann/pypto | PreSmoke_A3 | `/home/taskspace` 目录属主非 root，.run 包安装权限校验失败 | CI配置 | 9673 行 |
-| 2 | opencann/pypto | PreSmoke_A3 | `ModuleNotFoundError: No module named 'pypto'`，包下载 URL 路径错误 | CI配置 | 691 行 |
-| 3 | opencann/pypto | PreSmoke_A3 | `rtSetDevice(15)` device id 越界，valid range [0,4) | CI配置 | 434 行 |
-| 4 | opencann/hcomm | UT + ST | `getaddrinfo failed for file-cdn.gitcode.com`，mockcpp 下载 DNS 失败 | 环境/网络 | 4320 行 |
-| 5 | cann/hccl | ST_TEST | 日志未捕获（27 分钟无输出），疑似超时 | 环境超时 | 314 行 |
-| 6 | cann/ops-transformer | UT | `SparseFlashAttention tiling_13` tiling 返回 -1，期望 0 | 代码逻辑 | 1119 行 |
-| 7 | cann/cannbot-knowledge | check-pr | `SIGTERM` 进程被平台超时杀死 | 环境超时 | 10664 行 |
-
-### 1.3 痛点总结
+### 1.2 痛点总结
 
 | 痛点 | 影响 |
 |------|------|
@@ -45,9 +28,7 @@ CANN 门禁流水线（GitCode Action）覆盖编译、UT、ST、静态检查、
 
 ---
 
-## 2. 目标与非目标
-
-### 2.1 目标
+## 2. 目标
 
 | # | 目标 | 衡量标准 |
 |---|------|---------|
@@ -57,12 +38,6 @@ CANN 门禁流水线（GitCode Action）覆盖编译、UT、ST、静态检查、
 | G4 | **因果关联**：定位到 PR 变更的具体代码行 | 回答"改了什么导致失败" |
 | G5 | **增量对比**：同 PR 多次执行时只报告新增/已修复的变化 | 减少重复噪音 |
 | G6 | **经验复用**：历史失败模式形成知识库，推荐已验证方案 | 命中率随时间递增 |
-
-### 2.2 非目标
-
-- 不做自动修复代码（仅定位 + 建议）
-- 不做流水线编排优化（不改 workflow 结构）
-- 不替代人工 review（仅辅助定位）
 
 ---
 
