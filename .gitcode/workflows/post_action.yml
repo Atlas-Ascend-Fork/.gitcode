@@ -18,6 +18,6 @@ jobs:
           token: ${{ secrets.GIT_TOKEN }}
           pr_number: ${{ env.MERGE_ID }}
           apply_label: ${{ vars.APPLY_LABEL }}
-    runs-on: [dedicate-hosted, x64, small]
+    runs-on: ["self-hosted", "arch=x64", "spec=slim"]
     container:
       image: swr.cn-north-4.myhuaweicloud.com/ci_cann/ubuntu20.04.05_x86:k8s_v1.1006

@@ -41,8 +41,9 @@ jobs:
             ${{ steps.process_checkout.outputs.path }}/update_file_detail.txt
             ${{ steps.process_checkout.outputs.path }}/gitdiff.txt
           object-prefix: ${{ env.obs_path }}/
-    runs-on:
-    - default
+    runs-on: ["self-hosted", "arch=x64", "spec=slim"]
+    container:
+      image: swr.cn-north-4.myhuaweicloud.com/ci_cann/ubuntu20.04.05_x86:k8s_v1.1006
   JOB_shell:
     name: Test_get-shell
     steps:
@@ -64,8 +65,9 @@ jobs:
           artifact-path: |
             ${{ steps.process_checkout.outputs.path }}/.gitcode/scripts/*
           object-prefix: ${{ env.obs_path }}/
-    runs-on:
-    - default
+    runs-on: ["self-hosted", "arch=x64", "spec=slim"]
+    container:
+      image: swr.cn-north-4.myhuaweicloud.com/ci_cann/ubuntu20.04.05_x86:k8s_v1.1006
   JOB_pre:
     name: Test_pre_pipeline
     steps:
@@ -80,6 +82,6 @@ jobs:
       - name: associate-pr-comment
         uses: associate-pr-comment
         if: env.online == 'true'
-    runs-on: [dedicate-hosted, x64, small]
+    runs-on: ["self-hosted", "arch=x64", "spec=slim"]
     container:
       image: swr.cn-north-4.myhuaweicloud.com/ci_cann/ubuntu20.04.05_x86:k8s_v1.1006
