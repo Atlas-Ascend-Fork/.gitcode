@@ -20,11 +20,14 @@ class TagChecker {
       mismatched_id: '请确保开始标记和结束标记的ID序号保持一致',
       duplicate_end: '请删除重复的结束标记，确保每个标记只闭合一次',
       invalid_npu: '请使用配置文件中定义的有效NPU值，参考npus.json配置文件',
-      npu_hierarchy: '请确保父标记的npu值包含所有子标记的npu值，子标记的npu必须是父标记npu的子集',
+      npu_hierarchy: '请确保子标记的npu必须是父标记npu的子集',
       invalid_ref_format: '请确保位置标签格式为 <!-- @ref: 仓名/res/.../xx_res.md#idxxxxx -->',
       invalid_ref_repo: '请确保位置标签中的仓名与文档所在仓一致',
       invalid_ref_path: '请确保位置标签中的路径以/res/开头，不包含相对路径".."，文件名以_res.md结尾',
-      invalid_ref_anchor: '请确保位置标签中锚点存在且符合id+数字格式（如id00001、id123）'
+      invalid_ref_anchor: '请确保位置标签中锚点存在且符合id+数字格式（如id00001、id123）',
+      invalid_spacing: '开始标记的严格格式为 <!-- npu="值" idXXX -->，各部分间距规则：<!--与npu之间1个空格，npu与=之间无空格，=与左引号之间无空格，右引号与id之间1个空格，id与-->之间1个空格',
+      invalid_end_spacing: '结束标记的严格格式为 <!-- end idXXX -->，各部分间距规则：<!--与end之间1个空格，end与id之间1个空格，id与-->之间1个空格',
+      invalid_id_format: '请确保标记的ID为id+数字格式（如id001、id123）'
     };
   }
 
@@ -111,9 +114,16 @@ class TagChecker {
   }
 
   parseTags() {
+    const looseStartRe = /<!--\s*npu\s*=\s*"([^"]+)"\s+(id\d+)\s*-->/;
+    const strictStartRe = /<!-- npu="([^"]+)" (id\d+) -->/;
+    const looseEndRe = /<!--\s*end\s+(id\d+)\s*-->/;
+    const strictEndRe = /<!-- end (id\d+) -->/;
+    const broadStartRe = /<!--\s*npu\s*=\s*"([^"]+)"\s+(\S+)\s*-->/;
+    const broadEndRe = /<!--\s*end\s+(\S+)\s*-->/;
+
     this.lines.forEach((line, lineNum) => {
-      const startMatch = line.match(/<!--\s*npu\s*=\s*"([^"]+)"\s+(id\d+)\s*-->/);
-      const endMatch = line.match(/<!--\s*end\s+(id\d+)\s*-->/);
+      const startMatch = line.match(looseStartRe);
+      const endMatch = line.match(looseEndRe);
 
       if (startMatch) {
         this.tags.push({
@@ -123,6 +133,22 @@ class TagChecker {
           line: lineNum + 1,
           content: line.trim()
         });
+        if (!strictStartRe.test(line)) {
+          this.errors.push({
+            type: 'invalid_spacing',
+            message: `芯片标签格式错误：开始标记间距不符合规范，标签 "${line.trim()}" 间距不正确，正确格式为 <!-- npu="${startMatch[1]}" ${startMatch[2]} -->`,
+            line: lineNum + 1
+          });
+        }
+      } else {
+        const broadStartMatch = line.match(broadStartRe);
+        if (broadStartMatch) {
+          this.errors.push({
+            type: 'invalid_id_format',
+            message: `芯片标签格式错误：开始标记ID格式不正确，ID应为id+数字格式`,
+            line: lineNum + 1
+          });
+        }
       }
 
       if (endMatch) {
@@ -132,11 +158,27 @@ class TagChecker {
           line: lineNum + 1,
           content: line.trim()
         });
+        if (!strictEndRe.test(line)) {
+          this.errors.push({
+            type: 'invalid_end_spacing',
+            message: `芯片标签格式错误：结束标记间距不符合规范，标签 "${line.trim()}" 间距不正确，正确格式为 <!-- end ${endMatch[1]} -->`,
+            line: lineNum + 1
+          });
+        }
+      } else {
+        const broadEndMatch = line.match(broadEndRe);
+        if (broadEndMatch) {
+          this.errors.push({
+            type: 'invalid_id_format',
+            message: `芯片标签格式错误：结束标记ID格式不正确，ID应为id+数字格式`,
+            line: lineNum + 1
+          });
+        }
       }
 
       const refMatch = line.match(/<!--\s*@ref:/);
       if (refMatch) {
-        const strictMatch = line.match(/<!--\s*@ref:\s*(\S+?)(\/[^\s#]*)#(\S+?)\s*-->/);
+        const strictMatch = line.match(/<!--\s*@ref:\s*(\S+?)(\/[^\s#]*)#(\S+?) -->/);
         this.positionTags.push({
           line: lineNum + 1,
           content: line.trim(),
@@ -158,32 +200,45 @@ class TagChecker {
 
   checkDuplicateIds() {
     const startTags = this.tags.filter(t => t.type === 'start');
-    const idCounts = {};
+    const idLines = {};
 
     startTags.forEach(tag => {
-      if (idCounts[tag.id]) {
+      if (!idLines[tag.id]) {
+        idLines[tag.id] = [];
+      }
+      idLines[tag.id].push(tag.line);
+    });
+
+    Object.keys(idLines).forEach(id => {
+      if (idLines[id].length > 1) {
+        const lines = idLines[id].sort((a, b) => b - a);
+        const linesStr = lines.map(l => `第${l}行`).join('、');
         this.errors.push({
           type: 'duplicate_id',
-          message: `ID重复: ${tag.id} 在第 ${tag.line} 行和第 ${idCounts[tag.id]} 行重复出现`,
-          line: tag.line
+          message: `芯片标签格式错误：ID重复，${id} 在${linesStr}重复出现`,
+          line: lines[0]
         });
-      } else {
-        idCounts[tag.id] = tag.line;
       }
     });
   }
 
   checkTagMatching() {
-    const processedIds = new Set();
+    const processedIds = new Map();
+    const positionErrorIds = new Set();
+    const duplicateEndLines = {};
 
     this.tags.forEach(tag => {
       if (tag.type === 'start') {
         this.tagStack.push(tag);
       } else if (tag.type === 'end') {
+        if (positionErrorIds.has(tag.id)) {
+          return;
+        }
+
         if (this.tagStack.length === 0) {
           this.errors.push({
             type: 'unmatched_end',
-            message: `结束标记 ${tag.id} 在第 ${tag.line} 行没有对应的开始标记`,
+            message: `芯片标签格式错误：结束标记 ${tag.id} 没有对应的开始标记或开始标记格式错误`,
             line: tag.line
           });
           return;
@@ -192,35 +247,60 @@ class TagChecker {
         const lastStart = this.tagStack[this.tagStack.length - 1];
 
         if (lastStart.id !== tag.id) {
-          this.errors.push({
-            type: 'mismatched_id',
-            message: `ID不匹配: 第 ${lastStart.line} 行的开始标记 ${lastStart.id} 和第 ${tag.line} 行的结束标记 ${tag.id} 不匹配`,
-            line: tag.line
-          });
+          const matchIndex = this.tagStack.findIndex(s => s.id === tag.id);
+          if (matchIndex !== -1) {
+            for (let i = this.tagStack.length - 1; i >= matchIndex; i--) {
+              const startTag = this.tagStack[i];
+              this.errors.push({
+                type: 'unmatched_start',
+                message: `芯片标签格式错误：开始标记 ${startTag.id} 对应的结束标记位置错误`,
+                line: startTag.line
+              });
+              positionErrorIds.add(startTag.id);
+              this.tagStack.pop();
+            }
+          } else {
+            this.errors.push({
+              type: 'unmatched_end',
+              message: `芯片标签格式错误：结束标记 ${tag.id} 没有对应的开始标记或开始标记格式错误`,
+              line: tag.line
+            });
+          }
           return;
         }
 
         if (processedIds.has(tag.id)) {
-          this.errors.push({
-            type: 'duplicate_end',
-            message: `结束标记 ${tag.id} 在第 ${tag.line} 行重复出现`,
-            line: tag.line
-          });
+          if (!duplicateEndLines[tag.id]) {
+            duplicateEndLines[tag.id] = [processedIds.get(tag.id)];
+          }
+          duplicateEndLines[tag.id].push(tag.line);
           this.tagStack.pop();
           return;
         }
 
-        processedIds.add(tag.id);
+        processedIds.set(tag.id, tag.line);
         this.tagStack.pop();
       }
     });
 
-    this.tagStack.forEach(tag => {
+    Object.keys(duplicateEndLines).forEach(id => {
+      const lines = duplicateEndLines[id].sort((a, b) => b - a);
+      const linesStr = lines.map(l => `第${l}行`).join('、');
       this.errors.push({
-        type: 'unmatched_start',
-        message: `开始标记 ${tag.id} 在第 ${tag.line} 行没有对应的结束标记`,
-        line: tag.line
+        type: 'duplicate_end',
+        message: `芯片标签格式错误：ID重复，${id} 在${linesStr}重复出现`,
+        line: lines[0]
       });
+    });
+
+    this.tagStack.forEach(tag => {
+      if (!positionErrorIds.has(tag.id)) {
+        this.errors.push({
+          type: 'unmatched_start',
+          message: `芯片标签格式错误：开始标记 ${tag.id} 没有对应的结束标记或结束标记格式错误`,
+          line: tag.line
+        });
+      }
     });
   }
 
@@ -244,7 +324,9 @@ class TagChecker {
         stack[stack.length - 1].children.push(node);
         stack.push(node);
       } else if (tag.type === 'end') {
-        stack.pop();
+        if (stack.length > 1) {
+          stack.pop();
+        }
       }
     });
 
@@ -263,7 +345,7 @@ class TagChecker {
         if (!validNpus.includes(npu)) {
           this.errors.push({
             type: 'invalid_npu',
-            message: `无效的NPU值: ${npu} 在第 ${child.line} 行，不在配置的有效NPU列表中`,
+            message: `芯片标签格式错误：无效的NPU值，${npu} 不在配置的有效NPU列表中`,
             line: child.line
           });
         }
@@ -278,7 +360,7 @@ class TagChecker {
         if (missingInParent.length > 0) {
           this.errors.push({
             type: 'npu_hierarchy',
-            message: `NPU值不匹配: 第 ${child.line} 行的子标记包含 ${missingInParent.join(',')}，但父标记(第 ${node.line} 行)的npu="${node.npu}"中不包含这些值`,
+            message: `芯片标签格式错误：NPU值不匹配，子标记包含 ${missingInParent.join(',')}，但父标记(第 ${node.line} 行)的npu="${node.npu}"中不包含这些值`,
             line: child.line
           });
         }
@@ -293,7 +375,7 @@ class TagChecker {
       if (!tag.extracted) {
         this.errors.push({
           type: 'invalid_ref_format',
-          message: `位置标签格式错误: 第 ${tag.line} 行的标签 "${tag.content}" 不符合位置标签格式要求，正确格式为 <!-- @ref: 仓名/res/.../xx_res.md#idxxxxx -->`,
+          message: `位置标签格式错误: 标签 "${tag.content}" 不符合位置标签格式要求，正确格式为 <!-- @ref: 仓名/res/.../xx_res.md#idxxxxx -->`,
           line: tag.line,
           ruleName: '位置标签的合法性检查'
         });
@@ -303,7 +385,7 @@ class TagChecker {
       if (tag.repoName !== this.repoName) {
         this.errors.push({
           type: 'invalid_ref_repo',
-          message: `位置标签仓名不一致: 第 ${tag.line} 行的标签中仓名为"${tag.repoName}"，但文档所在仓为"${this.repoName}"`,
+          message: `位置标签格式错误: 标签中仓名为"${tag.repoName}"，但文档所在仓为"${this.repoName}"`,
           line: tag.line,
           ruleName: '位置标签的合法性检查'
         });
@@ -312,7 +394,7 @@ class TagChecker {
       if (!tag.refPath.startsWith('/res/')) {
         this.errors.push({
           type: 'invalid_ref_path',
-          message: `位置标签路径错误: 第 ${tag.line} 行的标签中路径"${tag.refPath}"不以/res/开头`,
+          message: `位置标签格式错误: 标签中路径"${tag.refPath}"不以/res/开头`,
           line: tag.line,
           ruleName: '位置标签的合法性检查'
         });
@@ -321,7 +403,7 @@ class TagChecker {
       if (tag.refPath.includes('..')) {
         this.errors.push({
           type: 'invalid_ref_path',
-          message: `位置标签路径错误: 第 ${tag.line} 行的标签中路径包含相对路径".."`,
+          message: `位置标签格式错误: 标签中路径包含相对路径".."`,
           line: tag.line,
           ruleName: '位置标签的合法性检查'
         });
@@ -331,7 +413,7 @@ class TagChecker {
       if (!fileName.endsWith('_res.md')) {
         this.errors.push({
           type: 'invalid_ref_path',
-          message: `位置标签路径错误: 第 ${tag.line} 行的标签中文件名"${fileName}"不以_res.md结尾`,
+          message: `位置标签格式错误: 标签中文件名"${fileName}"不以_res.md结尾`,
           line: tag.line,
           ruleName: '位置标签的合法性检查'
         });
@@ -340,14 +422,14 @@ class TagChecker {
       if (!tag.anchor) {
         this.errors.push({
           type: 'invalid_ref_anchor',
-          message: `位置标签锚点错误: 第 ${tag.line} 行的标签缺少锚点`,
+          message: `位置标签格式错误: 标签缺少id`,
           line: tag.line,
           ruleName: '位置标签的合法性检查'
         });
       } else if (!/^id\d+$/.test(tag.anchor)) {
         this.errors.push({
           type: 'invalid_ref_anchor',
-          message: `位置标签锚点错误: 第 ${tag.line} 行的标签中锚点"${tag.anchor}"不符合id+数字格式`,
+          message: `位置标签格式错误: 标签中"${tag.anchor}"不符合id+数字格式`,
           line: tag.line,
           ruleName: '位置标签的合法性检查'
         });
