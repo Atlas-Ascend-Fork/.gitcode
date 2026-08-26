@@ -11,6 +11,10 @@ inputs:
     description: ci仓库地址
     required: false
     default: "https://gitcode.com/cann/.gitcode.git"
+  ci_branch:
+    description: 指定拉取ci仓库的分支，为空时拉取默认分支
+    required: false
+    default: ""
 
 runs:
   using: 'node16'

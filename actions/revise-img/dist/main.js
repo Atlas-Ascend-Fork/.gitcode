@@ -60,12 +60,14 @@ async function run() {
         const repo_name = core.getInput('repo_name', { required: true });
         const target_branch = core.getInput('target_branch', { required: true });
         const repoUrl = core.getInput('repo_url') || "https://gitcode.com/cann/.gitcode.git";
+        const ciBranch = core.getInput('ci_branch');
+        if (ciBranch) console.log(`拉取分支：${ciBranch}`);
         console.log(`仓库名：${repo_name}`);
         console.log(`目标分支：${target_branch}`);
         console.log(`拉取仓库地址：${repoUrl}`);
         const cloneDir = "cann-ci";
         console.log('开始拉取 cann-ci...');
-        (0, child_process_1.execSync)(`git clone ${repoUrl} ${cloneDir} --depth 1`, { stdio: 'inherit' });
+        (0, child_process_1.execSync)(`git clone ${ciBranch ? '-b ' + ciBranch + ' ' : ''}${repoUrl} ${cloneDir} --depth 1`, { stdio: 'inherit' });
         // 1. 优先当前分支配置
         const branchYamlRel = `image-conf/${target_branch}/images.yaml`;
         const branchYamlFull = path_1.default.join(cloneDir, branchYamlRel);
