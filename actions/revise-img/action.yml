@@ -8,19 +8,15 @@ inputs:
   target_branch:
     required: true
   repo_url:
-    description: ci仓库地址
+    description: 形式1使用——ci仓库地址（不切换仓/分支时传入）
     required: false
     default: "https://gitcode.com/cann/.gitcode.git"
-  ci_branch:
-    description: 指定拉取ci仓库的分支，为空时从 comment 自动解析 @后的值
-    required: false
-    default: ""
   comment:
-    description: 触发评论正文，用于自动解析 ci_branch；为空时读取环境变量 comment
+    description: 形式2使用——触发评论正文，action 从中解析 @后的分支并切换到内部 ci 仓库
     required: false
     default: ""
   token:
-    description: 用于拉取私有 ci 仓库的 git token（仅 ci_branch 非空时使用）
+    description: 形式2使用——拉取私有 ci 仓库的 git token
     required: false
     default: ""
 

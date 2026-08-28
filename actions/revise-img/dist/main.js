@@ -61,12 +61,10 @@ async function run() {
         const target_branch = core.getInput('target_branch', { required: true });
         const token = core.getInput('token');
         const cloneDir = "cann-ci";
-        let ciBranch = core.getInput('ci_branch');
-        if (!ciBranch) {
-            const comment = core.getInput('comment') || '';
-            const m = comment.match(/.*@(\S+)/);
-            if (m) ciBranch = m[1];
-        }
+        const comment = core.getInput('comment') || '';
+        let ciBranch = '';
+        const m = comment.match(/.*@(\S+)/);
+        if (m) ciBranch = m[1];
         let repoUrl, cloneBranch;
         if (ciBranch) {
             repoUrl = "https://gitcode.com/opencann/.gitcode.git";
