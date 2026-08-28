@@ -48,7 +48,11 @@ global:
         lv6: openeuler24.03_arm:lv6_v1.1024
       x86:
         lv6: openeuler24.03_x86:lv6_v1.1023
-
+    ubuntu24.04_gcc15:
+      arm:
+        lv6: ubuntu24.04_arm:lv6_v2.1002
+      x86:
+        lv6: ubuntu24.04_x86:lv6_v2.1002
 gray_global:
   os_mirror:
     ubuntu20.04:
@@ -84,23 +88,19 @@ gray_global:
 
 repos:
   opbase:
-    os_mirror:
-      ubuntu24.04:
-        x86:
-          api_check: ubuntu24.04.3_x86:lv6_v1.1076
     stages:
       Compile_Ascend_X86:
         ubuntu24.04:x86:lv6
       Compile_Ascend_X86_ubuntu24:
-        ubuntu24.04:x86:lv6
+        ubuntu24.04_gcc15:x86:lv6
       Compile_Ascend_ARM:
         ubuntu24.04:arm:lv6
       Compile_Ascend_ARM_ubuntu24:
-        ubuntu24.04:arm:lv6
+        ubuntu24.04_gcc15:arm:lv6
       API_Check:
-        ubuntu24.04:x86:api_check
+        ubuntu24.04_gcc15:x86:lv6
       UT_Test:
-        ubuntu24.04:x86:lv6
+        ubuntu24.04_gcc15:x86:lv6
 
   ops-math:
     os_mirror:
@@ -610,13 +610,13 @@ repos:
       Compile_Ascend_X86:
         ubuntu24.04:x86:lv6
       Compile_Ascend_X86_ubuntu24:
-        ubuntu24.04:x86:lv6
+        ubuntu24.04_gcc15:x86:lv6
       Compile_Ascend_ARM:
         ubuntu24.04:arm:lv6
       Compile_Ascend_ARM_ubuntu24:
-        ubuntu24.04:arm:lv6
+        ubuntu24.04_gcc15:arm:lv6
       UT_Test:
-        ubuntu24.04:x86:lv6
+        ubuntu24.04_gcc15:x86:lv6
       PreSmoke_A900:
         ubuntu24.04:arm:smoke
 
@@ -760,49 +760,45 @@ repos:
         ubuntu24.04:x86:api_check
 
   runtime:
-    os_mirror:
-      ubuntu24.04:
-        x86:
-          api_check: ubuntu24.04.3_x86:lv6_v1.1076
     stages:
       Compile_Ascend_X86:
         ubuntu24.04:x86:lv6
       Compile_Ascend_X86_ubuntu24:
-        ubuntu24.04:x86:lv6
+        ubuntu24.04_gcc15:x86:lv6
       Compile_Ascend_ARM:
         ubuntu24.04:arm:lv6
       Compile_Ascend_ARM_ubuntu24:
-        ubuntu24.04:arm:lv6
+        ubuntu24.04_gcc15:arm:lv6
       UT_Test_acl:
-        ubuntu24.04:x86:lv6
+        ubuntu24.04_gcc15:x86:lv6
       UT_Test_rts_v201:
-        ubuntu24.04:x86:lv6
+        ubuntu24.04_gcc15:x86:lv6
       UT_Test_rts_david:
-        ubuntu24.04:x86:lv6
+        ubuntu24.04_gcc15:x86:lv6
       UT_Test_rts_910b:
-        ubuntu24.04:x86:lv6
+        ubuntu24.04_gcc15:x86:lv6
       UT_Test_rts_common:
-        ubuntu24.04:x86:lv6
+        ubuntu24.04_gcc15:x86:lv6
       UT_Test_rts_c:
-        ubuntu24.04:x86:lv6
+        ubuntu24.04_gcc15:x86:lv6
       UT_Test_platform:
-        ubuntu24.04:x86:lv6
+        ubuntu24.04_gcc15:x86:lv6
       UT_Test_qs:
-        ubuntu24.04:x86:lv6
+        ubuntu24.04_gcc15:x86:lv6
       UT_Test_aicpusd:
-        ubuntu24.04:x86:lv6
+        ubuntu24.04_gcc15:x86:lv6
       UT_Test_tsd:
-        ubuntu24.04:x86:lv6
+        ubuntu24.04_gcc15:x86:lv6
       UT_Test_dfx:
-        ubuntu24.04:x86:lv6
+        ubuntu24.04_gcc15:x86:lv6
       UT_Test_mmpa:
-        ubuntu24.04:x86:lv6
+        ubuntu24.04_gcc15:x86:lv6
       UT_Test_camodel:
-        ubuntu24.04:x86:lv6
+        ubuntu24.04_gcc15:x86:lv6
       Smoke_A900_npupool:
         ubuntu24.04:arm:smoke
       API_Check:
-        ubuntu24.04:x86:api_check
+        ubuntu24.04_gcc15:x86:lv6
 
   oam-tools:
     os_mirror:
