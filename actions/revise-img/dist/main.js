@@ -63,7 +63,7 @@ async function run() {
         const cloneDir = "cann-ci";
         let ciBranch = core.getInput('ci_branch');
         if (!ciBranch) {
-            const comment = core.getInput('comment') || process.env.comment || '';
+            const comment = core.getInput('comment') || '';
             const m = comment.match(/.*@(\S+)/);
             if (m) ciBranch = m[1];
         }

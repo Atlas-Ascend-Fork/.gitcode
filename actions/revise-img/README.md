@@ -23,7 +23,7 @@
 | `repo_name` | 是 | - | 仓库名称 |
 | `target_branch` | 是 | - | 目标分支（决定读取哪个版本的 `image-conf/<branch>/images.yaml`） |
 | `repo_url` | 否 | `https://gitcode.com/cann/.gitcode.git` | 默认 CI 仓库地址（仅当未指定 ci_branch 时使用） |
-| `comment` | 否 | - | 触发评论正文；action 自动从中解析 `@<分支>` 得到 ci_branch；为空时读取环境变量 `comment` |
+| `comment` | 否 | - | 触发评论正文；action 自动从中解析 `@<分支>` 得到 ci_branch（需调用方显式传入，不读取环境变量，保证老调用方兼容） |
 | `ci_branch` | 否 | - | 显式指定 CI 仓库分支，提供时优先于 `comment` 自动解析 |
 | `token` | 否 | - | 拉取私有 CI 仓库所用的 git token（仅 ci_branch 非空时使用） |
 
