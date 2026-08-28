@@ -452,15 +452,15 @@ repos:
   amct:
     stages:
       Compile_Ascend_X86:
-        ubuntu20.04:x86:lv6
-      Compile_Ascend_X86_ubuntu24:
         ubuntu24.04:x86:lv6
+      Compile_Ascend_X86_ubuntu24:
+        ubuntu24.04_gcc15:x86:lv6
       Compile_Ascend_ARM:
-        ubuntu20.04:arm:lv6
-      Compile_Ascend_ARM_ubuntu24:
         ubuntu24.04:arm:lv6
+      Compile_Ascend_ARM_ubuntu24:
+        ubuntu24.04_gcc15:arm:lv6
       UT_Test:
-        ubuntu20.04:x86:lv6
+        ubuntu24.04_gcc15:x86:lv6
 
   ge:
     os_mirror:
