@@ -12,7 +12,11 @@ inputs:
     required: false
     default: "https://gitcode.com/cann/.gitcode.git"
   ci_branch:
-    description: 指定拉取ci仓库的分支，为空时拉取默认分支
+    description: 指定拉取ci仓库的分支，为空时从 comment 自动解析 @后的值
+    required: false
+    default: ""
+  comment:
+    description: 触发评论正文，用于自动解析 ci_branch；为空时读取环境变量 comment
     required: false
     default: ""
   token:
