@@ -15,6 +15,10 @@ inputs:
     description: 指定拉取ci仓库的分支，为空时拉取默认分支
     required: false
     default: ""
+  token:
+    description: 用于拉取私有 ci 仓库的 git token（仅 ci_branch 非空时使用）
+    required: false
+    default: ""
 
 runs:
   using: 'node16'
