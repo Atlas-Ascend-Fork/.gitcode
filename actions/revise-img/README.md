@@ -50,5 +50,6 @@ staticcheck:ubuntu24.04.03:v1.0
   with:
     repo_name: ${{ env.repo_name }}
     target_branch: ${{ env.TARGET_BRANCH }}
-    repo_url: ${{ vars.CI_PATH }}
+    comment: ${{atomgit.event.comment.body}}
+    token: ${{ secrets.GIT_TOKEN }}
 ```
