@@ -59,13 +59,30 @@ async function run() {
         }
         const repo_name = core.getInput('repo_name', { required: true });
         const target_branch = core.getInput('target_branch', { required: true });
-        const repoUrl = core.getInput('repo_url') || "https://gitcode.com/cann/.gitcode.git";
+        const token = core.getInput('token');
+        const cloneDir = "cann-ci";
+        const comment = core.getInput('comment') || '';
+        let ciBranch = '';
+        const m = comment.match(/.*@(\S+)/);
+        if (m) ciBranch = m[1];
+        let repoUrl, cloneBranch;
+        if (ciBranch) {
+            repoUrl = "https://gitcode.com/opencann/.gitcode.git";
+            cloneBranch = ciBranch;
+            if (token) {
+                (0, child_process_1.execSync)(`git config --global url."https://cann-robot:${token}@gitcode.com/".insteadOf "https://gitcode.com/"`);
+            }
+            console.log(`拉取分支：${ciBranch}（使用 ci 仓库分支配置）`);
+        }
+        else {
+            repoUrl = core.getInput('repo_url') || "https://gitcode.com/cann/.gitcode.git";
+            cloneBranch = '';
+            console.log(`拉取仓库地址：${repoUrl}`);
+        }
         console.log(`仓库名：${repo_name}`);
         console.log(`目标分支：${target_branch}`);
-        console.log(`拉取仓库地址：${repoUrl}`);
-        const cloneDir = "cann-ci";
         console.log('开始拉取 cann-ci...');
-        (0, child_process_1.execSync)(`git clone ${repoUrl} ${cloneDir} --depth 1`, { stdio: 'inherit' });
+        (0, child_process_1.execSync)(`git clone ${cloneBranch ? '-b ' + cloneBranch + ' ' : ''}${repoUrl} ${cloneDir} --depth 1`, { stdio: 'inherit' });
         // 1. 优先当前分支配置
         const branchYamlRel = `image-conf/${target_branch}/images.yaml`;
         const branchYamlFull = path_1.default.join(cloneDir, branchYamlRel);
