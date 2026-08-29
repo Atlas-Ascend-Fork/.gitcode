@@ -78,7 +78,7 @@ class PreCommitChecker(CodeCheckerBaseClass):
                 oat_context = fr.read()
             logging.info(
                 "------------------------------------5. pre-commit - OAT 检测结果-----------------------------------")
-            logging.info(oat_context)
+            # logging.info(oat_context)
 
         diff_log_path = "pre-commit.txt"
         with open(diff_log_path, "w", encoding="utf-8") as f:
