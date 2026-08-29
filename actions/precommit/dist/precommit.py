@@ -78,7 +78,7 @@ class PreCommitChecker(CodeCheckerBaseClass):
                 oat_context = fr.read()
             logging.info(
                 "------------------------------------5. pre-commit - OAT 检测结果-----------------------------------")
-            # logging.info(oat_context)
+            logging.info(oat_context)
 
         diff_log_path = "pre-commit.txt"
         with open(diff_log_path, "w", encoding="utf-8") as f:
@@ -261,8 +261,8 @@ class PreCommitChecker(CodeCheckerBaseClass):
         else:
             logging.info("ℹ️ 没有需要替换的仓库地址")
 
-        if self.target_branch != 'master':
-            # 直接删除 oat-check 配置
+        # if self.target_branch != 'master':
+        #     # 直接删除 oat-check 配置
             oat_removed = remove_oat_check(data)
             if oat_removed:
                 logging.info("✅ 已成功删除整个 oat-check 配置")
