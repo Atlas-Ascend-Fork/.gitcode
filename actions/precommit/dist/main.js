@@ -72,7 +72,7 @@ function execPythonScript(script, args, cwd) {
     return new Promise((resolve, reject) => {
         const child = (0, child_process_1.execFile)("python3", [script, ...args], {
             cwd,
-            timeout: 600000,
+            timeout: 1800000,
         });
         child.stdout?.on("data", (data) => {
             core.info(data.toString().trimEnd());
