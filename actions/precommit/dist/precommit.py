@@ -261,8 +261,8 @@ class PreCommitChecker(CodeCheckerBaseClass):
         else:
             logging.info("ℹ️ 没有需要替换的仓库地址")
 
-        # if self.target_branch != 'master':
-        #     # 直接删除 oat-check 配置
+        if self.target_branch != 'master':
+            # 直接删除 oat-check 配置
             oat_removed = remove_oat_check(data)
             if oat_removed:
                 logging.info("✅ 已成功删除整个 oat-check 配置")
