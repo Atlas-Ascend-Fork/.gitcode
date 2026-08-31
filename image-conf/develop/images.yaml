@@ -30,9 +30,9 @@ global:
         xla_npu: ubuntu_npu:v1.0
     ubuntu24.04_gcc15:
       arm:
-        lv6: ubuntu24.04_arm:lv6_v2.1002
+        lv6: ubuntu24.04_arm:lv6_v2.1003
       x86:
-        lv6: ubuntu24.04_x86:lv6_v2.1002
+        lv6: ubuntu24.04_x86:lv6_v2.1003
     ubuntu22.04:
       x86:
         asnumpy: ubuntu22.04_x86:v1.0
