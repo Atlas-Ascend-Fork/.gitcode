@@ -103,51 +103,47 @@ repos:
         ubuntu24.04_gcc15:x86:lv6
 
   ops-math:
-    os_mirror:
-      ubuntu24.04:
-        x86:
-          api_check: ubuntu24.04.3_x86:lv6_v1.1076
     stages:
       Compile_Ascend_X86:
         ubuntu24.04:x86:lv6
       Compile_Ascend_X86_ubuntu24:
-        ubuntu24.04:x86:lv6
+        ubuntu24.04_gcc15:x86:lv6
       Compile_Ascend_X86_mobile_station:
         ubuntu24.04:x86:lv6
       Compile_Ascend_X86_mobile_station_ubuntu24:
-        ubuntu24.04:x86:lv6
+        ubuntu24.04_gcc15:x86:lv6
       Compile_Ascend_X86_experimental:
         ubuntu24.04:x86:lv6
       Compile_Ascend_X86_experimental_ubuntu24:
-        ubuntu24.04:x86:lv6
+        ubuntu24.04_gcc15:x86:lv6
       Compile_Ascend_X86_A5:
         ubuntu24.04:x86:lv6
       Compile_Ascend_X86_A5_ubuntu24:
-        ubuntu24.04:x86:lv6
+        ubuntu24.04_gcc15:x86:lv6
       Compile_Ascend_ARM:
         ubuntu24.04:arm:lv6
       Compile_Ascend_ARM_ubuntu24:
-        ubuntu24.04:arm:lv6
+        ubuntu24.04_gcc15:arm:lv6
       Compile_Ascend_ARM_experimental:
         ubuntu24.04:arm:lv6
       Compile_Ascend_ARM_experimental_ubuntu24:
-        ubuntu24.04:arm:lv6
+        ubuntu24.04_gcc15:arm:lv6
       Compile_Ascend_single:
         ubuntu24.04:arm:lv6
       Compile_Ascend_single_ubuntu24:
-        ubuntu24.04:arm:lv6
+        ubuntu24.04_gcc15:arm:lv6
       Compile_Ascend_ARM_A5:
         ubuntu24.04:arm:lv6
       Compile_Ascend_ARM_A5_ubuntu24:
-        ubuntu24.04:arm:lv6
+        ubuntu24.04_gcc15:arm:lv6
       Compile_X86_monitor:
         ubuntu24.04:x86:lv6_monitor
       Compile_X86_monitor_9_0_0:
         ubuntu24.04:x86:lv6_monitor_9_0_0
       API_Check:
-        ubuntu24.04:x86:api_check
+        ubuntu24.04_gcc15:x86:lv6
       UT_Test:
-        ubuntu24.04:x86:lv6
+        ubuntu24.04_gcc15:x86:lv6
       UT_Test_ai-review:
         ubuntu24.04:arm:opencode
       UT_Test_experimental:
