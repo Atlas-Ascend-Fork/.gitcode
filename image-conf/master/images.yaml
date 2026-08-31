@@ -50,9 +50,9 @@ global:
         lv6: openeuler24.03_x86:lv6_v1.1023
     ubuntu24.04_gcc15:
       arm:
-        lv6: ubuntu24.04_arm:lv6_v2.1002
+        lv6: ubuntu24.04_arm:lv6_v2.1003
       x86:
-        lv6: ubuntu24.04_x86:lv6_v2.1002
+        lv6: ubuntu24.04_x86:lv6_v2.1003
 gray_global:
   os_mirror:
     ubuntu20.04:
