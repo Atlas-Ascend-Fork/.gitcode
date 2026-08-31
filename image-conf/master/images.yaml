@@ -358,31 +358,31 @@ repos:
       Compile_Ascend_X86:
         ubuntu24.04:x86:lv6
       Compile_Ascend_X86_ubuntu24:
-        ubuntu24.04:x86:lv6
+        ubuntu24.04_gcc15:x86:lv6
       Compile_Ascend_ARM:
         ubuntu24.04:arm:lv6
       Compile_Ascend_ARM_ubuntu24:
-        ubuntu24.04:arm:lv6
+        ubuntu24.04_gcc15:arm:lv6
       UT_Test_superkernel:
-        ubuntu24.04:x86:lv6
+        ubuntu24.04_gcc15:x86:lv6
       UT_Test_Python_superkernel:
-        ubuntu24.04:x86:lv6
+        ubuntu24.04_gcc15:x86:lv6
       UT_Test_autofuse_framework:
-        ubuntu24.04:x86:lv6
+        ubuntu24.04_gcc15:x86:lv6
       UT_Test_autofuse_ascendc_api:
-        ubuntu24.04:x86:lv6
+        ubuntu24.04_gcc15:x86:lv6
       UT_Test_report:
-        ubuntu24.04:x86:lv6
+        ubuntu24.04_gcc15:x86:lv6
       ST_Test_Python_superkernel:
-        ubuntu24.04:x86:lv6
+        ubuntu24.04_gcc15:x86:lv6
       ST_Test_autofuse_framework:
-        ubuntu24.04:x86:lv6
+        ubuntu24.04_gcc15:x86:lv6
       ST_Test_autofuse_ascendc_api:
-        ubuntu24.04:x86:lv6
+        ubuntu24.04_gcc15:x86:lv6
       ST_Test_autofuse_e2e:
-        ubuntu24.04:x86:lv6
+        ubuntu24.04_gcc15:x86:lv6
       ST_Test_report:
-        ubuntu24.04:x86:lv6
+        ubuntu24.04_gcc15:x86:lv6
       PreSmoke_A900_npupool:
         ubuntu24.04:arm:smoke
 
