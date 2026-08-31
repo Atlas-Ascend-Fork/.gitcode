@@ -13,6 +13,7 @@ global:
         lv6_monitor: ubuntu20.04.05_arm:lv6_v1.1067
         lv6_monitor_9_0_0: ubuntu20.04.05_arm:lv6_v1.1089
         boost_component: ubuntu:20.04.arm.cann_20260429060022
+        boost_component_cann920: ubuntu:20.04.arm.cann920_260828
       x86:
         lv1: ubuntu20.04.05_x86:lv1_v1.1003
         lv2: ubuntu20.04.05_x86:lv2_v1.1010
@@ -1394,7 +1395,7 @@ repos:
   catlass:
     stages:
       Compile_Ascend_ARM:
-        ubuntu24.04:arm:boost_component_2
+        ubuntu20.04:arm:boost_component_cann920
       PreSmoke:
         ubuntu20.04:arm:boost_component
   ascend-boost-comm:
