@@ -24,6 +24,9 @@ global:
         lv6_monitor: ubuntu20.04.05_x86:lv6_v1.1069
         lv6_monitor_9_0_0: ubuntu20.04.05_x86:lv6_v1.1092
         boost_component: ubuntu:20.04.x86.cann_20260429060022
+    ubuntu22.04:
+      x86:
+        dsl_ut: ascend-catlass-dsl:latest
     ubuntu24.04:
       arm:
         lv6: ubuntu24.04_arm:lv6_v1.1118
@@ -1396,6 +1399,8 @@ repos:
     stages:
       Compile_Ascend_ARM:
         ubuntu20.04:arm:boost_component_cann920
+      UT_dsl:    
+        ubuntu22.04:x86:dsl_ut
       PreSmoke:
         ubuntu20.04:arm:boost_component
   ascend-boost-comm:
