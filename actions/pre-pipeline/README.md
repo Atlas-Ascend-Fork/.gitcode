@@ -1,6 +1,6 @@
 # pre-pipeline
 
-流水线开始前给 PR 打上 `ci-pipeline-running` 标签，并移除 `ci-pipeline-passed` 和 `ci-pipeline-failed` 标签。
+流水线开始前给 PR 打上 `ci-pipeline-running` 标签，并移除 `ci-pipeline-passed` 和 `ci-pipeline-failed` 标签；传入 `run_url` 时在 PR 评论区发布流水线链接评论。
 
 ## 输入参数
 
@@ -11,6 +11,7 @@
 | `pr_number` | 是 | - | PR 编号 |
 | `token` | 是 | - | GitCode 个人访问令牌 |
 | `apply_label` | 否 | `false` | 是否执行打标签逻辑 |
+| `run_url` | 否 | `''` | 当前流水线运行链接, 传入则在 PR 评论区发布流水线链接评论 |
 
 ## 涉及的 API
 
@@ -18,6 +19,7 @@
 | --- | --- | --- |
 | 添加 PR 标签 | POST | `/api/v5/repos/{owner}/{repo}/pulls/{pr_number}/labels` |
 | 删除 PR 标签 | DELETE | `/api/v5/repos/{owner}/{repo}/pulls/{pr_number}/labels/{label}` |
+| 发布 PR 评论 | POST | `/api/v5/repos/{owner}/{repo}/pulls/{pr_number}/comments` |
 
 ## 使用示例
 
@@ -30,4 +32,5 @@
     pr_number: ${{ atomgit.event.pull_request.number }}
     token: ${{ secrets.GIT_TOKEN }}
     apply_label: 'true'
+    run_url: https://gitcode.com/${{ env.org_name }}/${{ env.repo_name }}/actions/runs/${{ atomgit.workflow_run_id }}
 ```
