@@ -284,9 +284,9 @@ repos:
       PreSmoke_A900:
         ubuntu20.04:arm:smoke
       Compile_Ascend_X86_VB:
-        ubuntu24.04:x86:lv6
+        ubuntu20.04:x86:lv6
       Compile_Ascend_ARM_VB:
-        ubuntu24.04:arm:lv6
+        ubuntu20.04:arm:lv6
 
   ops-transformer:
     os_mirror:
@@ -353,13 +353,13 @@ repos:
         ubuntu24.04:arm:lv6
       UT_Test_superkernel:
         ubuntu24.04:x86:lv6
-      UT_Test_Python_superkernel:
+      UT_Test_Python_superkenel:
         ubuntu24.04:x86:lv6
       UT_Test_autofuse_framework:
         ubuntu24.04:x86:lv6
       UT_Test_autofuse_ascendc_api:
         ubuntu24.04:x86:lv6
-      ST_Test_Python_superkernel:
+      ST_Test_Python_superkenel:
         ubuntu24.04:x86:lv6
       ST_Test_autofuse_framework:
         ubuntu24.04:x86:lv6

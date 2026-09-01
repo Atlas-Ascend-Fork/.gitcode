@@ -4,25 +4,25 @@ global:
       arm:
         lv1: ubuntu20.04.05_arm:lv1_v1.1003
         lv2: ubuntu20.04.05_arm:lv2_v1.1011
-        lv3: ubuntu20.04.05_arm:lv3_v1.1094
-        lv4: ubuntu20.04.05_arm:lv4_v1.1089
-        lv5: ubuntu20.04.05_arm:lv5_v1.1090
-        lv6: ubuntu20.04.05_arm:lv6_v1.1069
+        lv3: ubuntu20.04.05_arm:lv3_v1.1111
+        lv4: ubuntu20.04.05_arm:lv4_v1.1106
+        lv5: ubuntu20.04.05_arm:lv5_v1.1107
+        lv6: ubuntu20.04.05_arm:lv6_v1.1089
         lv6_monitor: ubuntu20.04.05_arm:lv6_v1.1055
       x86:
         lv1: ubuntu20.04.05_x86:lv1_v1.1003
         lv2: ubuntu20.04.05_x86:lv2_v1.1010
-        lv3: ubuntu20.04.05_x86:lv3_v1.1104
-        lv4: ubuntu20.04.05_x86:lv4_v1.1090
-        lv5: ubuntu20.04.05_x86:lv5_v1.1091
-        lv6: ubuntu20.04.05_x86:lv6_v1.1071
+        lv3: ubuntu20.04.05_x86:lv3_v1.1123
+        lv4: ubuntu20.04.05_x86:lv4_v1.1108
+        lv5: ubuntu20.04.05_x86:lv5_v1.1108
+        lv6: ubuntu20.04.05_x86:lv6_v1.1092
         lv6_monitor: ubuntu20.04.05_x86:lv6_v1.1056
         lv6_monitor_9_0_0: ubuntu20.04.05_x86:lv6_v1.1082
     ubuntu24.04:
       arm:
-        lv6: ubuntu24.04_arm:lv6_v1.1036
+        lv6: ubuntu24.04_arm:lv6_v1.1079
       x86:
-        lv6: ubuntu24.04_x86:lv6_v1.1036
+        lv6: ubuntu24.04_x86:lv6_v1.1081
     ubuntu22.04:
       x86:
         asnumpy: ubuntu22.04_x86:v1.0
@@ -894,15 +894,15 @@ repos:
           lv4: ubuntu20.04.05_x86:lv4_v1.1064
     stages:
       Compile_Ascend_X86:
-        ubuntu24.04:x86:lv6
+        ubuntu20.04:x86:lv4
       Compile_Ascend_X86_ubuntu24:
         ubuntu24.04:x86:lv6
       Compile_Ascend_ARM:
-        ubuntu24.04:arm:lv6
+        ubuntu20.04:arm:lv4
       Compile_Ascend_ARM_ubuntu24:
         ubuntu24.04:arm:lv6
       UT_Test:
-        ubuntu20.04:x86:lv6
+        ubuntu20.04:x86:lv4
 
   acl-extend-dev:
     stages:
