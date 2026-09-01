@@ -818,15 +818,15 @@ repos:
           lv4: ubuntu20.04.05_x86:lv4_v1.1065
     stages:
       Compile_Ascend_X86:
-        ubuntu24.04:x86:lv6
+        ubuntu20.04:x86:lv4
       Compile_Ascend_X86_ubuntu24:
         ubuntu24.04:x86:lv6
       Compile_Ascend_ARM:
-        ubuntu24.04:arm:lv6
+        ubuntu20.04:arm:lv4
       Compile_Ascend_ARM_ubuntu24:
         ubuntu24.04:arm:lv6
       UT_Test:
-        ubuntu24.04:x86:lv6
+        ubuntu20.04:x86:lv4
   acl-extend-dev:
     stages:
       Compile_Ascend_X86:
