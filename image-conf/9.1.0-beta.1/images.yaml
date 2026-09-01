@@ -284,9 +284,9 @@ repos:
       PreSmoke_A900:
         ubuntu20.04:arm:smoke
       Compile_Ascend_X86_VB:
-        ubuntu24.04:x86:lv6
+        ubuntu20.04:x86:lv6
       Compile_Ascend_ARM_VB:
-        ubuntu24.04:arm:lv6
+        ubuntu20.04:arm:lv6
 
   ops-transformer:
     os_mirror:
