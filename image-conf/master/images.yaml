@@ -1119,6 +1119,13 @@ repos:
         x86:
           torchtitan: ubuntu24.04_x86_64:wdy05
 
+    stages:
+      lint:
+        ubuntu24.04:x86:torchtitan
+      UT_Test:
+        ubuntu24.04:x86:torchtitan
+      PreSmoke_A900_npupool:
+        ubuntu24.04:arm:torchtitan
 
     stages:
       lint:
