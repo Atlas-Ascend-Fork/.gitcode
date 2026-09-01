@@ -559,11 +559,11 @@ repos:
   amct-graph:
     stages:
       Compile_Ascend_X86:
-        ubuntu24.04:x86:lv6
+        ubuntu24.04_gcc15:x86:lv6
       Compile_Ascend_ARM:
-        ubuntu24.04:arm:lv6
+        ubuntu24.04_gcc15:arm:lv6
       UT_Test:
-        ubuntu24.04:x86:lv6
+        ubuntu24.04_gcc15:x86:lv6
 
   atvc:
     stages:
@@ -804,31 +804,27 @@ repos:
         ubuntu24.04:arm:smoke
 
   oam-tools-diag:
-    os_mirror:
-      ubuntu24.04:
-        x86:
-          api_check: ubuntu24.04.3_x86:lv6_v1.1076
     stages:
       Compile_Ascend_X86:
         ubuntu24.04:x86:lv6
       Compile_Ascend_X86_ubuntu24:
-        ubuntu24.04:x86:lv6
+        ubuntu24.04_gcc15:x86:lv6
       Compile_Ascend_ARM:
         ubuntu24.04:arm:lv6
       Compile_Ascend_ARM_ubuntu24:
-        ubuntu24.04:arm:lv6
+        ubuntu24.04_gcc15:arm:lv6
       Compile_Ascend_X86_debug:
         ubuntu24.04:x86:lv6
       Compile_Ascend_X86_debug_ubuntu24:
-        ubuntu24.04:x86:lv6
+        ubuntu24.04_gcc15:x86:lv6
       Compile_Ascend_ARM_debug:
         ubuntu24.04:arm:lv6
       Compile_Ascend_ARM_debug_ubuntu24:
-        ubuntu24.04:arm:lv6
+        ubuntu24.04_gcc15:arm:lv6
       API_Check:
-        ubuntu24.04:x86:api_check
+        ubuntu24.04_gcc15:x86:lv6
       UT_Test:
-        ubuntu24.04:x86:lv6
+        ubuntu24.04_gcc15:x86:lv6
       PreSmoke_A900:
         ubuntu24.04:arm:smoke
 
@@ -1117,11 +1113,12 @@ repos:
 
   torchtitan-npu:
     os_mirror:
-      ubuntu22.04:
+      ubuntu24.04:
         arm:
-          torchtitan: ubuntu22.04_arm:9.0.0-910b-py3.11-v1.1001
+          torchtitan: ubuntu24.04_arm:wdy05
         x86:
-          torchtitan: ubuntu22.04_x86:9.0.0-910b-py3.11-v1.1001
+          torchtitan: ubuntu24.04_x86_64:wdy05
+
 
     stages:
       lint:
