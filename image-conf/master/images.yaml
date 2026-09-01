@@ -30,8 +30,8 @@ global:
         smoke_A3: ubuntu24.04_arm:pre_mindspore_A3_conda_v1.1034
         asnumpy: ubuntu24.04_arm:asnumpy_v1.1001
         opencode: ubuntu24.04_arm:opencode_ai_check_v1.1001
-        lv6_monitor: ubuntu24.04_arm:lv6_v1.1085
-        lv6_monitor_9_0_0: ubuntu24.04_arm:lv6_v1.1079
+        lv6_monitor: ubuntu24.04_arm:lv6_v1.1106
+        lv6_monitor_9_0_0: ubuntu24.04_arm:lv6_v1.1113
         lv6_monitor_9.1.0_beta.1: ubuntu24.04_arm:lv6_v1.1086
         boost_component: ubuntu:24.04.CANN900.arm.260730
         boost_component_2: atb_version_build_arm:latest
@@ -39,8 +39,8 @@ global:
         lv6: ubuntu24.04_x86:lv6_v1.1127
         xla_npu: ubuntu_npu:v1.0
         asnumpy: ubuntu24.04_x86:asnumpy_v1.1002
-        lv6_monitor: ubuntu24.04_x86:lv6_v1.1088
-        lv6_monitor_9_0_0: ubuntu24.04_x86:lv6_v1.1081
+        lv6_monitor: ubuntu24.04_x86:lv6_v1.1110
+        lv6_monitor_9_0_0: ubuntu24.04_x86:lv6_v1.1116
         lv6_monitor_9.1.0_beta.1: ubuntu24.04_x86:lv6_v1.1089
         boost_component_2: atb_version_build_x86:latest
     openeuler24.03:

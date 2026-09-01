@@ -187,7 +187,7 @@ jobs:
           fi
           cd ${{ steps.process_checkout.outputs.path }}
           cd CI/scripts
-          codecheck_parent_task_id=$(bash ../../.gitcode-repo/scripts/parse_codecheck_style.sh) || exit 0
+          codecheck_parent_task_id=$(bash parse_codecheck_style.sh) || exit 0
           export codecheck_parent_task_id=$codecheck_parent_task_id
           python3 codecheck_gitcode.py --access_key ${{secrets.CODECHECK_AK}} --secret_access_key ${{secrets.CODECHECK_SK}} --access_key_get ${{secrets.CODECHECK_AK_GET}} --secret_access_key_get ${{secrets.CODECHECK_SK_GET}} --org_name ${org_name} --pr_id ${MERGE_ID} --repo ${repo_name} --commit_id ${{ atomgit.event.pull_request.merge_commit_sha }} --online ${{ vars.APPLY_LABEL }}
     if: env.online == 'true'
