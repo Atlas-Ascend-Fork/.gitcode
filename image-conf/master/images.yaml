@@ -1364,13 +1364,13 @@ repos:
       Compile_Ascend_ARM_ubuntu24:
         ubuntu24.04:arm:lv6
       Compile_Ascend_X86_Python_openeuler:
-        openeuler24.03_x86:lv6
+        openeuler24.03:x86:lv6
       Compile_Ascend_ARM_Python_openeuler:
-        openeuler24.03_arm:lv6
+        openeuler24.03:arm:lv6
       Compile_Ascend_X86_openeuler:
-        openeuler24.03_x86:lv6
+        openeuler24.03:x86:lv6
       Compile_Ascend_ARM_openeuler:
-        openeuler24.03_arm:lv6
+        openeuler24.03:arm:lv6
   npu-simulator:
     stages:
       Compile_Ascend_X86_ubuntu24:
