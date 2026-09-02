@@ -96,4 +96,8 @@ fi
 #     python3  ${WORKSPACE}/CI/pipeline/scripts/check_ai_review.py ${REPOSITORY_NAME} ${GIT_PR_NUMBER} ${access_token} ${WORKSPACE}/pr_filelist.txt
 # fi
 
+LOG_HEAD "Check URL and third-party library gate"
+python3 ${SCRIPT_DIR}/check_url_third_party.py ${WORKSPACE} ${REPOSITORY_NAME} ${GIT_TARGET_BRANCH}
+DP_ASSERT_EQUAL "$?" "0" "check URL and third-party library gate"
+
 
