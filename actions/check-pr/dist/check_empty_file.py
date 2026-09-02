@@ -66,6 +66,8 @@ def main(workspace, pr_filelist):
         file_content = tmp_file.readlines()
         for file_name in file_content:
             file_name=file_name.strip()
+            if file_name.endswith(".gitkeep"):
+                continue
             file_path=os.path.join(workspace,file_name)
             if os.path.exists(file_path):
                 scanfile(file_path,empty_total_file_tmp,empty_total_file)
