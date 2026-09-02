@@ -23,11 +23,11 @@ global:
         lv6_monitor_9_0_0: ubuntu20.04.05_x86:lv6_v1.1082
     ubuntu24.04:
       arm:
-        lv6: ubuntu24.04_arm:lv6_v1.1065
+        lv6: ubuntu24.04_arm:lv6_v1.1094
         smoke: ubuntu24.04_arm:pre_mindspore_A2_conda_v1.1001
         smoke_A3: ubuntu24.04_arm:pre_mindspore_A3_conda_v1.1001
       x86:
-        lv6: ubuntu24.04_x86:lv6_v1.1065
+        lv6: ubuntu24.04_x86:lv6_v1.1096
         lv6_0429: ubuntu24.04_x86:lv6_v1.1058
         xla_npu: ubuntu_npu:v1.0
         asnumpy: ubuntu24.04_x86:asnumpy_v1.1002
@@ -403,7 +403,10 @@ repos:
   hccl:
     os_mirror:
       ubuntu24.04:
+        arm:
+          lv6: ubuntu24.04_arm:lv6_v1.1063
         x86:
+          lv6: ubuntu24.04_x86:lv6_v1.1063
           api_check: ubuntu24.04.3_x86:lv6_v1.1075
     stages:
       Compile_Ascend_X86:
@@ -595,19 +598,9 @@ repos:
 
   ge:
     os_mirror:
-      ubuntu20.04:
-        arm:
-          lv3: ubuntu20.04.05_arm:lv3_v1.1103
-          lv6: ubuntu20.04.05_arm:lv6_v1.1081
-        x86:
-          lv3: ubuntu20.04.05_x86:lv3_v1.1115
-          lv6: ubuntu20.04.05_x86:lv6_v1.1084
       ubuntu24.04:
-        arm:
-          lv6: ubuntu24.04_arm:lv6_v1.1062
         x86:
           api_check: ubuntu24.04.3_x86:lv6_v1.1075
-          lv6: ubuntu24.04_x86:lv6_v1.1062
     stages:
       Compile_X86_compiler:
         ubuntu24.04:x86:lv6
