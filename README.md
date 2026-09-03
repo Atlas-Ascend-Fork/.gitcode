@@ -3,7 +3,7 @@
 本仓库包含适配 CANN 项目标准的 Issue 和 Pull Request 模板。
 
 ## 目录结构
-
+# test
 ```
 .gitcode/
 ├── ISSUE_TEMPLATE/
