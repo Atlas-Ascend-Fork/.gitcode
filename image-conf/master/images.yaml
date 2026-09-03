@@ -50,9 +50,9 @@ global:
         lv6: openeuler24.03_x86:lv6_v1.1023
     ubuntu24.04_gcc15:
       arm:
-        lv6: ubuntu24.04_arm:lv6_v2.1003
+        lv6: ubuntu24.04_arm:lv6_v2.1004
       x86:
-        lv6: ubuntu24.04_x86:lv6_v2.1003
+        lv6: ubuntu24.04_x86:lv6_v2.1004
 gray_global:
   os_mirror:
     ubuntu20.04:
@@ -688,25 +688,21 @@ repos:
         ubuntu24.04:arm:smoke
 
   metadef:
-    os_mirror:
-      ubuntu24.04:
-        x86:
-          api_check: ubuntu24.04.3_x86:lv6_v1.1076
     stages:
       Compile_Ascend_X86:
         ubuntu24.04:x86:lv6
       Compile_Ascend_X86_ubuntu24:
-        ubuntu24.04:x86:lv6
+        ubuntu24.04_gcc15:x86:lv6
       Compile_Ascend_ARM:
         ubuntu24.04:arm:lv6
       Compile_Ascend_ARM_ubuntu24:
-        ubuntu24.04:arm:lv6
+        ubuntu24.04_gcc15:arm:lv6
       UT_Test:
-        ubuntu24.04:x86:lv6
+        ubuntu24.04_gcc15:x86:lv6
       Smoke_A900_npupool:
         ubuntu24.04:arm:smoke
       API_Check:
-        ubuntu24.04:x86:api_check
+        ubuntu24.04_gcc15:x86:lv6
 
   runtime-dev:
     os_mirror:
@@ -966,21 +962,21 @@ repos:
       Compile_Ascend_X86:
         ubuntu24.04:x86:lv6
       Compile_Ascend_X86_ubuntu24:
-        ubuntu24.04:x86:lv6
+        ubuntu24.04_gcc15:x86:lv6
       Compile_Ascend_ARM:
         ubuntu24.04:arm:lv6
       Compile_Ascend_ARM_ubuntu24:
-        ubuntu24.04:arm:lv6
+        ubuntu24.04_gcc15:arm:lv6
       Compile_Ascend_ARM_A5:
         ubuntu24.04:arm:lv6
       Compile_Ascend_X86_A5_ubuntu24:
-        ubuntu24.04:x86:lv6
+        ubuntu24.04_gcc15:x86:lv6
       UT_Test:
-        ubuntu24.04:x86:lv6
+        ubuntu24.04_gcc15:x86:lv6
       UT_Test_A3:
-        ubuntu24.04:x86:lv6
+        ubuntu24.04_gcc15:x86:lv6
       UT_Test_A5:
-        ubuntu24.04:x86:lv6
+        ubuntu24.04_gcc15:x86:lv6
       PreSmoke_A3_npupool:
         ubuntu24.04:arm:smoke_A3
       PreSmoke_npupool:
@@ -1368,13 +1364,13 @@ repos:
       Compile_Ascend_ARM_ubuntu24:
         ubuntu24.04:arm:lv6
       Compile_Ascend_X86_Python_openeuler:
-        openeuler24.03_x86:lv6
+        openeuler24.03:x86:lv6
       Compile_Ascend_ARM_Python_openeuler:
-        openeuler24.03_arm:lv6
+        openeuler24.03:arm:lv6
       Compile_Ascend_X86_openeuler:
-        openeuler24.03_x86:lv6
+        openeuler24.03:x86:lv6
       Compile_Ascend_ARM_openeuler:
-        openeuler24.03_arm:lv6
+        openeuler24.03:arm:lv6
   npu-simulator:
     stages:
       Compile_Ascend_X86_ubuntu24:
