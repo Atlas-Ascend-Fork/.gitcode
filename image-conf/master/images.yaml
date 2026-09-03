@@ -971,11 +971,11 @@ repos:
       Compile_Ascend_X86_ubuntu24:
         ubuntu24.04_gcc15:x86:lv6
       Compile_Ascend_ARM:
-        ubuntu24.04_gcc15:x86:lv6
+        ubuntu24.04_gcc15:arm:lv6
       Compile_Ascend_ARM_ubuntu24:
         ubuntu24.04_gcc15:arm:lv6
       Compile_Ascend_ARM_A5:
-        ubuntu24.04_gcc15:x86:lv6
+        ubuntu24.04_gcc15:arm:lv6
       Compile_Ascend_X86_A5_ubuntu24:
         ubuntu24.04_gcc15:x86:lv6
       UT_Test:
