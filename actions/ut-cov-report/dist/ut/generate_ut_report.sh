@@ -31,7 +31,7 @@ function genStReport(){
             echo "合并命令: lcov ${merge_cmd} -o coverage_merged.info"
             
             # 注意：这里在 lcov 和 ${merge_cmd} 之间需要空格
-            lcov ${merge_cmd} -o coverage_merged.info
+            lcov ${merge_cmd} -o coverage_merged.info --ignore-errors format
             # 检查合并是否成功
             if [ $? -eq 0 ] && [ -f "coverage_merged.info" ]; then
                 echo "覆盖率报告合并成功: coverage_merged.info"
