@@ -866,9 +866,9 @@ repos:
         openeuler:arm:driver
       Compile_Ascend_ARM_driver_npu_910b:
         openeuler:arm:driver
-      Compile_Ascend_ARM_driver-dev_npu_sp3:
+      Compile_Ascend_ARM_npu_sp3:
         openeuler:arm:driver_sp3
-      Compile_Ascend_ARM_driver-dev_npu_sp4:
+      Compile_Ascend_ARM_npu_sp4:
         openeuler:arm:driver_sp4
       UT_Test:
         ubuntu20.04:x86:driver
@@ -890,15 +890,15 @@ repos:
           driver: ubuntu24.04_x86:headers680-v1.10
           api_check: ubuntu24.04.3_x86:lv6-13_v1.1007
     stages:
-      Compile_Ascend_X86_driver-dev_npu_910b:
+      Compile_Ascend_X86_npu_910b:
         ubuntu20.04:x86:driver
-      Compile_Ascend_X86_driver-dev_ubuntu_24_04_npu_910b:
+      Compile_Ascend_X86_ubuntu_24_04_npu_910b:
         ubuntu24.04:x86:driver
-      Compile_Ascend_ARM_driver-dev_npu_910b:
+      Compile_Ascend_ARM_npu_910b:
         openeuler:arm:driver
-      Compile_Ascend_ARM_driver-dev_npu_sp3:
+      Compile_Ascend_ARM_npu_sp3:
         openeuler:arm:driver_sp3
-      Compile_Ascend_ARM_driver-dev_npu_sp4:
+      Compile_Ascend_ARM_npu_sp4:
         openeuler:arm:driver_sp4
       UT_Test:
         ubuntu20.04:x86:driver
