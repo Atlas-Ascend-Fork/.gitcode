@@ -57,8 +57,12 @@ class PreCommitChecker(CodeCheckerBaseClass):
         if not file_lines:
             logging.info("✅ 没有需要检查的文件")
             return
-
-        check_result = self.run_cmd(f"cat pr_filelist_precommit.txt | xargs pre-commit run --show-diff-on-failure --file", os.getcwd(), shell=True, capture_output=True)
+        cmd = (
+            "cat pr_filelist_precommit.txt "
+            "| awk '$0 != \".pre-commit-config.yaml\"' "
+            "| xargs pre-commit run --show-diff-on-failure --files"
+        )
+        check_result = self.run_cmd(cmd, os.getcwd(), shell=True, capture_output=True)
         
         full_output = unquote(check_result.stdout)
         normal_output = ""
@@ -261,7 +265,7 @@ class PreCommitChecker(CodeCheckerBaseClass):
         else:
             logging.info("ℹ️ 没有需要替换的仓库地址")
 
-        if self.target_branch != 'master':
+        if self.target_branch != 'master' and self.target_branch != 'develop':
             # 直接删除 oat-check 配置
             oat_removed = remove_oat_check(data)
             if oat_removed:
