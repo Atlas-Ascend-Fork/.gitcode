@@ -89,6 +89,30 @@ def remove_pr_label(owner, repo, pr_number, label, token, max_retries=1):
     return False
 
 
+def remove_pr_labels_batch(owner, repo, pr_number, labels, token, max_retries=1):
+    """批量移除 PR 标签: DELETE /labels/name1,name2 (逗号分隔一次删除)"""
+    if not labels:
+        return True
+    names = ",".join(labels)
+    url = f"{PR_LABELS_URL.format(owner, repo, pr_number)}/{names}?access_token={token}"
+    for attempt in range(max_retries + 1):
+        status, body = api_request(url, token, "DELETE")
+        if status in (200, 204):
+            print(f"✅ 批量移除标签 [{names}] 成功")
+            return True
+        if status == 429 and attempt < max_retries:
+            wait = 10
+            print(f"⚠️ 批量移除标签触发限流，{wait}s 后重试 (attempt {attempt + 1}/{max_retries})")
+            time.sleep(wait)
+            continue
+        if status == 404:
+            print(f"ℹ️ 标签 [{names}] 不存在，无需移除")
+            return True
+        print(f"❌ 批量移除标签 [{names}] 失败: HTTP {status}, {body}")
+        return False
+    return False
+
+
 def main():
     parser = argparse.ArgumentParser(description="流水线开始前给 PR 打上 ci-pipeline-running 标签, 并发布流水线链接评论")
     parser.add_argument("--owner", required=True, help="仓库所属组织/用户")
@@ -120,8 +144,8 @@ def main():
         print("未传入 run_url，跳过流水线链接评论")
     print()
 
-    remove_pr_label(args.owner, args.repo, args.pr_number, LABEL_PASS, args.token)
-    remove_pr_label(args.owner, args.repo, args.pr_number, LABEL_FAIL, args.token)
+    # 一次批量移除旧 CI 标签
+    remove_pr_labels_batch(args.owner, args.repo, args.pr_number, [LABEL_PASS, LABEL_FAIL], args.token)
     add_pr_label(args.owner, args.repo, args.pr_number, LABEL_RUNNING, args.token)
     print()
 
