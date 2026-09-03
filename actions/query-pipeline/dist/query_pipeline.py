@@ -113,6 +113,30 @@ def remove_pr_label(owner, repo, pr_number, label, token, max_retries=1):
     return False
 
 
+def remove_pr_labels_batch(owner, repo, pr_number, labels, token, max_retries=1):
+    """批量移除 PR 标签: DELETE /labels/name1,name2 (逗号分隔一次删除)"""
+    if not labels:
+        return True
+    names = ",".join(labels)
+    url = f"{PR_LABELS_URL.format(owner, repo, pr_number)}/{names}?access_token={token}"
+    for attempt in range(max_retries + 1):
+        status, body = api_request(url, token, "DELETE")
+        if status in (200, 204):
+            print(f"✅ 批量移除标签 [{names}] 成功")
+            return True
+        if status == 429 and attempt < max_retries:
+            wait = 10
+            print(f"⚠️ 批量移除标签触发限流，{wait}s 后重试 (attempt {attempt + 1}/{max_retries})")
+            time.sleep(wait)
+            continue
+        if status == 404:
+            print(f"ℹ️ 标签 [{names}] 不存在，无需移除")
+            return True
+        print(f"❌ 批量移除标签 [{names}] 失败: HTTP {status}, {body}")
+        return False
+    return False
+
+
 def apply_label_by_jobs(owner, repo, pr_number, jobs, token):
     if not pr_number:
         return
@@ -124,9 +148,8 @@ def apply_label_by_jobs(owner, repo, pr_number, jobs, token):
     neutral_statuses = {"SKIPPED", "IGNORED", "INIT"}
     failed_jobs = [j for j in jobs if j.get("status") in FAILED_STATUSES]
     non_success_jobs = [j for j in jobs if j.get("status") not in success_statuses and j.get("status") not in neutral_statuses]
-    remove_pr_label(owner, repo, pr_number, LABEL_PASS, token)
-    remove_pr_label(owner, repo, pr_number, LABEL_FAIL, token)
-    remove_pr_label(owner, repo, pr_number, LABEL_RUNNING, token)
+    # 一次批量移除全部旧 CI 标签
+    remove_pr_labels_batch(owner, repo, pr_number, [LABEL_PASS, LABEL_FAIL, LABEL_RUNNING], token)
     if non_success_jobs:
         print(f"  非成功任务数: {len(non_success_jobs)} (失败: {len(failed_jobs)})")
         for j in non_success_jobs:
