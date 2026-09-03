@@ -463,6 +463,10 @@ repos:
         ubuntu24.04_gcc15:x86:lv6
 
   ge:
+    os_mirror:
+      ubuntu24.04_gcc15:
+        x86:
+          lv6_0828: ubuntu24.04_x86:lv6_v2.1004
     stages:
       Compile_X86_compiler:
         ubuntu24.04:x86:lv6
@@ -493,7 +497,7 @@ repos:
       UT_Test_dflow:
         ubuntu24.04_gcc15:x86:lv6
       UT_Test_ge_common:
-        ubuntu24.04_gcc15:x86:lv6
+        ubuntu24.04_gcc15:x86:lv6_0828
       UT_Test_parser:
         ubuntu24.04_gcc15:x86:lv6
       UT_Test_python:
@@ -509,15 +513,15 @@ repos:
       UT_Test_executor:
         ubuntu24.04_gcc15:x86:lv6
       UT_Test_fe:
-        ubuntu24.04_gcc15:x86:lv6
+        ubuntu24.04_gcc15:x86:lv6_0828
       UT_Test_tefusion:
-        ubuntu24.04_gcc15:x86:lv6
+        ubuntu24.04_gcc15:x86:lv6_0828
       ST_Test_Report:
         ubuntu24.04_gcc15:x86:lv6
       ST_Test_dflow:
         ubuntu24.04_gcc15:x86:lv6
       ST_Test_ge_common:
-        ubuntu24.04_gcc15:x86:lv6
+        ubuntu24.04_gcc15:x86:lv6_0828
       ST_Test_parser:
         ubuntu24.04_gcc15:x86:lv6
       ST_Test_python:
@@ -533,9 +537,9 @@ repos:
       ST_Test_hetero:
         ubuntu24.04_gcc15:x86:lv6
       ST_Test_fe:
-        ubuntu24.04_gcc15:x86:lv6
+        ubuntu24.04_gcc15:x86:lv6_0828
       ST_Test_tefusion:
-        ubuntu24.04_gcc15:x86:lv6
+        ubuntu24.04_gcc15:x86:lv6_0828
       API_Check:
         ubuntu24.04_gcc15:x86:lv6
       PreSmoke_A900_npupool:
