@@ -875,7 +875,7 @@ repos:
       API_Check:
         ubuntu24.04:x86:api_check
 
-  driver-dev:
+  driver-dev_5285:
     os_mirror:
       ubuntu20.04:
         x86:
