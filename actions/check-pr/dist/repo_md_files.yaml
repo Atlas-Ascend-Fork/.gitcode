@@ -4,6 +4,8 @@ common:
   - AGENTS.md
   - .codex
   - .agents
+  - docs/en/api
+  - docs/en/guide
 
 asc-devkit:
   - docs/zh/api
