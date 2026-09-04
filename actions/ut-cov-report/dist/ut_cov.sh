@@ -42,7 +42,9 @@ else
     if [ "${UT_PROCESS}" = "ut_cov" ];then
       cd "${SCRIPT_DIR}/ut"
       chmod +x ./addlcov
-      python3 count_files.py "${WORKSPACE}/classify_rule.yaml" "${UT_TYPE}" "${WORKSPACE}" "${WORKSPACE}"
+      if [ "${LANGUAGE}" != "ts" ];then
+          python3 count_files.py "${WORKSPACE}/classify_rule.yaml" "${UT_TYPE}" "${WORKSPACE}" "${WORKSPACE}"
+      fi
       if [ "${LANGUAGE}" = "cpp" ];then
           bash generate_ut_cov.sh "${UT_TYPE}" "${TARGET_BRANCH}" "${WORKSPACE}" True "${WORKSPACE}/cov/coverage.info" "${COVERAGE_NUM}" "${WORKSPACE}/pr_filelist_mod.txt"
           coverage_path=$(find "${WORKSPACE}" -name "cov" | head -n1)
@@ -51,6 +53,8 @@ else
           cp -rf ut_cov_${UT_TYPE}.tar.gz "${WORKSPACE}"
       elif [ "${LANGUAGE}" = "python" ];then
           bash generate_ut_cov_python.sh
+      elif [ "${LANGUAGE}" = "ts" ];then
+          bash generate_ut_cov_ts.sh
       fi
     elif [ "${UT_PROCESS}" = "coverage" ];then
       cd "${WORKSPACE}"
