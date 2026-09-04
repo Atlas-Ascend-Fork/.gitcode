@@ -1441,3 +1441,7 @@ repos:
         ubuntu24.04:arm:boost_component
       UT_Test:
         ubuntu24.04:arm:boost_component
+  pypto-tools:
+    stages:
+      UT_Test:
+        ubuntu24.04_gcc15:x86:lv6
