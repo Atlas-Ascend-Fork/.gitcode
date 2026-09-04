@@ -463,10 +463,6 @@ repos:
         ubuntu24.04_gcc15:x86:lv6
 
   ge:
-    os_mirror:
-      ubuntu24.04_gcc15:
-        x86:
-          lv6_0828: ubuntu24.04_x86:lv6_v2.1004
     stages:
       Compile_X86_compiler:
         ubuntu24.04:x86:lv6
