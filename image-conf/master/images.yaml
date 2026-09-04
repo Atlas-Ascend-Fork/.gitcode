@@ -913,7 +913,7 @@ repos:
         ubuntu24.04:x86:api_check
 
 
-  pypto:
+  pypto_1238:
     stages:
       Compile_Ascend_X86:
         ubuntu24.04:x86:lv6
