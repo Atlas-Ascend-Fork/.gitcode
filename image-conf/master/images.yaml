@@ -916,29 +916,29 @@ repos:
   pypto:
     stages:
       Compile_Ascend_X86:
-        ubuntu24.04:x86:lv6
+        ubuntu24.04_gcc15:x86:lv6
       Compile_Ascend_X86_ubuntu24:
-        ubuntu24.04:x86:lv6
+        ubuntu24.04_gcc15:x86:lv6
       Compile_Ascend_ARM:
-        ubuntu24.04:arm:lv6
+        ubuntu24.04_gcc15:arm:lv6
       Compile_Ascend_ARM_ubuntu24:
-        ubuntu24.04:arm:lv6
+        ubuntu24.04_gcc15:arm:lv6
       UT_Test_Py3_ninja_simulation:
-        ubuntu24.04:x86:lv6
+        ubuntu24.04_gcc15:x86:lv6
       UT_Test_Py3_ninja:
-        ubuntu24.04:x86:lv6
+        ubuntu24.04_gcc15:x86:lv6
       UT_Test_Cpp_make_clang:
-        ubuntu24.04:x86:lv6
+        ubuntu24.04_gcc15:x86:lv6
       # UT_Test_Cpp_make_gnu: # 程定要求删除
       #   ubuntu24.04:x86:lv6
       UT_Test_Cpp_make_gnu_part_1:
-        ubuntu24.04:x86:lv6
+        ubuntu24.04_gcc15:x86:lv6
       UT_Test_Cpp_make_gnu_part_2:
-        ubuntu24.04:x86:lv6
+        ubuntu24.04_gcc15:x86:lv6
       UT_Test_Cpp_make_gnu_part_3:
-        ubuntu24.04:x86:lv6
+        ubuntu24.04_gcc15:x86:lv6
       UT_Test_report:
-        ubuntu24.04:x86:lv6
+        ubuntu24.04_gcc15:x86:lv6
 
   pypto-gym:
     stages:
