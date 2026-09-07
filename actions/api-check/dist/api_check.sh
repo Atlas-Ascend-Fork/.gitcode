@@ -11,24 +11,35 @@ curl "http://10.0.0.193:10001/api/pullRequestDetail/check?prId=${remote_url}_${G
 cat <<'EOF' > /tmp/get_result.py
 import json
 import os
+import sys
 
 with open('/tmp/api_check_output.txt', 'r') as file:
     out_result = json.load(file)
 
 data = out_result.get('data', None)
 all_messages = []
-if not data:
-    status = "pass"
-    print("check pass")
-else:
-    all_messages = out_result['data'].get('messages', [])
-    status = "pass" if out_result['data'].get('pass', False) else "fail"
+
+def resolve(data):
+    """根据 data.level 的 error/warn/info判断状态"""
+    if not data:
+        return "pass", "✅", "info"
+    level = str(data.get('level', '')).strip().lower()
+    if level == "error":
+        return "fail", "❌", "error"
+    if level == "warn":
+        return "pass", "⚠️", "warn"
+    # 其余视为 info
+    return "pass", "✅", "info"
+
+status, status_icon, current_level = resolve(data)
+
+if data:
+    all_messages = data.get('messages', [])
     for msg in all_messages:
         print(f"{msg}")
 
 summary_path = os.environ.get("ATOMGIT_STEP_SUMMARY", "")
 if summary_path:
-    status_icon = "✅" if status == "pass" else "⚠️"
     summary_lines = [
         f"## {status_icon} API 接口校验结果\n",
     ]
@@ -66,6 +77,9 @@ if summary_path:
 
     with open(summary_path, "a", encoding="utf-8") as f:
         f.write("\n".join(summary_lines) + "\n")
+
+# error -> 失败退出(非零), warn/info -> 成功退出(0)
+sys.exit(1 if current_level == "error" else 0)
 EOF
 
 python3 /tmp/get_result.py
