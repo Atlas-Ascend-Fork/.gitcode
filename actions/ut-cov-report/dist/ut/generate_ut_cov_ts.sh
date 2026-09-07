@@ -19,11 +19,29 @@ echo "coverage-final.json found: ${coverageJson}"
 
 node "${SCRIPT_DIR}/convert_json_to_lcov.mjs" "${coverageJson}" "${WORKSPACE}/cov/coverage.info"
 
+cd "${WORKSPACE}"
+
+rm -rf cov/all_cov
+if command -v genhtml >/dev/null 2>&1; then
+    if genhtml "cov/coverage.info" --prefix "${WORKSPACE}" -o "cov/all_cov" --legend; then
+        echo "Full coverage report: cov/all_cov"
+    else
+        echo "WARN: genhtml failed, skip full coverage report"
+        rm -rf cov/all_cov
+    fi
+else
+    echo "WARN: genhtml not found, skip full coverage report"
+fi
+
+if [ -f "cov/coverage.info" ]; then
+    mkdir -p cov/inc_cov
+    python3 -m diff_cover.diff_cover_tool "cov/coverage.info" --compare-branch=origin/${TARGET_BRANCH} --fail-under=${COVERAGE_NUM} --html-report "cov/inc_cov/diff_cover.html" || true
+    if [ ! -f "cov/inc_cov/diff_cover.html" ]; then
+        echo "WARN: diff-cover report not generated, skip incremental coverage report"
+        rm -rf cov/inc_cov
+    fi
+fi
+
 cd "${WORKSPACE}/cov"
 tar -zcf "ut_cov_${UT_TYPE}.tar.gz" *
 cp -f "ut_cov_${UT_TYPE}.tar.gz" "${WORKSPACE}"
-
-cd "${WORKSPACE}"
-if [ -f "cov/coverage.info" ]; then
-    python3 -m diff_cover.diff_cover_tool "cov/coverage.info" --compare-branch=origin/${TARGET_BRANCH} --fail-under=${COVERAGE_NUM} || true
-fi
