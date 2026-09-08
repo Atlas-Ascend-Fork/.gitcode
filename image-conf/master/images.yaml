@@ -964,7 +964,7 @@ repos:
       API_Check:
         ubuntu24.04:x86:api_check
 
-  pto-isa:
+  pto-isa_3465:
     stages:
       Compile_Ascend_X86:
         ubuntu24.04_gcc15:x86:lv6
