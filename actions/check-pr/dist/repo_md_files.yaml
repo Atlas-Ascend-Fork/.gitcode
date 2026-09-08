@@ -11,6 +11,8 @@ asc-devkit:
   - docs/zh/api
   - docs/zh/guide
   - docs/zh/vitepress
+  - docs/api
+  - docs/guide
   - .agent
   - .claude
   - .codex
