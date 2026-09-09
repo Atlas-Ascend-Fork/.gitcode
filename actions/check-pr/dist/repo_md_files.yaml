@@ -18,6 +18,9 @@ asc-devkit:
   - .codex
   - .opencode
 
+asc-tools:
+  - tools
+
 amct:
   - docs
   - .claude
