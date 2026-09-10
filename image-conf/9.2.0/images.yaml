@@ -911,6 +911,12 @@ repos:
 
 
   pypto:
+    os_mirror:
+      ubuntu24.04_gcc15:
+        arm:
+          lv6: ubuntu24.04_arm:lv6_v2.1005
+        x86:
+          lv6: ubuntu24.04_x86:lv6_v2.1005
     stages:
       Compile_Ascend_X86:
         ubuntu24.04_gcc15:x86:lv6
