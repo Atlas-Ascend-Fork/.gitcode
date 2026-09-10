@@ -1,22 +1,38 @@
 # -*- coding: utf-8 -*-
 """
-CANN PR 门禁检测：URL 链接 & 三方库引用白名单检查。
+CANN PR 门禁检测：开源依赖与 URL 白名单检查。
+
+门禁文件：oss_dep_security_gate_<branch>.json（如 master 分支为
+oss_dep_security_gate_master.json），由 sbom 扫描工程对各仓扫描生成，
+每仓 key 结构：branch / CANN_CMAKE_TAG / url / opensource_c /
+opensource_py / opensource_js。
 
 检测逻辑：
 1. 获取开发者提交的代码 patch（优先读取 get-pr 产出的 update_file_detail.txt，
    即 git diff -U0 -w --no-renames origin/<target_branch>...HEAD 的输出；
    文件不存在时尝试在代码仓内重新生成），提取新增行中的：
    - URL 链接（http/https）
-   - 三方库引用（add_cann_third_party(xxx)）
+   - C/C++ 三方库引用（add_cann_third_party(xxx)）
+   - Python 依赖声明（*requirements*.txt 的新增行，如 torch==2.5.1）
+   - NodeJS 依赖声明（package.json 新增的 "name": "version" 行）
    若均未涉及，门禁直接通过。
-2. 涉及 URL 或三方库引用时，读取目标分支对应的白名单文件
-   pipline_ctrl_<branch>.json（如 master 分支为 pipline_ctrl_master.json）：
-   - 代码仓不在白名单文件中：此代码仓不作检查管控，门禁通过；
-   - 代码仓在白名单文件中：
-     (1) 开发者新增的 URL 必须在 URL 属性内；
-     (2) 开发者新增的三方库引用必须在 Third_party 属性内；
-     全部通过则门禁通过，否则门禁拦截，打印
-     "引入的URL/三方库 不在白名单列表内" 并以非 0 退出。
+2. 读取目标分支对应的门禁文件，代码仓不在文件 key 中：此代码仓不作检查
+   管控，门禁通过。
+3. 代码仓受控时：
+   (1) url 白名单：新增 URL 必须在 url 属性内（完全匹配或带边界字符的
+       前缀匹配）。URL 不在 url 白名单内时，若能识别为 Python/NodeJS
+       依赖组件 URL（pypi 项目页、whl/tgz 制品、npm registry 制品等），
+       且组件版本仍满足 opensource_py / opensource_js 的版本约束，
+       依然准许合入（宽范围版本放行）；组件版本大于 opensource_py /
+       opensource_js 允许版本时拦截。
+   (2) opensource_c 白名单：新增三方库引用必须在 opensource_c 属性内。
+   (3) opensource_py / opensource_js 版本管控（requirements.txt /
+       package.json 引入的依赖组件）：
+       - 组件在白名单内且版本满足约束：放行；
+       - 版本号大于白名单允许版本：拦截，需要在相应依赖文件
+         requirements.txt 或 package.json 同步更新版本号；
+       - 组件不在白名单内，或版本落在约束范围外：拦截。
+   全部通过则门禁通过，否则门禁拦截并以非 0 退出。
 
 用法：
     python3 check_url_third_party.py <WORKSPACE> <REPOSITORY_NAME> <GIT_TARGET_BRANCH>
@@ -30,7 +46,14 @@ import re
 import subprocess
 import sys
 
+try:
+    from urllib.parse import unquote
+except ImportError:  # py2 兜底
+    from urllib import unquote
+
 THIS_FILE_PATH = os.path.dirname(os.path.realpath(__file__))
+
+GATE_FILE_PREFIX = "oss_dep_security_gate_"
 
 URL_PATTERN = re.compile(r'https?://[^\s"\'<>\)\\]+', re.IGNORECASE)
 
@@ -41,17 +64,410 @@ THIRD_PARTY_PATTERN = re.compile(
 
 BRANCH_NAME_PATTERN = re.compile(r'^[A-Za-z0-9._\-]+$')
 
+# Python 依赖文件（*requirements*.txt）
+PY_REQ_FILE_RE = re.compile(r'(^|/)requirements[\w.-]*\.txt$', re.IGNORECASE)
+
+# NodeJS 依赖清单（package.json / package-lock.json）
+JS_FILE_RE = re.compile(r'(^|/)package(-lock)?\.json$')
+
+# package.json 中承载依赖的 section
+JS_SECTION_KEYS = ('dependencies', 'devDependencies', 'optionalDependencies',
+                   'peerDependencies', 'overrides')
+
+# package.json 中需要跳过的非依赖 key（section 上下文缺失时兜底过滤）
+JS_BLOCKED_KEYS = {
+    'name', 'version', 'type', 'main', 'module', 'types', 'typings', 'files',
+    'license', 'licence', 'author', 'description', 'private', 'sideEffects',
+    'exports', 'imports', 'homepage', 'repository', 'keywords', 'engines',
+    'os', 'cpu', 'funding', 'resolutions', 'packageManager', 'resolved',
+    'integrity', 'dev', 'optional', 'peer', 'hasInstallScript', 'bin',
+    'directories', 'scripts', 'url', 'email', 'icon', 'displayName',
+    'publisher', 'categories', 'activationEvents', 'contributes',
+}
+
+# 依赖版本约束的大致形态（用于识别 "name": "version" 依赖行）
+JS_SPEC_SHAPE = re.compile(
+    r'^(\^|~|>=|<=|>|<|=|\*|v?\d|workspace:|file:|npm:|github:|link:'
+    r'|git\+|latest$|https?://)')
+
+# section 声明行（用于跟踪 package.json 上下文）
+JS_SECTION_LINE_RE = re.compile(
+    r'"(dependencies|devDependencies|optionalDependencies|peerDependencies'
+    r'|overrides|engines|scripts|resolutions)"\s*:')
+
 # URL 末尾可能粘连的标点（ASCII 标点、markdown 反引号、全角/中文标点等）
 TRAILING_PUNCTUATION = '.,;:!?)]}>\'"`」〉》】〕』”’），；。？！、'
 
-# 全角标点：中文语境下 URL 常与后续说明文字直接粘连（无空格），
-# 如 "参考（https://xxx/anaconda）安装"，按此类字符截断生成候选
+# 全角标点：中文语境下 URL 常与后续说明文字直接粘连（无空格）
 FULLWIDTH_CUT_CHARS = '，。；：？！、（）「」『』《》〈〉【】〔〕［］“”‘’'
 
 # URL 前缀匹配时允许的边界字符，防止 https://gitcode.com 匹配
 # https://gitcode.com.evil.com 这类旁路；} 用于兼容白名单中被截断的
 # 占位符条目（如 https://xxx/${obs_path）
 PREFIX_BOUNDARY_CHARS = ('/', '?', '#', '&', ';', '}')
+
+# ---------------- 版本比较（PEP440-lite / semver-lite） ----------------
+
+
+def _ver_tuple(v, size=5):
+    parts = []
+    for seg in str(v).split('.'):
+        m = re.match(r'^(\d+)', seg)
+        if not m:
+            break
+        parts.append(int(m.group(1)))
+    while len(parts) < size:
+        parts.append(0)
+    return tuple(parts[:size])
+
+
+def py_ver_key(v):
+    """Python 版本 -> 可比较 key（忽略 local 段，支持 post/dev/rc 后缀）"""
+    v = str(v).strip().lower()
+    if not v:
+        return ((_ver_tuple('0'), (1, 0, 0)))
+    v = v.split('+', 1)[0]
+    post = None
+    m = re.search(r'[.\-_](?:post|rev|r)(\d+)$', v)
+    if m:
+        post = int(m.group(1))
+        v = v[:m.start()]
+    pre = None
+    m = re.search(r'[.\-_](dev|a|b|rc)(\d+)$', v)
+    if m:
+        pre = (m.group(1), int(m.group(2)))
+        v = v[:m.start()]
+    nums = _ver_tuple(v)
+    if pre:
+        phase = (0, {'dev': 0, 'a': 1, 'b': 2, 'rc': 3}[pre[0]], pre[1])
+    elif post is not None:
+        phase = (2, 0, post)
+    else:
+        phase = (1, 0, 0)
+    return (nums, phase)
+
+
+def js_ver_key(v):
+    """NodeJS semver 版本 -> 可比较 key"""
+    v = str(v).strip().lower().lstrip('v')
+    if not v:
+        return _ver_tuple('0')
+    v = v.split('+', 1)[0]
+    return _ver_tuple(v)
+
+
+def _bump_at(nums, idx):
+    """在 idx 段进位，其后（前 3 段内）清零：(3,5,32,0,0)@1 -> (3,6,0,0,0)"""
+    out = list(nums)
+    out[idx] = out[idx] + 1
+    for j in range(idx + 1, 3):
+        out[j] = 0
+    return tuple(out)
+
+
+def _bump_partial(val):
+    """部分版本上界：'2.1' -> <2.2.0；'2' -> <3.0.0（按原有段数进位）"""
+    segs = [s for s in str(val).split('.') if s != '']
+    idx = max(len(segs) - 1, 0)
+    return _bump_at(_ver_tuple(val), idx)
+
+
+def _bump_penultimate(val):
+    """次末段进位上界：'1.4.5' -> <1.5.0；'2.2' -> <3.0.0（~= / ~ 语义）"""
+    segs = [s for s in str(val).split('.') if s != '']
+    idx = max(len(segs) - 2, 0)
+    return _bump_at(_ver_tuple(val), idx)
+
+
+PY_SPEC_ATOM_RE = re.compile(r'^(==|>=|<=|>|<|~=|\*|=)\s*(.*)$')
+
+
+def parse_py_spec(spec):
+    """
+    解析 Python 版本约束为 [[(op, key), ...], ...]（|| 分支 -> 逗号原子）。
+    '*' / 空约束 -> 空原子列表（恒真）；无法解析返回 None。
+    """
+    branches = []
+    for part in str(spec).split('||'):
+        part = part.strip()
+        if not part:
+            branches.append([])
+            continue
+        atoms = []
+        ok = True
+        for atom in part.split(','):
+            atom = atom.strip()
+            if not atom or atom == '*':
+                continue
+            m = PY_SPEC_ATOM_RE.match(atom)
+            if not m:
+                return None
+            op, val = m.group(1), m.group(2).strip()
+            if val in ('', '*'):
+                continue
+            if val.endswith('.*'):
+                base = val[:-2]
+                atoms.append(('>=', py_ver_key(base)))
+                atoms.append(('<', py_ver_key('.'.join(
+                    str(x) for x in _bump_partial(base)))))
+                continue
+            if op == '=':
+                op = '=='
+            if op == '~=':
+                atoms.append(('>=', py_ver_key(val)))
+                atoms.append(('<', py_ver_key('.'.join(
+                    str(x) for x in _bump_penultimate(val)))))
+                continue
+            try:
+                atoms.append((op, py_ver_key(val)))
+            except Exception:
+                return None
+        if ok:
+            branches.append(atoms)
+    return branches
+
+
+def _parse_js_token(tok):
+    """单个 semver token -> [(op, key), ...]；'*'/无法解析 -> []（无约束）"""
+    tok = tok.strip()
+    if not tok or tok in ('*', 'x', 'X', 'latest'):
+        return []
+    if re.match(r'^(workspace:|file:|npm:|github:|link:|git\+|https?://)', tok):
+        return []
+    m = re.match(r'^([\^~]|>=|<=|>|<|=)?\s*(.+)$', tok)
+    if not m:
+        return None
+    op, val = (m.group(1) or ''), m.group(2).strip()
+    if not re.match(r'^v?\d', val):
+        return None
+    nums = _ver_tuple(val.lstrip('v'))
+    segs = val.lstrip('v').split('.')
+    if op == '^':
+        if nums[0] > 0:
+            upper = _bump_at(nums, 0)
+        elif len(segs) > 1 and nums[1] > 0:
+            upper = _bump_at(nums, 1)
+        else:
+            upper = _bump_at(nums, 2)
+        return [('>=', nums), ('<', upper)]
+    if op == '~':
+        return [('>=', nums), ('<', _bump_penultimate(val))]
+    if op == '':
+        if len(segs) < 3:
+            return [('>=', nums), ('<', _bump_partial(val))]
+        return [('==', nums)]
+    if op == '=':
+        return [('==', nums)]
+    return [(op, nums)]
+
+
+def parse_js_spec(spec):
+    """解析 NodeJS 版本约束为 [[(op, key), ...], ...]；无法解析返回 None"""
+    s = str(spec).strip()
+    if not s:
+        return [[]]
+    branches = []
+    for part in s.split('||'):
+        part = part.strip()
+        if not part:
+            branches.append([])
+            continue
+        atoms = []
+        ok = True
+        m = re.match(r'^(.+?)\s+-\s+(.+)$', part)
+        if m:  # 连字符区间 a - b
+            atoms.append(('>=', js_ver_key(m.group(1))))
+            hi = m.group(2).strip()
+            segs = hi.split('.')
+            if len(segs) < 3:
+                atoms.append(('<', _bump_partial(hi)))
+            else:
+                atoms.append(('<=', js_ver_key(hi)))
+            branches.append(atoms)
+            continue
+        for tok in part.split():
+            parsed = _parse_js_token(tok)
+            if parsed is None:
+                ok = False
+                break
+            atoms.extend(parsed)
+        if not ok:
+            return None
+        branches.append(atoms)
+    return branches
+
+
+def _atom_ok(vkey, op, k):
+    if op == '==':
+        return vkey == k
+    if op == '>=':
+        return vkey >= k
+    if op == '<=':
+        return vkey <= k
+    if op == '>':
+        return vkey > k
+    if op == '<':
+        return vkey < k
+    return True
+
+
+def _branch_upper(atoms):
+    """分支上界 (key, inclusive)；无上界返回 None"""
+    upper = None
+    for op, k in atoms:
+        if op in ('==', '<='):
+            cand = (k, True)
+        elif op == '<':
+            cand = (k, False)
+        else:
+            continue
+        if upper is None or cand[0] > upper[0] or \
+                (cand[0] == upper[0] and cand[1] and not upper[1]):
+            upper = cand
+    return upper
+
+
+def check_version_key(vkey, wl_parsed, upper_keys_exclusive=None):
+    """
+    版本 key 对白名单约束集的判定。
+    返回 ('ok'|'greater'|'out', upper)。
+    """
+    for branches in wl_parsed:
+        if all(_atom_ok(vkey, op, k) for op, k in branches):
+            return 'ok', None
+    for branches in wl_parsed:
+        if _branch_upper(branches) is None:
+            return 'out', None  # 存在无上界分支却仍未满足 -> 范围外（如低于下限）
+    upper = None
+    for branches in wl_parsed:
+        b = _branch_upper(branches)
+        if b and (upper is None or b[0] > upper[0] or
+                  (b[0] == upper[0] and b[1] and not upper[1])):
+            upper = b
+    if upper is not None:
+        k, incl = upper
+        if vkey > k or (vkey == k and not incl):
+            return 'greater', upper
+    # 开发者约束的排他上界与白名单排他上界相同（如 ^3.5.34 vs ^3.5.32）
+    if upper_keys_exclusive and vkey in upper_keys_exclusive and upper \
+            and vkey == upper[0] and not upper[1]:
+        return 'ok', upper
+    return 'out', upper
+
+
+def spec_has_unbounded_branch(branches_list):
+    for branches in branches_list:
+        if _branch_upper(branches) is None:
+            return True
+    return False
+
+
+# ---------------- 依赖组件识别 ----------------
+
+
+def normalize_py_name(name):
+    return re.sub(r'[-_.]+', '-', str(name).strip().lower())
+
+
+def parse_py_req_line(line):
+    """解析 requirements 新增行 -> (name, spec) 或 None"""
+    t = line.strip()
+    if not t or t.startswith('#') or t.startswith('-'):
+        return None
+    t = re.sub(r'\s+#.*$', '', t).strip()
+    if not t:
+        return None
+    t = t.split(';', 1)[0].strip()
+    m = re.match(r'^([A-Za-z0-9][A-Za-z0-9._-]*)\s*(?:\[[^\]]*\])?\s*(.*)$', t)
+    if not m:
+        return None
+    name = m.group(1)
+    spec = re.sub(r'\s*([<>=!~,;@])\s*', r'\1', m.group(2).strip())
+    if not spec:
+        spec = '*'
+    return name, spec
+
+
+def parse_js_dep_line(line, section):
+    """解析 package.json 新增行 -> (name, spec) 或 None"""
+    m = re.search(r'"([^"]+)"\s*:\s*"([^"]*)"', line)
+    if not m:
+        return None
+    key, val = m.group(1).strip(), m.group(2).strip()
+    if not key or key.startswith('//'):
+        return None
+    if section is not None:
+        if section not in JS_SECTION_KEYS:
+            return None
+    else:
+        if key in JS_BLOCKED_KEYS:
+            return None
+    if not JS_SPEC_SHAPE.match(val):
+        return None
+    return key, val
+
+
+ARTIFACT_EXTS = ('.whl', '.tar.gz', '.tgz', '.zip')
+ARTIFACT_SEG_RE = re.compile(
+    r'^([A-Za-z0-9][A-Za-z0-9_.@+-]*?)-'
+    r'(\d+(?:\.\d+)+(?:\.(?:post|dev|rc)\d+)*(?:\+[\w.]+)?)'
+    r'(?:[-.].*)?$')
+
+
+def _artifact_from_last_segment(seg):
+    for ext in ARTIFACT_EXTS:
+        if seg.endswith(ext):
+            seg = seg[:-len(ext)]
+            break
+    else:
+        return None
+    m = ARTIFACT_SEG_RE.match(seg)
+    if not m:
+        return None
+    return m.group(1), m.group(2)
+
+
+def extract_dep_from_url(url):
+    """
+    识别 Python/NodeJS 依赖组件 URL。
+    返回 (name, version|None)；非依赖组件 URL 返回 None。
+    """
+    u = url.split('#', 1)[0].split('?', 1)[0]
+    try:
+        u = unquote(u)
+    except Exception:
+        pass
+    # pypi 项目页：https://pypi.org/project/<name>/<version>/
+    m = re.match(r'^https?://pypi\.org/project/([A-Za-z0-9._-]+)'
+                 r'(?:/([0-9][A-Za-z0-9.+*-]*))?', u, re.IGNORECASE)
+    if m:
+        return m.group(1), m.group(2)
+    # npm registry 制品（含 scope）
+    m = re.match(r'^https?://registry\.npmjs\.org/(@[^/]+)/([^/]+)/-/'
+                 r'[^/]+-([0-9][\w.+-]*)\.(?:tgz|tar\.gz)$', u)
+    if m:
+        return '{}/{}'.format(m.group(1), m.group(2)), m.group(3)
+    m = re.match(r'^https?://registry\.npmjs\.org/([^/@][^/]*)/-/'
+                 r'[^/]+-([0-9][\w.+-]*)\.(?:tgz|tar\.gz)$', u)
+    if m:
+        return m.group(1), m.group(2)
+    # 通用制品：取 URL 最后一段解析 <name>-<version>.<ext>
+    seg = u.rstrip('/').split('/')[-1]
+    return _artifact_from_last_segment(seg)
+
+
+def version_from_url_spec(spec):
+    """从 '@https://...' / 'git+https://...' 直引约束中提取制品版本"""
+    m = re.search(r'https?://[^\s;]+', spec)
+    if not m:
+        return None
+    dep = extract_dep_from_url(m.group(0))
+    if dep and dep[1]:
+        return dep[1]
+    return None
+
+
+# ---------------- 日志 ----------------
 
 
 def log_info(msg):
@@ -66,6 +482,9 @@ def log_error(msg):
     print("[ERROR] check_url_third_party: {}".format(msg))
 
 
+# ---------------- patch 获取与解析 ----------------
+
+
 def load_patch(workspace, target_branch):
     """获取开发者提交的代码 patch（unified diff 全量文本）"""
     patch_file = os.path.join(workspace, "update_file_detail.txt")
@@ -74,7 +493,6 @@ def load_patch(workspace, target_branch):
         with open(patch_file, "r", encoding="utf-8", errors="replace") as f:
             return f.read()
 
-    # 兜底：update_file_detail.txt 不存在时，尝试在代码仓内重新生成 diff
     log_warning("代码 patch 文件不存在: {}，尝试通过 git diff 生成".format(patch_file))
     ref = "origin/{}".format(target_branch)
     try:
@@ -117,12 +535,7 @@ def clean_url(url):
 
 
 def url_candidates(url):
-    """
-    生成待匹配的 URL 候选列表：
-    - 原始串（白名单中存在含粘连标点的原始条目）
-    - 去除末尾标点后的串
-    - 按第一个全角标点截断后的串（处理中文语境下 URL 与说明文字粘连的场景）
-    """
+    """生成待匹配的 URL 候选（原始串 / 去尾标点 / 全角截断）"""
     candidates = []
     for cand in (url, clean_url(url)):
         if cand and cand not in candidates:
@@ -137,12 +550,7 @@ def url_candidates(url):
 
 
 def url_in_whitelist(url, url_whitelist):
-    """
-    判断新增 URL 是否在白名单内。
-    匹配规则：完全相等（含末尾斜杠等价），或白名单条目是新增 URL 的前缀
-    且带边界字符（白名单中存在裸域名条目和被 { 截断的占位符条目，
-    需按前缀放行）。
-    """
+    """URL 完全匹配或带边界字符的前缀匹配"""
     url_lower = url.lower()
     for entry in url_whitelist:
         entry = entry.strip().lower()
@@ -157,16 +565,163 @@ def url_in_whitelist(url, url_whitelist):
 
 
 def normalize_third_party(entry):
-    """
-    归一化三方库白名单条目。
-    兼容两种格式：完整调用 add_cann_third_party(boost) 与裸名称 boost，
-    统一提取三方库名称。
-    """
+    """归一化 opensource_c 条目为三方库名称"""
     entry = entry.strip()
-    match = THIRD_PARTY_PATTERN.search(entry)
-    if match:
-        return match.group(1).lower()
+    m = THIRD_PARTY_PATTERN.search(entry)
+    if m:
+        return m.group(1).lower()
     return entry.lower()
+
+
+# ---------------- 白名单加载 ----------------
+
+
+def load_py_whitelist(py_conf):
+    """opensource_py -> {归一化包名: [spec, ...]}"""
+    wl = {}
+    if not isinstance(py_conf, dict):
+        return wl
+    for name, spec in py_conf.items():
+        if isinstance(spec, str):
+            wl.setdefault(normalize_py_name(name), []).append(spec)
+    return wl
+
+
+def load_js_whitelist(js_conf):
+    """opensource_js（含 dependencies/devDependencies/overrides/lock 等）->
+    {包名: [spec, ...]}"""
+    wl = {}
+
+    def walk(node):
+        if isinstance(node, dict):
+            for k, v in node.items():
+                if isinstance(v, str):
+                    wl.setdefault(str(k), []).append(v)
+                elif isinstance(v, dict):
+                    walk(v)
+
+    walk(js_conf if isinstance(js_conf, dict) else {})
+    return wl
+
+
+# ---------------- 主流程 ----------------
+
+
+def collect_changes(added_lines):
+    """从新增行提取 URL / C 三方库 / py 依赖 / js 依赖"""
+    new_urls = {}
+    new_third_party = {}
+    new_py_deps = {}
+    new_js_deps = {}
+    js_section = {}
+    for file_path, line in added_lines:
+        if not file_path:
+            continue
+        for url in URL_PATTERN.findall(line):
+            if url:
+                new_urls.setdefault(url, set()).add(file_path)
+        for name in THIRD_PARTY_PATTERN.findall(line):
+            new_third_party.setdefault(name.lower(), set()).add(file_path)
+        norm_path = file_path.replace('\\', '/')
+        if PY_REQ_FILE_RE.search(norm_path):
+            dep = parse_py_req_line(line)
+            if dep:
+                new_py_deps.setdefault(dep, set()).add(file_path)
+        if JS_FILE_RE.search(norm_path):
+            m = JS_SECTION_LINE_RE.search(line)
+            if m:
+                js_section[file_path] = m.group(1)
+                continue
+            dep = parse_js_dep_line(line, js_section.get(file_path))
+            if dep:
+                new_js_deps.setdefault(dep, set()).add(file_path)
+    return new_urls, new_third_party, new_py_deps, new_js_deps
+
+
+def describe_files(files):
+    return ", ".join(sorted(files))
+
+
+def check_dep_version(ecosystem, name, spec, wl_specs, files):
+    """
+    检查依赖声明（requirements.txt / package.json 新增行）的版本合规性。
+    返回 True 放行 / False 拦截。
+    """
+    dep_file = 'requirements.txt' if ecosystem == 'py' else 'package.json'
+    attr = 'opensource_py' if ecosystem == 'py' else 'opensource_js'
+    eco_label = 'Python' if ecosystem == 'py' else 'NodeJS'
+    if spec.startswith('@') or '://' in spec or spec.startswith('git+'):
+        ver = version_from_url_spec(spec)
+        if ver is None:
+            log_info("新增{}依赖组件 {} 以URL方式引入且组件在{}白名单内，放行 ({})"
+                     .format(eco_label, name, attr, describe_files(files)))
+            return True
+        vkey = py_ver_key(ver) if ecosystem == 'py' else js_ver_key(ver)
+        dev_excl = None
+    else:
+        parse = parse_py_spec if ecosystem == 'py' else parse_js_spec
+        try:
+            branches = parse(spec)
+        except Exception:
+            branches = None
+        if branches is None:
+            log_warning("依赖 {} 的版本约束 '{}' 无法解析，按组件白名单放行 ({})"
+                        .format(name, spec, describe_files(files)))
+            return True
+        eq_keys = [k for b in branches for op, k in b if op == '==']
+        uppers = [_branch_upper(b) for b in branches]
+        upper_vals = [u for u in uppers if u]
+        if eq_keys or upper_vals:
+            keys = list(eq_keys)
+            for k, _incl in upper_vals:
+                keys.append(k)
+            vkey = max(keys)
+            dev_excl = set(k for k, incl in upper_vals if not incl)
+        else:
+            # 开发者约束无上界（如 >=x / *）
+            wl_parsed = []
+            for s in wl_specs:
+                b = parse(s)
+                if b is not None:
+                    wl_parsed.extend(b)
+            if wl_parsed and spec_has_unbounded_branch(wl_parsed):
+                log_info("新增{}依赖组件 {} 版本约束 '{}' 在{}宽范围版本内，放行 ({})"
+                         .format(eco_label, name, spec, attr,
+                                 describe_files(files)))
+                return True
+            log_error("引入的{}依赖组件 {} 版本约束 '{}' 无上界，超出{}允许版本 {}，"
+                      "拦截：需要在相应依赖文件 {} 同步更新版本号 (文件: {})"
+                      .format(eco_label, name, spec, attr,
+                              ' || '.join(wl_specs), dep_file,
+                              describe_files(files)))
+            return False
+    # 版本 key 判定
+    wl_parsed = []
+    parse = parse_py_spec if ecosystem == 'py' else parse_js_spec
+    for s in wl_specs:
+        b = parse(s)
+        if b is not None:
+            wl_parsed.extend(b)
+    if not wl_parsed:
+        log_warning("依赖 {} 的白名单版本约束无法解析，按组件白名单放行 ({})"
+                    .format(name, describe_files(files)))
+        return True
+    status, upper = check_version_key(vkey, wl_parsed, dev_excl)
+    if status == 'ok':
+        log_info("新增{}依赖组件 {}@'{}' 在{}白名单版本范围内，放行 ({})"
+                 .format(eco_label, name, spec, attr, describe_files(files)))
+        return True
+    if status == 'greater':
+        log_error("引入的{}依赖组件 {} 版本号('{}') 大于{}白名单允许版本 {}，"
+                  "拦截：需要在相应依赖文件 {} 同步更新版本号 (文件: {})"
+                  .format(eco_label, name, spec, attr,
+                          ' || '.join(wl_specs), dep_file,
+                          describe_files(files)))
+        return False
+    log_error("引入的{}依赖组件 {} 版本('{}') 不在{}白名单版本约束 {} 范围内 (文件: {})"
+              .format(eco_label, name, spec, attr, ' || '.join(wl_specs),
+                      describe_files(files)))
+    return False
 
 
 def main():
@@ -186,86 +741,195 @@ def main():
         return 0
 
     added_lines = parse_added_lines(diff_text)
+    new_urls, new_third_party, new_py_deps, new_js_deps = \
+        collect_changes(added_lines)
 
-    new_urls = {}
-    new_third_party = {}
-    for file_path, line in added_lines:
-        for url in URL_PATTERN.findall(line):
-            if url:
-                new_urls.setdefault(url, set()).add(file_path)
-        for name in THIRD_PARTY_PATTERN.findall(line):
-            new_third_party.setdefault(name.lower(), set()).add(file_path)
+    log_info("PR 新增内容中检测到 URL {} 个，C三方库引用 {} 个，"
+             "Python依赖声明 {} 个，NodeJS依赖声明 {} 个".format(
+                 len(new_urls), len(new_third_party),
+                 len(new_py_deps), len(new_js_deps)))
 
-    log_info("PR 新增内容中检测到 URL {} 个，三方库引用 {} 个".format(
-        len(new_urls), len(new_third_party)))
-
-    # 2. 不包含 URL 或三方库，门禁通过
-    if not new_urls and not new_third_party:
-        log_info("开发者修改代码不包含URL或三方库，门禁通过")
+    if not new_urls and not new_third_party and not new_py_deps \
+            and not new_js_deps:
+        log_info("开发者修改代码不包含URL/三方库/依赖组件，门禁通过")
         return 0
 
-    # 3. 根据分支读取白名单文件 pipline_ctrl_xxxx.json
+    # 2. 读取门禁文件 oss_dep_security_gate_<branch>.json
     if not BRANCH_NAME_PATTERN.match(target_branch):
-        log_warning("分支名 {} 不含可用白名单文件，门禁通过".format(target_branch))
+        log_warning("分支名 {} 不含可用门禁文件，门禁通过".format(target_branch))
         return 0
-    whitelist_file = os.path.join(
-        THIS_FILE_PATH, "pipline_ctrl_{}.json".format(target_branch))
-    if not os.path.isfile(whitelist_file):
-        log_warning("白名单文件 pipline_ctrl_{}.json 不存在，分支 {} 不作检查管控，"
-                    "门禁通过".format(target_branch, target_branch))
+    gate_file = os.path.join(
+        THIS_FILE_PATH, "{}{}.json".format(GATE_FILE_PREFIX, target_branch))
+    if not os.path.isfile(gate_file):
+        log_warning("门禁文件 {}{}.json 不存在，分支 {} 不作检查管控，门禁通过"
+                    .format(GATE_FILE_PREFIX, target_branch, target_branch))
         return 0
 
     try:
-        with open(whitelist_file, "r", encoding="utf-8-sig") as f:
-            whitelist = json.load(f)
+        with open(gate_file, "r", encoding="utf-8-sig") as f:
+            gate = json.load(f)
     except Exception as e:
-        log_warning("白名单文件解析失败: {}，门禁通过".format(e))
+        log_warning("门禁文件解析失败: {}，门禁通过".format(e))
         return 0
 
-    # 4. 以代码仓为 key 查询，不在白名单文件内则不管控
-    repo_conf = whitelist.get(repo_name)
+    # 3. 以代码仓为 key 查询，不在门禁文件内则不管控
+    repo_conf = gate.get(repo_name)
     if not isinstance(repo_conf, dict):
-        log_info("代码仓 {} 不在白名单文件管控列表内，门禁通过".format(repo_name))
+        log_info("代码仓 {} 不在门禁文件管控列表内，门禁通过".format(repo_name))
         return 0
 
-    url_entries = repo_conf.get("URL") or []
-    third_party_entries = repo_conf.get("Third_party") or []
-    if not isinstance(url_entries, list) or not isinstance(third_party_entries, list):
-        log_warning("代码仓 {} 白名单属性格式异常，门禁通过".format(repo_name))
+    url_entries = repo_conf.get("url") or []
+    c_entries = repo_conf.get("opensource_c") or []
+    py_conf = repo_conf.get("opensource_py") or {}
+    js_conf = repo_conf.get("opensource_js") or {}
+    if not isinstance(url_entries, list) or not isinstance(c_entries, list):
+        log_warning("代码仓 {} 门禁属性格式异常，门禁通过".format(repo_name))
         return 0
     url_whitelist = [str(u) for u in url_entries]
-    third_party_whitelist = set(
-        normalize_third_party(t) for t in third_party_entries)
-    log_info("代码仓 {} 受控，URL 白名单 {} 条，三方库白名单 {} 条".format(
-        repo_name, len(url_whitelist), len(third_party_whitelist)))
+    c_whitelist = set(normalize_third_party(t) for t in c_entries)
+    py_wl = load_py_whitelist(py_conf)
+    js_wl = load_js_whitelist(js_conf)
+    log_info("代码仓 {} 受控，url 白名单 {} 条，opensource_c {} 条，"
+             "opensource_py {} 项，opensource_js {} 项".format(
+                 repo_name, len(url_whitelist), len(c_whitelist),
+                 len(py_wl), len(js_wl)))
 
-    # 5. 检查新增 URL / 三方库是否在白名单属性内
     blocked = False
+
+    # 4. C 三方库引用检查（opensource_c）
+    for name in sorted(new_third_party):
+        files = new_third_party[name]
+        if name in c_whitelist:
+            log_info("新增三方库在白名单内: add_cann_third_party({}) ({})"
+                     .format(name, describe_files(files)))
+        else:
+            blocked = True
+            log_error("引入的三方库 不在opensource_c白名单列表内: "
+                      "add_cann_third_party({}) (文件: {})"
+                      .format(name, describe_files(files)))
+
+    # 5. Python 依赖声明检查（opensource_py）
+    for (name, spec) in sorted(new_py_deps):
+        files = new_py_deps[(name, spec)]
+        key = normalize_py_name(name)
+        if key not in py_wl:
+            blocked = True
+            log_error("引入的Python依赖组件 {} 不在opensource_py白名单列表内 "
+                      "(文件: {})".format(name, describe_files(files)))
+        else:
+            if not check_dep_version('py', name, spec, py_wl[key], files):
+                blocked = True
+
+    # 6. NodeJS 依赖声明检查（opensource_js）
+    for (name, spec) in sorted(new_js_deps):
+        files = new_js_deps[(name, spec)]
+        if name not in js_wl and name.lower() not in js_wl:
+            blocked = True
+            log_error("引入的NodeJS依赖组件 {} 不在opensource_js白名单列表内 "
+                      "(文件: {})".format(name, describe_files(files)))
+        else:
+            specs = js_wl.get(name) or js_wl.get(name.lower())
+            if not check_dep_version('js', name, spec, specs, files):
+                blocked = True
+
+    # 7. URL 检查（url 白名单 + opensource_py/js 宽范围版本放行）
     for url in sorted(new_urls):
-        files = ", ".join(sorted(new_urls[url]))
+        files = new_urls[url]
         candidates = url_candidates(url)
         if any(url_in_whitelist(c, url_whitelist) for c in candidates):
-            log_info("新增 URL 在白名单内: {} ({})".format(clean_url(url), files))
-        else:
-            blocked = True
-            log_error("引入的URL 不在白名单列表内: {} (文件: {})".format(
-                clean_url(url), files))
-
-    for name in sorted(new_third_party):
-        files = ", ".join(sorted(new_third_party[name]))
-        if name in third_party_whitelist:
-            log_info("新增三方库在白名单内: add_cann_third_party({}) ({})".format(
-                name, files))
-        else:
-            blocked = True
-            log_error("引入的三方库 不在白名单列表内: add_cann_third_party({}) "
-                      "(文件: {})".format(name, files))
+            log_info("新增 URL 在白名单内: {} ({})"
+                     .format(clean_url(url), describe_files(files)))
+            continue
+        # URL 不在白名单：尝试识别为 py/js 依赖组件 URL，按版本范围放行
+        dep = extract_dep_from_url(clean_url(url))
+        relaxed = False
+        if dep:
+            dep_name, dep_ver = dep
+            eco = None
+            specs = None
+            py_key = normalize_py_name(dep_name)
+            if py_key in py_wl:
+                eco, specs = 'py', py_wl[py_key]
+            elif dep_name in js_wl:
+                eco, specs = 'js', js_wl[dep_name]
+            elif dep_name.lower() in js_wl:
+                eco, specs = 'js', js_wl[dep_name.lower()]
+            if eco is not None:
+                attr = 'opensource_py' if eco == 'py' else 'opensource_js'
+                dep_file = 'requirements.txt' if eco == 'py' else 'package.json'
+                if dep_ver is None:
+                    relaxed = True
+                    log_info("新增 URL 不在url白名单内，但依赖组件 {} 在{}白名单内，"
+                             "按组件白名单放行: {} ({})"
+                             .format(dep_name, attr, clean_url(url),
+                                     describe_files(files)))
+                else:
+                    parse = parse_py_spec if eco == 'py' else parse_js_spec
+                    vkey = (py_ver_key(dep_ver) if eco == 'py'
+                            else js_ver_key(dep_ver))
+                    wl_parsed = []
+                    for s in specs:
+                        b = parse(s)
+                        if b is not None:
+                            wl_parsed.extend(b)
+                    if wl_parsed:
+                        status, _upper = check_version_key(vkey, wl_parsed)
+                        if status == 'ok':
+                            relaxed = True
+                            log_info("新增 URL 不在url白名单内，但依赖组件 {} "
+                                     "版本 {} 仍在{}允许范围 {} 内，准许合入: {} ({})"
+                                     .format(dep_name, dep_ver, attr,
+                                             ' || '.join(specs), clean_url(url),
+                                             describe_files(files)))
+                        elif status == 'greater':
+                            blocked = True
+                            log_error("新增 URL 引入的{}依赖组件 {} 版本号({}) 大于{}"
+                                      "白名单允许版本 {}，拦截：需要在相应依赖文件 {} "
+                                      "同步更新版本号: {} (文件: {})"
+                                      .format('Python' if eco == 'py' else 'NodeJS',
+                                              dep_name, dep_ver, attr,
+                                              ' || '.join(specs), dep_file,
+                                              clean_url(url), describe_files(files)))
+                        else:
+                            blocked = True
+                            log_error("新增 URL 引入的{}依赖组件 {} 版本({}) 不在{}"
+                                      "白名单版本约束 {} 范围内: {} (文件: {})"
+                                      .format('Python' if eco == 'py' else 'NodeJS',
+                                              dep_name, dep_ver, attr,
+                                              ' || '.join(specs), clean_url(url),
+                                              describe_files(files)))
+                    else:
+                        relaxed = True
+                        log_warning("依赖组件 {} 白名单版本约束无法解析，按组件白名单"
+                                    "放行: {} ({})"
+                                    .format(dep_name, clean_url(url),
+                                            describe_files(files)))
+        if not relaxed:
+            # 未放行且未因版本规则拦截的，按 URL 不在白名单拦截
+            already = False
+            dep2 = extract_dep_from_url(clean_url(url))
+            if dep2:
+                py_key2 = normalize_py_name(dep2[0])
+                if py_key2 in py_wl or dep2[0] in js_wl \
+                        or dep2[0].lower() in js_wl:
+                    already = True  # 已按版本规则输出拦截原因
+            if not already:
+                blocked = True
+                if dep2:
+                    log_error("引入的URL 不在url白名单列表内，且识别为依赖组件 "
+                              "{}@{} 不在opensource_py/opensource_js白名单内: "
+                              "{} (文件: {})"
+                              .format(dep2[0], dep2[1] or '-', clean_url(url),
+                                      describe_files(files)))
+                else:
+                    log_error("引入的URL 不在白名单列表内: {} (文件: {})"
+                              .format(clean_url(url), describe_files(files)))
 
     if blocked:
-        log_error("门禁检查未通过：引入的URL/三方库 不在白名单列表内")
+        log_error("门禁检查未通过：引入的URL/三方库/依赖组件不合规")
         return 1
 
-    log_info("URL/三方库门禁检查通过")
+    log_info("URL/三方库/开源依赖门禁检查通过")
     return 0
 
 
