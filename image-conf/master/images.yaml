@@ -358,10 +358,6 @@ repos:
       # 不处理 ubuntu24，因为 base 是 ubuntu22
 
   graph-autofusion:
-    os_mirror:
-      ubuntu24.04_gcc15:
-        x86:
-          lv6: ubuntu24.04_x86:lv6_v2.1005
     stages:
       Compile_Ascend_X86:
         ubuntu24.04:x86:lv6
@@ -613,9 +609,6 @@ repos:
       ubuntu24.04:
         x86:
           api_check: ubuntu24.04.3_x86:lv6_v1.1076
-      ubuntu24.04_gcc15:
-        x86:
-          lv6: ubuntu24.04_x86:lv6_v2.1005
     stages:
       Compile_Ascend_X86:
         ubuntu24.04:x86:lv6
