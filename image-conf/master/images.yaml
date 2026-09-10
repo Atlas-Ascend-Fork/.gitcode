@@ -1101,11 +1101,17 @@ repos:
       Compile_Ascend_X86_TF:
         ubuntu24.04:x86:lv6
       Compile_Ascend_ARM:
-        ubuntu24.04:arm:lv6
+        ubuntu24.04_gcc15:arm:lv6
+      Compile_Ascend_X86_ubuntu24:
+        ubuntu24.04_gcc15:x86:lv6
+      Compile_Ascend_X86_TF_ubuntu24:
+        ubuntu24.04_gcc15:x86:lv6
+      Compile_Ascend_ARM_ubuntu24:
+        ubuntu24.04_gcc15:arm:lv6
       UT_Test:
-        ubuntu24.04:x86:lv6
+        ubuntu24.04_gcc15:x86:lv6
       ST_Test:
-        ubuntu24.04:x86:lv6
+        ubuntu24.04_gcc15:x86:lv6
 
   torchtitan-npu:
     os_mirror:
@@ -1438,3 +1444,11 @@ repos:
     stages:
       UT_Test:
         ubuntu24.04_gcc15:x86:lv6
+  triton-inference-server-ge-backend:
+    os_mirror:
+      ubuntu22.04:
+        arm:
+          image: 2.3.1-cann8.3.rc2-910b-utuntu22.04-py3.10-arm
+    stages:
+      Compile_Ascend_ARM:
+        ubuntu22.04:arm:image
