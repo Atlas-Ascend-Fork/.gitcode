@@ -961,6 +961,8 @@ repos:
         ubuntu24.04:x86:lv6
       PreSmoke_A3_npupool:
         ubuntu24.04:arm:smoke_A3
+      PreSmoke_npupool:
+        ubuntu24.04:arm:smoke
   dvpp-dev:
     os_mirror:
       ubuntu24.04:
