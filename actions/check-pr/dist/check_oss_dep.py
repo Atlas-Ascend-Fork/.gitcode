@@ -35,7 +35,7 @@ opensource_py / opensource_js。
    全部通过则门禁通过，否则门禁拦截并以非 0 退出。
 
 用法：
-    python3 check_url_third_party.py <WORKSPACE> <REPOSITORY_NAME> <GIT_TARGET_BRANCH>
+    python3 check_oss_dep.py <WORKSPACE> <REPOSITORY_NAME> <GIT_TARGET_BRANCH>
 
 退出码：0 门禁通过；1 门禁拦截
 """
@@ -471,15 +471,15 @@ def version_from_url_spec(spec):
 
 
 def log_info(msg):
-    print("[INFO] check_url_third_party: {}".format(msg))
+    print("[INFO] check_oss_dep: {}".format(msg))
 
 
 def log_warning(msg):
-    print("[WARNING] check_url_third_party: {}".format(msg))
+    print("[WARNING] check_oss_dep: {}".format(msg))
 
 
 def log_error(msg):
-    print("[ERROR] check_url_third_party: {}".format(msg))
+    print("[ERROR] check_oss_dep: {}".format(msg))
 
 
 # ---------------- patch 获取与解析 ----------------
@@ -726,7 +726,7 @@ def check_dep_version(ecosystem, name, spec, wl_specs, files):
 
 def main():
     if len(sys.argv) < 4:
-        log_error("参数不足，用法: python3 check_url_third_party.py "
+        log_error("参数不足，用法: python3 check_oss_dep.py "
                   "<WORKSPACE> <REPOSITORY_NAME> <GIT_TARGET_BRANCH>")
         return 1
 

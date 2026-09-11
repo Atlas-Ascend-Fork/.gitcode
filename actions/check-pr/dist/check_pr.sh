@@ -97,7 +97,7 @@ fi
 # fi
 
 LOG_HEAD "Check URL and third-party library gate"
-python3 ${SCRIPT_DIR}/check_url_third_party.py ${WORKSPACE} ${REPOSITORY_NAME} ${GIT_TARGET_BRANCH}
+python3 ${SCRIPT_DIR}/check_oss_dep.py ${WORKSPACE} ${REPOSITORY_NAME} ${GIT_TARGET_BRANCH}
 DP_ASSERT_EQUAL "$?" "0" "check URL and third-party library gate"
 
 
