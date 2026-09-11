@@ -62,6 +62,7 @@ ge:
 
 pypto:
   - docs/zh
+  - docs/en
   - .opencode
   - .agents
   - AGENTS.md
