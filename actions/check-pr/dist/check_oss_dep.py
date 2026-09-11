@@ -13,7 +13,8 @@ opensource_py / opensource_js。
    文件不存在时尝试在代码仓内重新生成），提取新增行中的：
    - URL 链接（http/https）
    - C/C++ 三方库引用（add_cann_third_party(xxx)）
-   - Python 依赖声明（*requirements*.txt 的新增行，如 torch==2.5.1）
+   - Python 依赖声明（*requirements*.txt 新增行、脚本中
+     pip install <name><op><version> 引入行）
    - NodeJS 依赖声明（package.json 新增的 "name": "version" 行）
    若均未涉及，门禁直接通过。
 2. 读取目标分支对应的门禁文件，代码仓不在文件 key 中：此代码仓不作检查
@@ -23,15 +24,16 @@ opensource_py / opensource_js。
        前缀匹配）。URL 不在 url 白名单内时，若能识别为 Python/NodeJS
        依赖组件 URL（pypi 项目页、whl/tgz 制品、npm registry 制品等），
        且组件版本仍满足 opensource_py / opensource_js 的版本约束，
-       依然准许合入（宽范围版本放行）；组件版本大于 opensource_py /
-       opensource_js 允许版本时拦截。
+       依然准许合入（宽范围版本放行）。
    (2) opensource_c 白名单：新增三方库引用必须在 opensource_c 属性内。
-   (3) opensource_py / opensource_js 版本管控（requirements.txt /
-       package.json 引入的依赖组件）：
+   (3) opensource_py / opensource_js 版本管控（依赖文件与脚本引入的
+       依赖组件）：
        - 组件在白名单内且版本满足约束：放行；
-       - 版本号大于白名单允许版本：拦截，需要在相应依赖文件
-         requirements.txt 或 package.json 同步更新版本号；
-       - 组件不在白名单内，或版本落在约束范围外：拦截。
+       - 版本号大于白名单允许版本（或落在约束范围外）：若 PR 已在相应
+         依赖文件（requirements.txt / package.json）同步声明该组件版本，
+         视为已完成版本同步更新，放行；否则拦截，并提示需要在相应依赖
+         文件 requirements.txt 或 package.json 同步更新版本号；
+       - 组件不在白名单内：拦截（新组件需先进入门禁基线）。
    全部通过则门禁通过，否则门禁拦截并以非 0 退出。
 
 用法：
@@ -94,6 +96,13 @@ JS_SPEC_SHAPE = re.compile(
 JS_SECTION_LINE_RE = re.compile(
     r'"(dependencies|devDependencies|optionalDependencies|peerDependencies'
     r'|overrides|engines|scripts|resolutions)"\s*:')
+
+# 脚本中的 pip 安装引入（如 build.sh 内 pip3 install torch-npu==2.6.1.post1）：
+# 属于"引入"而非"登记"，引入版本超出白名单时需 PR 内依赖文件同步声明
+PIP_INSTALL_RE = re.compile(
+    r'\bpip3?\s+install\s+(?:-\S+\s+)*'
+    r'([A-Za-z0-9][A-Za-z0-9._-]*)\s*(==|>=|<=|>|<|~=)\s*([A-Za-z0-9][\w.+*-]*)',
+    re.IGNORECASE)
 
 # URL 末尾可能粘连的标点（ASCII 标点、markdown 反引号、全角/中文标点等）
 TRAILING_PUNCTUATION = '.,;:!?)]}>\'"`」〉》】〕』”’），；。？！、'
@@ -608,11 +617,13 @@ def load_js_whitelist(js_conf):
 
 
 def collect_changes(added_lines):
-    """从新增行提取 URL / C 三方库 / py 依赖 / js 依赖"""
+    """从新增行提取 URL / C 三方库 / py 依赖 / js 依赖 / 依赖文件同步声明"""
     new_urls = {}
     new_third_party = {}
     new_py_deps = {}
     new_js_deps = {}
+    py_sync = {}
+    js_sync = {}
     js_section = {}
     for file_path, line in added_lines:
         if not file_path:
@@ -623,10 +634,13 @@ def collect_changes(added_lines):
         for name in THIRD_PARTY_PATTERN.findall(line):
             new_third_party.setdefault(name.lower(), set()).add(file_path)
         norm_path = file_path.replace('\\', '/')
+        base_name = norm_path.split('/')[-1].lower()
         if PY_REQ_FILE_RE.search(norm_path):
             dep = parse_py_req_line(line)
             if dep:
                 new_py_deps.setdefault(dep, set()).add(file_path)
+                if base_name == 'requirements.txt':
+                    py_sync.setdefault(normalize_py_name(dep[0]), []).append(dep[1])
         if JS_FILE_RE.search(norm_path):
             m = JS_SECTION_LINE_RE.search(line)
             if m:
@@ -635,21 +649,61 @@ def collect_changes(added_lines):
             dep = parse_js_dep_line(line, js_section.get(file_path))
             if dep:
                 new_js_deps.setdefault(dep, set()).add(file_path)
-    return new_urls, new_third_party, new_py_deps, new_js_deps
+                if base_name == 'package.json':
+                    js_sync.setdefault(dep[0], []).append(dep[1])
+        # 脚本等任意文件中的 pip install <name><op><ver> 引入（非登记）
+        stripped = line.strip()
+        if not stripped.startswith('#'):
+            for pm in PIP_INSTALL_RE.finditer(line):
+                dep = (pm.group(1), pm.group(2) + pm.group(3))
+                new_py_deps.setdefault(dep, set()).add(file_path)
+    return new_urls, new_third_party, new_py_deps, new_js_deps, py_sync, js_sync
 
 
 def describe_files(files):
     return ", ".join(sorted(files))
 
 
-def check_dep_version(ecosystem, name, spec, wl_specs, files):
+def sync_covers(ecosystem, vkey, sync_specs):
     """
-    检查依赖声明（requirements.txt / package.json 新增行）的版本合规性。
+    判断 PR 依赖文件（requirements.txt / package.json）中是否已同步声明
+    覆盖 vkey 的版本约束（版本同步更新完成的判定）。
+    """
+    if not sync_specs:
+        return False
+    parse = parse_py_spec if ecosystem == 'py' else parse_js_spec
+    keyfn = py_ver_key if ecosystem == 'py' else js_ver_key
+    for s in sync_specs:
+        s = str(s).strip()
+        if s.startswith('@') or '://' in s or s.startswith('git+'):
+            ver = version_from_url_spec(s)
+            if ver is None:
+                return True  # 声明为URL且无法解析版本，按已登记放行
+            if vkey == keyfn(ver):
+                return True
+            continue
+        try:
+            branches = parse(s)
+        except Exception:
+            branches = None
+        if branches is None:
+            return True  # 声明无法解析，按已登记放行
+        for b in branches:
+            if all(_atom_ok(vkey, op, k) for op, k in b):
+                return True
+    return False
+
+
+def check_dep_version(ecosystem, name, spec, wl_specs, files, sync_specs=None):
+    """
+    检查依赖声明（requirements.txt / package.json / 脚本 pip install 新增行）
+    的版本合规性。版本超出白名单时，若 PR 依赖文件已同步声明该版本则放行。
     返回 True 放行 / False 拦截。
     """
     dep_file = 'requirements.txt' if ecosystem == 'py' else 'package.json'
     attr = 'opensource_py' if ecosystem == 'py' else 'opensource_js'
     eco_label = 'Python' if ecosystem == 'py' else 'NodeJS'
+    sync_specs = sync_specs or []
     if spec.startswith('@') or '://' in spec or spec.startswith('git+'):
         ver = version_from_url_spec(spec)
         if ver is None:
@@ -689,6 +743,13 @@ def check_dep_version(ecosystem, name, spec, wl_specs, files):
                          .format(eco_label, name, spec, attr,
                                  describe_files(files)))
                 return True
+            if sync_specs:
+                log_info("新增{}依赖组件 {} 版本约束 '{}' 超出{}允许版本 {}，"
+                         "但PR已在依赖文件 {} 同步更新版本号，放行 ({})"
+                         .format(eco_label, name, spec, attr,
+                                 ' || '.join(wl_specs), dep_file,
+                                 describe_files(files)))
+                return True
             log_error("引入的{}依赖组件 {} 版本约束 '{}' 无上界，超出{}允许版本 {}，"
                       "拦截：需要在相应依赖文件 {} 同步更新版本号 (文件: {})"
                       .format(eco_label, name, spec, attr,
@@ -710,6 +771,13 @@ def check_dep_version(ecosystem, name, spec, wl_specs, files):
     if status == 'ok':
         log_info("新增{}依赖组件 {}@'{}' 在{}白名单版本范围内，放行 ({})"
                  .format(eco_label, name, spec, attr, describe_files(files)))
+        return True
+    if sync_covers(ecosystem, vkey, sync_specs):
+        log_info("新增{}依赖组件 {}@'{}' 版本超出{}白名单允许版本 {}，"
+                 "但PR已在依赖文件 {} 同步更新版本号，放行 ({})"
+                 .format(eco_label, name, spec, attr,
+                         ' || '.join(wl_specs), dep_file,
+                         describe_files(files)))
         return True
     if status == 'greater':
         log_error("引入的{}依赖组件 {} 版本号('{}') 大于{}白名单允许版本 {}，"
@@ -741,7 +809,7 @@ def main():
         return 0
 
     added_lines = parse_added_lines(diff_text)
-    new_urls, new_third_party, new_py_deps, new_js_deps = \
+    new_urls, new_third_party, new_py_deps, new_js_deps, py_sync, js_sync = \
         collect_changes(added_lines)
 
     log_info("PR 新增内容中检测到 URL {} 个，C三方库引用 {} 个，"
@@ -817,7 +885,8 @@ def main():
             log_error("引入的Python依赖组件 {} 不在opensource_py白名单列表内 "
                       "(文件: {})".format(name, describe_files(files)))
         else:
-            if not check_dep_version('py', name, spec, py_wl[key], files):
+            if not check_dep_version('py', name, spec, py_wl[key], files,
+                                     py_sync.get(key)):
                 blocked = True
 
     # 6. NodeJS 依赖声明检查（opensource_js）
@@ -829,7 +898,8 @@ def main():
                       "(文件: {})".format(name, describe_files(files)))
         else:
             specs = js_wl.get(name) or js_wl.get(name.lower())
-            if not check_dep_version('js', name, spec, specs, files):
+            if not check_dep_version('js', name, spec, specs, files,
+                                     js_sync.get(name) or js_sync.get(name.lower())):
                 blocked = True
 
     # 7. URL 检查（url 白名单 + opensource_py/js 宽范围版本放行）
@@ -881,23 +951,36 @@ def main():
                                      .format(dep_name, dep_ver, attr,
                                              ' || '.join(specs), clean_url(url),
                                              describe_files(files)))
-                        elif status == 'greater':
-                            blocked = True
-                            log_error("新增 URL 引入的{}依赖组件 {} 版本号({}) 大于{}"
-                                      "白名单允许版本 {}，拦截：需要在相应依赖文件 {} "
-                                      "同步更新版本号: {} (文件: {})"
-                                      .format('Python' if eco == 'py' else 'NodeJS',
-                                              dep_name, dep_ver, attr,
-                                              ' || '.join(specs), dep_file,
-                                              clean_url(url), describe_files(files)))
                         else:
-                            blocked = True
-                            log_error("新增 URL 引入的{}依赖组件 {} 版本({}) 不在{}"
-                                      "白名单版本约束 {} 范围内: {} (文件: {})"
-                                      .format('Python' if eco == 'py' else 'NodeJS',
-                                              dep_name, dep_ver, attr,
-                                              ' || '.join(specs), clean_url(url),
-                                              describe_files(files)))
+                            sync_specs = (py_sync.get(py_key) if eco == 'py'
+                                          else (js_sync.get(dep_name)
+                                                or js_sync.get(dep_name.lower())))
+                            if sync_covers(eco, vkey, sync_specs):
+                                relaxed = True
+                                log_info("新增 URL 引入的{}依赖组件 {} 版本({}) 超出{}"
+                                         "白名单允许版本 {}，但PR已在依赖文件 {} 同步"
+                                         "更新版本号，准许合入: {} ({})"
+                                         .format('Python' if eco == 'py' else 'NodeJS',
+                                                 dep_name, dep_ver, attr,
+                                                 ' || '.join(specs), dep_file,
+                                                 clean_url(url), describe_files(files)))
+                            elif status == 'greater':
+                                blocked = True
+                                log_error("新增 URL 引入的{}依赖组件 {} 版本号({}) 大于{}"
+                                          "白名单允许版本 {}，拦截：需要在相应依赖文件 {} "
+                                          "同步更新版本号: {} (文件: {})"
+                                          .format('Python' if eco == 'py' else 'NodeJS',
+                                                  dep_name, dep_ver, attr,
+                                                  ' || '.join(specs), dep_file,
+                                                  clean_url(url), describe_files(files)))
+                            else:
+                                blocked = True
+                                log_error("新增 URL 引入的{}依赖组件 {} 版本({}) 不在{}"
+                                          "白名单版本约束 {} 范围内: {} (文件: {})"
+                                          .format('Python' if eco == 'py' else 'NodeJS',
+                                                  dep_name, dep_ver, attr,
+                                                  ' || '.join(specs), clean_url(url),
+                                                  describe_files(files)))
                     else:
                         relaxed = True
                         log_warning("依赖组件 {} 白名单版本约束无法解析，按组件白名单"
