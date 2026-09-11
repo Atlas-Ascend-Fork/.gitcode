@@ -82,6 +82,17 @@ jobs:
           repo_name: ${{ env.repo_name }}
           workspace: ${{ steps.process_checkout.outputs.path }}
           target_branch: ${{ env.target_branch }}
+      -
+        name: upload
+        uses: obs-upload
+        if: ${{ always() }}
+        with:
+          endpoint: "https://obs.cn-north-4.myhuaweicloud.com"
+          bucket: "ascend-ci"
+          access-key: ${{secrets.AK}}
+          secret-key: ${{secrets.SK}}
+          artifact-path: "${{ steps.process_checkout.outputs.path }}/oss-dep-gate*.txt"
+          object-prefix: ${{ env.obs_path }}/
     runs-on: ["self-hosted", "arch=x64", "spec=slim"]
     container:
       image: swr.cn-north-4.myhuaweicloud.com/ci_cann/${{ inputs.codecheck_image_version }}

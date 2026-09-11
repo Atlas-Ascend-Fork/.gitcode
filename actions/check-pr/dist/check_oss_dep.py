@@ -37,6 +37,8 @@ opensource_py / opensource_js。
          文件 requirements.txt 或 package.json 同步更新版本号；
        - 组件不在白名单内：拦截（新组件需先进入门禁基线）。
    全部通过则门禁通过，否则门禁拦截并以非 0 退出。
+   触发门禁豁免（豁免路径）或门禁拦截时，全量检查日志写入 workspace 下
+   oss-dep-gate-check.txt，由流水线 obs-upload 上传至 OBS 留档供后续使用。
    脚本内部异常按拦截处理（fail-closed）；patch/门禁文件缺失等数据类
    失败按放行处理（fail-open，避免 CI 基础设施故障误伤）。
 
@@ -51,6 +53,7 @@ import os
 import re
 import subprocess
 import sys
+import time
 
 try:
     from urllib.parse import unquote
@@ -530,17 +533,52 @@ def is_url_spec(spec):
 
 # ---------------- 日志 ----------------
 
+# 全量日志记录：豁免/拦截时随日志文件落盘，供 obs-upload 上传 OBS 留档
+LOG_RECORDS = []
+
+
+def _emit(level, msg):
+    line = "[{}] check_oss_dep: {}".format(level, msg)
+    print(line)
+    LOG_RECORDS.append("[{}] {}".format(level, msg))
+
 
 def log_info(msg):
-    print("[INFO] check_oss_dep: {}".format(msg))
+    _emit("INFO", msg)
 
 
 def log_warning(msg):
-    print("[WARNING] check_oss_dep: {}".format(msg))
+    _emit("WARNING", msg)
 
 
 def log_error(msg):
-    print("[ERROR] check_oss_dep: {}".format(msg))
+    _emit("ERROR", msg)
+
+
+def write_gate_log(workspace, repo_name, target_branch, verdict, exempt_files):
+    """
+    门禁豁免/拦截时将全量检查日志写入 workspace 下的 oss-dep-gate-check.txt
+    （命名与上传 glob 对齐，模仿 precommit 的 pre-commit.txt 产物模式），
+    由流水线 obs-upload 步骤上传至 OBS（obs_path 前缀）供后续使用。
+    """
+    path = os.path.join(workspace, "oss-dep-gate-check.txt")
+    try:
+        with open(path, "w", encoding="utf-8") as f:
+            f.write("OSS 依赖门禁检查日志\n")
+            f.write("仓库: {}\n".format(repo_name))
+            f.write("目标分支: {}\n".format(target_branch))
+            f.write("检查时间: {}\n".format(
+                time.strftime("%Y-%m-%d %H:%M:%S")))
+            f.write("检查结论: {}\n".format(verdict))
+            if exempt_files:
+                f.write("豁免路径: {}\n".format(describe_files(exempt_files)))
+            f.write("=" * 60 + "\n")
+            f.write("\n".join(LOG_RECORDS) + "\n")
+        log_info("门禁日志已写入: {}".format(path))
+        return path
+    except Exception as e:
+        log_warning("门禁日志写入失败: {}，不影响门禁结论".format(e))
+        return None
 
 
 # ---------------- patch 获取与解析 ----------------
@@ -962,6 +1000,8 @@ def main():
             and not new_js_deps:
         if exempt_files:
             log_info("开发者修改仅涉及豁免路径，门禁通过")
+            write_gate_log(workspace, repo_name, target_branch,
+                           "放行（门禁豁免）", exempt_files)
         else:
             log_info("开发者修改代码不包含URL/三方库/依赖组件，门禁通过")
         return 0
@@ -1057,9 +1097,16 @@ def main():
 
     if blocked:
         log_error("门禁检查未通过：引入的URL/三方库/依赖组件不合规")
+        write_gate_log(workspace, repo_name, target_branch,
+                       "拦截（门禁不通过）", exempt_files)
         return 1
 
+    verdict = "放行（含门禁豁免）" if exempt_files else "放行"
+    log_info("门禁结论: {}".format(verdict))
     log_info("URL/三方库/开源依赖门禁检查通过")
+    if exempt_files:
+        write_gate_log(workspace, repo_name, target_branch,
+                       verdict, exempt_files)
     return 0
 
 
