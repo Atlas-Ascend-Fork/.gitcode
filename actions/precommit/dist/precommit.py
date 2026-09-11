@@ -48,7 +48,7 @@ class PreCommitChecker(CodeCheckerBaseClass):
         logging.info(
             "------------------------------------3. pre-commit检测changes files-----------------------------------")
         logging.info(
-            "本地执行pre-commit可参考 https://gitcode.com/cann/infrastructure/tree/main/docs/SC/pre-commit/pre-commit配置指导书.md,谢谢!")
+            "本地执行pre-commit可参考 https://gitcode.com/cann/infrastructure/blob/main/docs/SC/pre-commit/pre-commit%E9%85%8D%E7%BD%AE%E6%8C%87%E5%AF%BC%E4%B9%A6.md#3-%E7%A4%BE%E5%8C%BA%E8%B4%A1%E7%8C%AE%E8%80%85%E4%BD%BF%E7%94%A8pre-commit%E8%83%BD%E5%8A%9B,谢谢!")
 
         # get changed files
         with open('pr_filelist_precommit.txt', 'r', encoding='utf-8') as f:
@@ -99,6 +99,7 @@ class PreCommitChecker(CodeCheckerBaseClass):
             summary_lines = [
                 f"## {status_icon} Pre-commit 检查结果\n",
                 f"**状态**: {'通过' if passed else '失败'}\n",
+                f"**参考链接**: [本地执行 pre-commit 指导](https://gitcode.com/cann/infrastructure/blob/main/docs/SC/pre-commit/pre-commit%E9%85%8D%E7%BD%AE%E6%8C%87%E5%AF%BC%E4%B9%A6.md#3-%E7%A4%BE%E5%8C%BA%E8%B4%A1%E7%8C%AE%E8%80%85%E4%BD%BF%E7%94%A8pre-commit%E8%83%BD%E5%8A%9B)\n",
             ]
 
             # 从 .pre-commit-config.yaml 读取 hook 列表，
