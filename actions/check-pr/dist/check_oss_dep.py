@@ -37,6 +37,8 @@ opensource_py / opensource_js。
          文件 requirements.txt 或 package.json 同步更新版本号；
        - 组件不在白名单内：拦截（新组件需先进入门禁基线）。
    全部通过则门禁通过，否则门禁拦截并以非 0 退出。
+   常规放行（白名单/版本范围内等）聚合统计输出，避免大 PR 逐条日志刷屏；
+   同步更新放行、豁免与拦截逐条输出。
    触发门禁豁免（豁免路径）或门禁拦截时，全量检查日志写入 workspace 下
    oss-dep-gate-check.txt，由流水线 obs-upload 上传至 OBS 留档供后续使用。
    脚本内部异常按拦截处理（fail-closed）；patch/门禁文件缺失等数据类
@@ -724,7 +726,8 @@ def resolve_dep_ecosystem(dep_name, py_wl, js_wl):
 
 def collect_changes(added_lines):
     """从新增行提取 URL / C 三方库 / py 依赖 / js 依赖 / 依赖文件同步声明。
-    豁免路径（doc(s)/__pycache__/node_modules/.git/.md）的新增行不参与检测。"""
+    豁免路径（doc(s)/__pycache__/node_modules/.git/.md）的新增行不参与检测。
+    路径分类（豁免/依赖文件判定）按文件缓存，避免同一文件逐行重复正则。"""
     new_urls = {}
     new_third_party = {}
     new_py_deps = {}
@@ -733,16 +736,28 @@ def collect_changes(added_lines):
     js_sync = {}
     exempt_files = set()
     js_section = {}
+    classify_cache = {}
+
+    def classify(fp):
+        if fp not in classify_cache:
+            norm = fp.replace('\\', '/')
+            classify_cache[fp] = (
+                is_exempt_path(fp),
+                norm,
+                norm.rsplit('/', 1)[-1].lower(),
+                PY_REQ_FILE_RE.search(norm) is not None,
+                JS_FILE_RE.search(norm) is not None,
+            )
+        return classify_cache[fp]
+
     for file_path, line in added_lines:
         if not file_path:
             continue
-        if is_exempt_path(file_path):
+        is_exempt, norm_path, base_name, is_py_file, is_js_file = \
+            classify(file_path)
+        if is_exempt:
             exempt_files.add(file_path)
             continue
-        norm_path = file_path.replace('\\', '/')
-        base_name = norm_path.rsplit('/', 1)[-1].lower()
-        is_py_file = PY_REQ_FILE_RE.search(norm_path) is not None
-        is_js_file = JS_FILE_RE.search(norm_path) is not None
         # 行级 fast-skip：非依赖文件仅处理含特征标记（http/三方库/pip）的行
         low = line.lower()
         if not (is_py_file or is_js_file or 'http' in low
@@ -784,6 +799,27 @@ def describe_files(files):
     return ", ".join(sorted(files))
 
 
+# 常规放行原因 -> 中文标签（由调用方聚合输出，避免大 PR 逐条日志刷屏；
+# 同步更新放行与拦截原因仍逐条输出）
+REASON_ZH = {
+    'in_range': '白名单范围内',
+    'wide_range': '宽范围版本',
+    'url_intro': 'URL引入',
+    'known_component': '组件在白名单',
+    'whitelist': 'URL在白名单内',
+}
+
+
+def log_pass_summary(title, counter):
+    """聚合输出常规放行统计（无放行项时不输出）"""
+    if not counter:
+        return
+    total = sum(counter.values())
+    detail = " / ".join("{} {}".format(REASON_ZH[r], n)
+                        for r, n in sorted(counter.items()))
+    log_info("{}: {} 个常规放行（{}）".format(title, total, detail))
+
+
 def sync_covers(ecosystem, vkey, sync_specs):
     """
     判断 PR 依赖文件（requirements.txt / package.json）中是否已同步声明
@@ -817,7 +853,8 @@ def check_dep_version(ecosystem, name, spec, wl_specs, files, sync_specs=None):
     """
     检查依赖声明（requirements.txt / package.json / 脚本 pip install 新增行）
     的版本合规性。版本超出白名单时，若 PR 依赖文件已同步声明该版本则放行。
-    返回 True 放行 / False 拦截。
+    返回 (放行与否, 原因标签)：常规放行原因（in_range/wide_range/url_intro，
+    见 REASON_ZH）由调用方聚合输出；同步更新放行与拦截原因逐条输出日志。
     """
     conf = ECO_CONF[ecosystem]
     eco_label, attr, dep_file = conf['label'], conf['attr'], conf['dep_file']
@@ -825,9 +862,7 @@ def check_dep_version(ecosystem, name, spec, wl_specs, files, sync_specs=None):
     if is_url_spec(spec):
         ver = version_from_url_spec(spec)
         if ver is None:
-            log_info("新增{}依赖组件 {} 以URL方式引入且组件在{}白名单内，放行 ({})"
-                     .format(eco_label, name, attr, describe_files(files)))
-            return True
+            return True, 'url_intro'
         vkey = conf['keyfn'](ver)
         dev_excl = None
     else:
@@ -838,7 +873,7 @@ def check_dep_version(ecosystem, name, spec, wl_specs, files, sync_specs=None):
         if branches is None:
             log_warning("依赖 {} 的版本约束 '{}' 无法解析，按组件白名单放行 ({})"
                         .format(name, spec, describe_files(files)))
-            return True
+            return True, 'spec_unparseable'
         eq_keys = [k for b in branches for op, k in b if op == '==']
         upper_vals = [u for u in (_branch_upper(b) for b in branches) if u]
         if eq_keys or upper_vals:
@@ -849,68 +884,63 @@ def check_dep_version(ecosystem, name, spec, wl_specs, files, sync_specs=None):
             # 开发者约束无上界（如 >=x / *）
             wl_parsed = parse_specs(wl_specs, ecosystem)
             if wl_parsed and spec_has_unbounded_branch(wl_parsed):
-                log_info("新增{}依赖组件 {} 版本约束 '{}' 在{}宽范围版本内，放行 ({})"
-                         .format(eco_label, name, spec, attr,
-                                 describe_files(files)))
-                return True
+                return True, 'wide_range'
             if sync_specs:
                 log_info("新增{}依赖组件 {} 版本约束 '{}' 超出{}允许版本 {}，"
                          "但PR已在依赖文件 {} 同步更新版本号，放行 ({})"
                          .format(eco_label, name, spec, attr,
                                  ' || '.join(wl_specs), dep_file,
                                  describe_files(files)))
-                return True
+                return True, 'no_upper_sync'
             log_error("引入的{}依赖组件 {} 版本约束 '{}' 无上界，超出{}允许版本 {}，"
                       "拦截：需要在相应依赖文件 {} 同步更新版本号 (文件: {})"
                       .format(eco_label, name, spec, attr,
                               ' || '.join(wl_specs), dep_file,
                               describe_files(files)))
-            return False
+            return False, 'no_upper'
     wl_parsed = parse_specs(wl_specs, ecosystem)
     if not wl_parsed:
         log_warning("依赖 {} 的白名单版本约束无法解析，按组件白名单放行 ({})"
                     .format(name, describe_files(files)))
-        return True
+        return True, 'wl_unparseable'
     status, _upper = check_version_key(vkey, wl_parsed, dev_excl)
     if status == 'ok':
-        log_info("新增{}依赖组件 {}@'{}' 在{}白名单版本范围内，放行 ({})"
-                 .format(eco_label, name, spec, attr, describe_files(files)))
-        return True
+        return True, 'in_range'
     if sync_covers(ecosystem, vkey, sync_specs):
         log_info("新增{}依赖组件 {}@'{}' 版本超出{}白名单允许版本 {}，"
                  "但PR已在依赖文件 {} 同步更新版本号，放行 ({})"
                  .format(eco_label, name, spec, attr,
                          ' || '.join(wl_specs), dep_file,
                          describe_files(files)))
-        return True
+        return True, 'sync'
     if status == 'greater':
         log_error("引入的{}依赖组件 {} 版本号('{}') 大于{}白名单允许版本 {}，"
                   "拦截：需要在相应依赖文件 {} 同步更新版本号 (文件: {})"
                   .format(eco_label, name, spec, attr,
                           ' || '.join(wl_specs), dep_file,
                           describe_files(files)))
-        return False
+        return False, 'greater'
     log_error("引入的{}依赖组件 {} 版本('{}') 不在{}白名单版本约束 {} 范围内 (文件: {})"
               .format(eco_label, name, spec, attr, ' || '.join(wl_specs),
                       describe_files(files)))
-    return False
+    return False, 'out'
 
 
 def check_url_entry(url, files, url_wl, url_exact, py_wl, js_wl, py_sync, js_sync):
     """
     单个新增 URL 的门禁判定（url 白名单 + py/js 组件宽范围版本放行 +
-    依赖文件同步声明豁免）。返回 True 放行 / False 拦截。
+    依赖文件同步声明豁免）。
+    返回 (放行与否, 原因标签)：常规放行原因（whitelist/in_range/known_component，
+    见 REASON_ZH）由调用方聚合输出；同步更新放行与拦截原因逐条输出日志。
     """
     candidates = url_candidates(url)
     if any(url_in_whitelist(c, url_wl, url_exact) for c in candidates):
-        log_info("新增 URL 在白名单内: {} ({})"
-                 .format(clean_url(url), describe_files(files)))
-        return True
+        return True, 'whitelist'
     dep = extract_dep_from_url(clean_url(url))
     if not dep:
         log_error("引入的URL 不在白名单列表内: {} (文件: {})"
                   .format(clean_url(url), describe_files(files)))
-        return False
+        return False, 'not_in_wl'
     dep_name, dep_ver = dep
     eco, specs = resolve_dep_ecosystem(dep_name, py_wl, js_wl)
     if eco is None:
@@ -919,28 +949,21 @@ def check_url_entry(url, files, url_wl, url_exact, py_wl, js_wl, py_sync, js_syn
                   "{} (文件: {})"
                   .format(dep_name, dep_ver or '-', clean_url(url),
                           describe_files(files)))
-        return False
+        return False, 'unknown_component'
     conf = ECO_CONF[eco]
     attr, dep_file = conf['attr'], conf['dep_file']
     eco_label = conf['label']
     if dep_ver is None:
-        log_info("新增 URL 不在url白名单内，但依赖组件 {} 在{}白名单内，"
-                 "按组件白名单放行: {} ({})"
-                 .format(dep_name, attr, clean_url(url), describe_files(files)))
-        return True
+        return True, 'known_component'
     vkey = conf['keyfn'](dep_ver)
     wl_parsed = parse_specs(specs, eco)
     if not wl_parsed:
         log_warning("依赖组件 {} 白名单版本约束无法解析，按组件白名单放行: {} ({})"
                     .format(dep_name, clean_url(url), describe_files(files)))
-        return True
+        return True, 'wl_unparseable'
     status, _upper = check_version_key(vkey, wl_parsed)
     if status == 'ok':
-        log_info("新增 URL 不在url白名单内，但依赖组件 {} 版本 {} 仍在{}"
-                 "允许范围 {} 内，准许合入: {} ({})"
-                 .format(dep_name, dep_ver, attr, ' || '.join(specs),
-                         clean_url(url), describe_files(files)))
-        return True
+        return True, 'in_range'
     if eco == 'py':
         sync_specs = py_sync.get(normalize_py_name(dep_name))
     else:
@@ -951,7 +974,7 @@ def check_url_entry(url, files, url_wl, url_exact, py_wl, js_wl, py_sync, js_syn
                  .format(eco_label, dep_name, dep_ver, attr,
                          ' || '.join(specs), dep_file,
                          clean_url(url), describe_files(files)))
-        return True
+        return True, 'sync'
     if status == 'greater':
         log_error("新增 URL 引入的{}依赖组件 {} 版本号({}) 大于{}白名单允许版本 {}，"
                   "拦截：需要在相应依赖文件 {} 同步更新版本号: {} (文件: {})"
@@ -964,7 +987,7 @@ def check_url_entry(url, files, url_wl, url_exact, py_wl, js_wl, py_sync, js_syn
                   .format(eco_label, dep_name, dep_ver, attr,
                           ' || '.join(specs), clean_url(url),
                           describe_files(files)))
-    return False
+    return False, status
 
 
 def main():
@@ -1066,6 +1089,7 @@ def main():
                       .format(name, describe_files(files)))
 
     # 5. Python 依赖声明检查（opensource_py）
+    py_pass = {}
     for (name, spec) in sorted(new_py_deps):
         files = new_py_deps[(name, spec)]
         key = normalize_py_name(name)
@@ -1073,11 +1097,17 @@ def main():
             blocked = True
             log_error("引入的Python依赖组件 {} 不在opensource_py白名单列表内 "
                       "(文件: {})".format(name, describe_files(files)))
-        elif not check_dep_version('py', name, spec, py_wl[key], files,
-                                   py_sync.get(key)):
+            continue
+        ok, reason = check_dep_version('py', name, spec, py_wl[key], files,
+                                       py_sync.get(key))
+        if not ok:
             blocked = True
+        elif reason in REASON_ZH:
+            py_pass[reason] = py_pass.get(reason, 0) + 1
+    log_pass_summary("Python依赖声明检查", py_pass)
 
     # 6. NodeJS 依赖声明检查（opensource_js）
+    js_pass = {}
     for (name, spec) in sorted(new_js_deps):
         files = new_js_deps[(name, spec)]
         specs = js_lookup(js_wl, name)
@@ -1085,15 +1115,25 @@ def main():
             blocked = True
             log_error("引入的NodeJS依赖组件 {} 不在opensource_js白名单列表内 "
                       "(文件: {})".format(name, describe_files(files)))
-        elif not check_dep_version('js', name, spec, specs, files,
-                                   js_lookup(js_sync, name)):
+            continue
+        ok, reason = check_dep_version('js', name, spec, specs, files,
+                                       js_lookup(js_sync, name))
+        if not ok:
             blocked = True
+        elif reason in REASON_ZH:
+            js_pass[reason] = js_pass.get(reason, 0) + 1
+    log_pass_summary("NodeJS依赖声明检查", js_pass)
 
     # 7. URL 检查（url 白名单 + opensource_py/js 宽范围版本放行）
+    url_pass = {}
     for url in sorted(new_urls):
-        if not check_url_entry(url, new_urls[url], url_wl, url_exact,
-                               py_wl, js_wl, py_sync, js_sync):
+        ok, reason = check_url_entry(url, new_urls[url], url_wl, url_exact,
+                                     py_wl, js_wl, py_sync, js_sync)
+        if not ok:
             blocked = True
+        elif reason in REASON_ZH:
+            url_pass[reason] = url_pass.get(reason, 0) + 1
+    log_pass_summary("URL检查", url_pass)
 
     if blocked:
         log_error("门禁检查未通过：引入的URL/三方库/依赖组件不合规")
