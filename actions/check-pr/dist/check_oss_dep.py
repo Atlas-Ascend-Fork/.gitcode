@@ -16,6 +16,8 @@ opensource_py / opensource_js。
    - Python 依赖声明（*requirements*.txt 新增行、脚本中
      pip install <name><op><version> 引入行）
    - NodeJS 依赖声明（package.json 新增的 "name": "version" 行）
+   豁免路径（doc(s)/__pycache__/node_modules/.git 目录及 .md 文件，
+   与门禁文件生成侧排除规则一致）的新增内容不参与检测，直接放行。
    若均未涉及，门禁直接通过。
 2. 读取目标分支对应的门禁文件，代码仓不在文件 key 中：此代码仓不作检查
    管控，门禁通过。
@@ -116,6 +118,20 @@ FULLWIDTH_CUT_CHARS = '，。；：？！、（）「」『』《》〈〉【】
 # https://gitcode.com.evil.com 这类旁路；} 用于兼容白名单中被截断的
 # 占位符条目（如 https://xxx/${obs_path）
 PREFIX_BOUNDARY_CHARS = ('/', '?', '#', '&', ';', '}')
+
+# 门禁豁免路径：与门禁文件生成侧（sbom 扫描）的排除规则保持一致，
+# doc(s)/__pycache__/node_modules/.git 目录及 .md 文件不做 URL/开源依赖检测，
+# 这些路径的新增内容不参与门禁判定，直接放行
+EXEMPT_PATH_RE = re.compile(
+    r'(^|/)(\.git|__pycache__|node_modules|docs?)(/|$)', re.IGNORECASE)
+
+
+def is_exempt_path(path):
+    """门禁豁免路径：doc(s)/__pycache__/node_modules/.git 目录及 .md 文件"""
+    p = str(path).replace('\\', '/')
+    if p.lower().endswith('.md'):
+        return True
+    return EXEMPT_PATH_RE.search(p) is not None
 
 # ---------------- 版本比较（PEP440-lite / semver-lite） ----------------
 
@@ -669,16 +685,21 @@ def resolve_dep_ecosystem(dep_name, py_wl, js_wl):
 
 
 def collect_changes(added_lines):
-    """从新增行提取 URL / C 三方库 / py 依赖 / js 依赖 / 依赖文件同步声明"""
+    """从新增行提取 URL / C 三方库 / py 依赖 / js 依赖 / 依赖文件同步声明。
+    豁免路径（doc(s)/__pycache__/node_modules/.git/.md）的新增行不参与检测。"""
     new_urls = {}
     new_third_party = {}
     new_py_deps = {}
     new_js_deps = {}
     py_sync = {}
     js_sync = {}
+    exempt_files = set()
     js_section = {}
     for file_path, line in added_lines:
         if not file_path:
+            continue
+        if is_exempt_path(file_path):
+            exempt_files.add(file_path)
             continue
         norm_path = file_path.replace('\\', '/')
         base_name = norm_path.rsplit('/', 1)[-1].lower()
@@ -717,7 +738,8 @@ def collect_changes(added_lines):
             for pm in PIP_INSTALL_RE.finditer(line):
                 dep = (pm.group(1), pm.group(2) + pm.group(3))
                 new_py_deps.setdefault(dep, set()).add(file_path)
-    return new_urls, new_third_party, new_py_deps, new_js_deps, py_sync, js_sync
+    return (new_urls, new_third_party, new_py_deps, new_js_deps,
+            py_sync, js_sync, exempt_files)
 
 
 def describe_files(files):
@@ -924,8 +946,12 @@ def main():
         return 0
 
     added_lines = parse_added_lines(diff_text)
-    new_urls, new_third_party, new_py_deps, new_js_deps, py_sync, js_sync = \
-        collect_changes(added_lines)
+    (new_urls, new_third_party, new_py_deps, new_js_deps,
+     py_sync, js_sync, exempt_files) = collect_changes(added_lines)
+
+    if exempt_files:
+        log_info("豁免路径不执行门禁检测（doc(s)/__pycache__/node_modules/.md）: {}"
+                 .format(describe_files(exempt_files)))
 
     log_info("PR 新增内容中检测到 URL {} 个，C三方库引用 {} 个，"
              "Python依赖声明 {} 个，NodeJS依赖声明 {} 个".format(
@@ -934,7 +960,10 @@ def main():
 
     if not new_urls and not new_third_party and not new_py_deps \
             and not new_js_deps:
-        log_info("开发者修改代码不包含URL/三方库/依赖组件，门禁通过")
+        if exempt_files:
+            log_info("开发者修改仅涉及豁免路径，门禁通过")
+        else:
+            log_info("开发者修改代码不包含URL/三方库/依赖组件，门禁通过")
         return 0
 
     # 2. 读取门禁文件 oss_dep_security_gate_<branch>.json
