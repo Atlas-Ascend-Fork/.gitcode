@@ -20,7 +20,8 @@ opensource_py / opensource_js。
    与门禁文件生成侧排除规则一致）的新增内容不参与检测，直接放行。
    若均未涉及，门禁直接通过。
 2. 读取目标分支对应的门禁文件，代码仓不在文件 key 中：此代码仓不作检查
-   管控，门禁通过。
+   管控，门禁通过；门禁基线的 branch 字段须与 PR 目标分支一致（缺失视为
+   不一致）才触发门禁检查，否则不触发、门禁通过。
 3. 代码仓受控时：
    (1) url 白名单：新增 URL 必须在 url 属性内（完全匹配或带边界字符的
        前缀匹配）。URL 不在 url 白名单内时，若能识别为 Python/NodeJS
@@ -1051,6 +1052,17 @@ def main():
     repo_conf = gate.get(repo_name)
     if not isinstance(repo_conf, dict):
         log_info("代码仓 {} 不在门禁文件管控列表内，门禁通过".format(repo_name))
+        return 0
+
+    # 分支一致性触发条件：门禁基线 branch 字段须与 PR 目标分支一致才触发检查
+    gate_branch = str(repo_conf.get("branch") or "").strip()
+    if not gate_branch:
+        log_warning("代码仓 {} 门禁配置缺少 branch 字段，不触发门禁检查，门禁通过"
+                    .format(repo_name))
+        return 0
+    if target_branch != gate_branch:
+        log_info("门禁基线分支({})与PR目标分支({})不一致，{} 仓不触发门禁检查，"
+                 "门禁通过".format(gate_branch, target_branch, repo_name))
         return 0
 
     url_entries = repo_conf.get("url") or []
