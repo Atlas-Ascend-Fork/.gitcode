@@ -114,27 +114,30 @@ def remove_pr_label(owner, repo, pr_number, label, token, max_retries=1):
 
 
 def remove_pr_labels_batch(owner, repo, pr_number, labels, token, max_retries=1):
-    """批量移除 PR 标签: DELETE /labels/name1,name2 (逗号分隔一次删除)"""
-    if not labels:
-        return True
-    names = ",".join(labels)
-    url = f"{PR_LABELS_URL.format(owner, repo, pr_number)}/{names}?access_token={token}"
-    for attempt in range(max_retries + 1):
-        status, body = api_request(url, token, "DELETE")
-        if status in (200, 204):
-            print(f"✅ 批量移除标签 [{names}] 成功")
-            return True
-        if status == 429 and attempt < max_retries:
-            wait = 10
-            print(f"⚠️ 批量移除标签触发限流，{wait}s 后重试 (attempt {attempt + 1}/{max_retries})")
-            time.sleep(wait)
-            continue
-        if status == 404:
-            print(f"ℹ️ 标签 [{names}] 不存在，无需移除")
-            return True
-        print(f"❌ 批量移除标签 [{names}] 失败: HTTP {status}, {body}")
-        return False
-    return False
+    """批量移除 PR 标签: 逐个调用 DELETE /labels/{name}
+    注: 逗号分隔的批量 URL(/labels/name1,name2) 会被 apig 网关拒绝(HTTP 403), 只能逐个删除"""
+    for label in labels:
+        url = f"{PR_LABELS_URL.format(owner, repo, pr_number)}/{label}?access_token={token}"
+        for attempt in range(max_retries + 1):
+            status, body = api_request(url, token, "DELETE")
+            if status in (200, 204):
+                print(f"✅ 移除标签 [{label}] 成功")
+                break
+            if status == 429 and attempt < max_retries:
+                wait = 10
+                print(f"⚠️ 移除标签触发限流，{wait}s 后重试 (attempt {attempt + 1}/{max_retries})")
+                time.sleep(wait)
+                continue
+            if status == 404:
+                body_str = body if isinstance(body, str) else json.dumps(body)
+                if "project not found" in body_str.lower():
+                    print(f"❌ 移除标签 [{label}] 失败: 仓库不存在 (project not found)，请检查 owner/repo 参数")
+                    return False
+                print(f"ℹ️ 标签 [{label}] 不存在，无需移除")
+                break
+            print(f"❌ 移除标签 [{label}] 失败: HTTP {status}, {body}")
+            break
+    return True
 
 
 def apply_label_by_jobs(owner, repo, pr_number, jobs, token):
