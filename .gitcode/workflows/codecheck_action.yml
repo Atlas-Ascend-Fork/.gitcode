@@ -72,22 +72,34 @@ jobs:
           key: |
             ${{ env.obs_path }}/pr_filelist.txt
             ${{ env.obs_path }}/pr_filelist_mod.txt
+            ${{ env.obs_path }}/update_file_detail.txt
           path: ${{ steps.process_checkout.outputs.path }}
       -
         name: check-pr
         identifier: check-pr
-        uses: cann/.gitcode/actions/check-pr@master
+        uses: gcw_UQE6G7Ro/.gitcode/actions/check-pr@master
         with:
           repo_name: ${{ env.repo_name }}
           workspace: ${{ steps.process_checkout.outputs.path }}
           target_branch: ${{ env.target_branch }}
+      -
+        name: upload
+        uses: obs-upload
+        if: ${{ always() }}
+        with:
+          endpoint: "https://obs.cn-north-4.myhuaweicloud.com"
+          bucket: "ascend-ci"
+          access-key: ${{secrets.AK}}
+          secret-key: ${{secrets.SK}}
+          artifact-path: "${{ steps.process_checkout.outputs.path }}/oss-dep-gate*.txt"
+          object-prefix: ${{ env.obs_path }}/
     runs-on: ["self-hosted", "arch=x64", "spec=slim"]
     container:
       image: swr.cn-north-4.myhuaweicloud.com/ci_cann/${{ inputs.codecheck_image_version }}
   JOB_sca:
     name: SCA
     steps:
-      - 
+      -
         name: sca
         id: sca-pr-scan
         uses: sca-pr-scan
