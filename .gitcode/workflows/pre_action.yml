@@ -65,16 +65,10 @@ jobs:
           artifact-path: |
             ${{ steps.process_checkout.outputs.path }}/.gitcode/scripts/*
           object-prefix: ${{ env.obs_path }}/
-    if: ${{ !contains(atomgit.event.comment.body, '@') }}
-    runs-on: ["self-hosted", "arch=x64", "spec=slim"]
-    container:
-      image: swr.cn-north-4.myhuaweicloud.com/ci_cann/ubuntu20.04.05_x86:k8s_v1.1006
-  JOB_specify_scripts:
-    name: specify_scripts
-    steps:
       -
         name: specify_scripts
         identifier: specify_scripts
+        if: contains(atomgit.event.comment.body, '@')
         uses: wangyunxiang1/.gitcode/actions/specify_scripts@master
         with:
           repo_name: ${{ env.repo_name }}
@@ -85,7 +79,6 @@ jobs:
           access-key: ${{ secrets.AK }}
           secret-key: ${{ secrets.SK }}
           object-prefix: ${{ env.obs_path }}/
-    if: contains(atomgit.event.comment.body, '@')
     runs-on: ["self-hosted", "arch=x64", "spec=slim"]
     container:
       image: swr.cn-north-4.myhuaweicloud.com/ci_cann/ubuntu20.04.05_x86:k8s_v1.1006
