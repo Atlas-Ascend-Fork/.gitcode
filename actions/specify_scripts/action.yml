@@ -1,0 +1,35 @@
+name: 'specify_scripts'
+author: 'CANN'
+version: '1.1.0'
+description: 'this is a specify scripts action'
+inputs:
+  repo_name:
+    description: 仓库名称（决定 ci 仓库中的 scripts/<repo_name>/ 目录）
+    required: true
+  comment:
+    description: 触发评论正文，action 从中解析 @<分支>，无 @ 时跳过指定
+    required: false
+    default: ""
+  token:
+    description: 拉取 ci 仓库的 git token
+    required: false
+    default: ""
+  endpoint:
+    description: OBS endpoint，如 https://obs.cn-north-4.myhuaweicloud.com
+    required: true
+  bucket:
+    description: OBS 桶名
+    required: true
+  access-key:
+    description: OBS Access Key
+    required: true
+  secret-key:
+    description: OBS Secret Key
+    required: true
+  object-prefix:
+    description: OBS 对象前缀，如 org/repo/ci/package/<pr_id>/
+    required: true
+
+runs:
+  using: 'node16'
+  main: 'dist/main.js'
