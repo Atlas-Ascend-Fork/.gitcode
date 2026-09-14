@@ -75,7 +75,7 @@ jobs:
       -
         name: specify_scripts
         identifier: specify_scripts
-        uses: cann/.gitcode/actions/specify_scripts@master
+        uses: wangyunxiang1/.gitcode/actions/specify_scripts@master
         with:
           repo_name: ${{ env.repo_name }}
           comment: ${{ atomgit.event.comment.body }}
