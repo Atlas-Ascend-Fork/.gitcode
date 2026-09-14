@@ -1,0 +1,43 @@
+name: 'setup-python'
+author: 'CANN'
+version: '1.0.0'
+description: '参考 actions/setup-python：为 GitCode CI 工作流设置指定版本 Python 并加入 PATH；支持版本范围/文件读取/多版本注册/venv 创建'
+
+inputs:
+  python-version:
+    description: 'Python 版本或 SemVer 范围，如 3.12 / 3.12.x / >=3.10,<3.13；缺省时读 .python-version 文件，仍无则用系统默认 python3'
+    required: false
+  python-version-file:
+    description: '版本文件路径（pyenv 风格，每行一个版本），默认 .python-version'
+    required: false
+  architecture:
+    description: 'x64 / arm64，默认宿主架构'
+    required: false
+  register-all:
+    description: 'true 时把找到的全部候选版本都加入 PATH（多版本场景），默认只加首个命中'
+    required: false
+    default: 'false'
+  create-venv:
+    description: 'true 时创建虚拟环境并激活（目录 .venv），默认不创建'
+    required: false
+    default: 'false'
+  venv-path:
+    description: '虚拟环境目录，默认 .venv'
+    required: false
+    default: '.venv'
+  allow-missing:
+    description: 'true 时版本缺失不失败（回退系统 python3 并告警），默认失败'
+    required: false
+    default: 'false'
+
+outputs:
+  python-path:
+    description: '命中的 python 可执行文件绝对路径'
+  python-version:
+    description: '实际解析到的版本号（x.y.z）'
+  installed:
+    description: 'true=系统已有直接复用 / false=本 action 安装（当前版本不含在线安装，见 README）'
+
+runs:
+  using: 'node16'
+  main: 'dist/main.js'
