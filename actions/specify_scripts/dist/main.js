@@ -87,16 +87,19 @@ async function run() {
         try {
             execFileSync('git', ['clone', '-b', ciBranch, CI_REPO_URL, 'cann-ci', '--depth', '1'], { stdio: 'inherit', timeout: CLONE_TIMEOUT_MS });
         } catch (e) {
-            throw new Error(`分支 ${ciBranch} 拉取失败，请检查：1) opencann/.gitcode 上是否存在该分支（git ls-remote ${CI_REPO_URL} 验证）；2) token 是否有该私有仓库的访问权限；3) 分支名是否拼写正确`);
+            console.log(`::warning::分支 ${ciBranch} 拉取失败（请检查 opencann/.gitcode 上是否存在该分支、token 是否有权限、网络是否超时），本次使用默认上传的脚本`);
+            return;
         }
 
         scriptsRoot = path.resolve('cann-ci', 'scripts', repoName);
         if (!fs.existsSync(scriptsRoot) || !fs.statSync(scriptsRoot).isDirectory()) {
-            throw new Error(`脚本目录不存在：scripts/${repoName}（分支 ${ciBranch}）`);
+            console.log(`::warning::分支 ${ciBranch} 上不存在脚本目录 scripts/${repoName}，本次使用默认上传的脚本`);
+            return;
         }
         const files = collectFiles(scriptsRoot);
         if (files.length === 0) {
-            throw new Error(`脚本目录为空：scripts/${repoName}（分支 ${ciBranch}）`);
+            console.log(`::warning::分支 ${ciBranch} 上脚本目录 scripts/${repoName} 为空，本次使用默认上传的脚本`);
+            return;
         }
 
         console.log(`开始上传 ${files.length} 个脚本到 obs://${bucket}/${objectPrefix} ...`);
