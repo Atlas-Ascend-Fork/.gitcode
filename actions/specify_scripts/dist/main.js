@@ -52898,12 +52898,13 @@ exports.fromJSON = fromJSON;
 /************************************************************************/
 var __webpack_exports__ = {};
 const core = __nccwpck_require__(7484);
-const { execSync } = __nccwpck_require__(5317);
+const { execFileSync } = __nccwpck_require__(5317);
 const fs = __nccwpck_require__(9896);
 const path = __nccwpck_require__(6928);
 const ObsClient = __nccwpck_require__(1728);
 
 const CI_REPO_URL = 'https://gitcode.com/opencann/.gitcode.git';
+const CLONE_TIMEOUT_MS = 5 * 60 * 1000;
 
 function collectFiles(rootDir, relDir, acc) {
     relDir = relDir || '';
@@ -52950,19 +52951,26 @@ async function run() {
         const secretKey = core.getInput('secret-key', { required: true });
         const objectPrefix = (core.getInput('object-prefix', { required: true }) || '').replace(/^\/+|\/+$/g, '');
 
-        const m = comment.match(/.*@(\S+)/);
+        const m = comment.match(/compile[^@]*@(\S+)/i);
         ciBranch = m ? m[1] : '';
         if (!ciBranch) {
-            console.log('comment 中未解析到 @<分支>，跳过脚本指定');
+            console.log('comment 中未解析到 compile 后的 @<分支>，跳过脚本指定');
             return;
         }
         console.log(`拉取分支：${ciBranch}（使用 ci 仓库分支脚本）`);
         console.log(`仓库名：${repoName}`);
         if (token) {
-            execSync(`git config --global url."https://cann-robot:${token}@gitcode.com/".insteadOf "https://gitcode.com/"`);
+            execFileSync('git', ['config', '--global', `url.https://cann-robot:${token}@gitcode.com/.insteadOf`, 'https://gitcode.com/']);
         }
         const cloneDir = 'cann-ci';
-        execSync(`git clone -b ${ciBranch} ${CI_REPO_URL} ${cloneDir} --depth 1`, { stdio: 'inherit' });
+        try {
+            execFileSync('git', ['clone', '-b', ciBranch, CI_REPO_URL, cloneDir, '--depth', '1'], { stdio: 'inherit', timeout: CLONE_TIMEOUT_MS });
+        } catch (e) {
+            const reason = e.killed || (e.signal && e.signal !== 'SIGTERM')
+                ? `克隆超时（超过 ${CLONE_TIMEOUT_MS / 60000} 分钟），请检查网络`
+                : `分支 ${ciBranch} 拉取失败，请检查：1) opencann/.gitcode 上是否存在该分支（git ls-remote https://gitcode.com/opencann/.gitcode.git 验证）；2) token 是否有该私有仓库的访问权限；3) 分支名是否拼写正确`;
+            throw new Error(reason);
+        }
 
         scriptsRoot = path.resolve(cloneDir, 'scripts', repoName);
         if (!fs.existsSync(scriptsRoot) || !fs.statSync(scriptsRoot).isDirectory()) {
