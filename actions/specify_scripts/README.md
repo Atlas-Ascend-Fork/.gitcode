@@ -6,8 +6,8 @@
 
 1. 从 `comment` 解析分支名：取 `compile` 后第一个 `@` 之后的非空白串，如 `compile@feat-ci` → `feat-ci`、`/compile@feat-ci @reviewer` → `feat-ci`。
 2. 无 `@` → 跳过指定（exit 0），不影响流水线。
-3. `git clone -b <分支>` 拉取 CI 仓库（传入 `token` 时自动配置 git 鉴权，日志不打印仓库地址）。
-4. 分支上不存在 `scripts/<repo_name>/` 目录或目录为空 → action 失败（exit 1）。
+3. `git clone -b <分支>` 拉取 CI 仓库（传入 `token` 时自动配置 git 鉴权，日志不打印仓库地址）,克隆超时 5 分钟。
+4. 拉取不到分支脚本（分支不存在/目录缺失/目录为空）→ 打 `::warning::` 后退出（exit 0），不阻断流水线，沿用先前已上传的默认脚本。
 5. 目录下全部文件按相对路径递归上传：`scripts/<repo_name>/ut.sh` → `<object-prefix>/ut.sh`，`scripts/<repo_name>/sub/x.py` → `<object-prefix>/sub/x.py`。与流水线中 `obs-upload` 步骤的对象键一致时，本 action 后执行可覆盖先前上传的脚本。
 
 ## 输入参数
