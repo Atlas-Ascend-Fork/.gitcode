@@ -99,7 +99,7 @@ jobs:
   JOB_sca:
     name: SCA
     steps:
-      -
+      - 
         name: sca
         id: sca-pr-scan
         uses: sca-pr-scan
