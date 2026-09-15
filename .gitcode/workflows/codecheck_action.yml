@@ -33,7 +33,7 @@ jobs:
       -
         name: precommit
         identifier: precommit
-        uses: zhangfands/.gitcode/actions/precommit@master
+        uses: cann/.gitcode/actions/precommit@master
         with:
           merge_id: ${{ env.MERGE_ID }}
           repo_name: ${{ env.repo_name }}
