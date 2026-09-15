@@ -64,7 +64,7 @@ fi
 # OSS 开源依赖门禁：暂时仅在以下仓生效，其余仓跳过
 if [[ "${REPOSITORY_NAME}" == @(asc-devkit|ops-math) ]]; then
     LOG_HEAD "Check URL and third-party library gate"
-    python3 ${SCRIPT_DIR}/check_oss_dep.py ${WORKSPACE} ${REPOSITORY_NAME} ${GIT_TARGET_BRANCH}
+    python3 ${SCRIPT_DIR}/check_oss_dep.py ${WORKSPACE} ${REPOSITORY_NAME} ${GIT_TARGET_BRANCH} "${MERGE_ID:-}"
     DP_ASSERT_EQUAL "$?" "0" "check URL and third-party library gate"
 else
     LOG_HEAD "oss dep gate not enabled for ${REPOSITORY_NAME}, skip"
