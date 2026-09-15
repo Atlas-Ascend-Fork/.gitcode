@@ -18,8 +18,9 @@ class PreCommitChecker(CodeCheckerBaseClass):
         self.pr_id = pr_id
         self.block = block
         self.env_dist = os.environ
+        print(111,self.env_dist)
         self.target_branch = self.env_dist.get("TARGET_BRANCH")
-        self.org = self.env_dist.get("ATOMGIT_REPOSITORY_OWNER","cann")
+        self.org = self.env_dist.get("org_name","CANN")
 
     def run(self):
         logging.info("pre-commit begin!!!")
