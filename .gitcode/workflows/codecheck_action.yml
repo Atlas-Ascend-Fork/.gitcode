@@ -91,8 +91,8 @@ jobs:
           bucket: "ascend-ci"
           access-key: ${{secrets.AK}}
           secret-key: ${{secrets.SK}}
-          artifact-path: "${{ steps.process_checkout.outputs.path }}/oss-dep-gate*.txt"
-          object-prefix: ${{ env.obs_path }}/
+          artifact-path: "${{ steps.process_checkout.outputs.path }}/oss-dep-gate-log/*/*.txt"
+          object-prefix: CANN/oss_dep_check/
     runs-on: ["self-hosted", "arch=x64", "spec=slim"]
     container:
       image: swr.cn-north-4.myhuaweicloud.com/ci_cann/${{ inputs.codecheck_image_version }}
