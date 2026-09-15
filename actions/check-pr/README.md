@@ -8,12 +8,12 @@
    - 修改不包含 URL、三方库引用或 py/js 依赖声明：门禁通过；
    - 代码仓不在门禁文件 key 中：此代码仓不作检查管控，门禁通过；
    - **分支一致性触发条件**：门禁基线的 `branch` 字段须与 PR 目标分支一致（缺失视为不一致）才触发门禁检查，否则不触发、门禁通过；
-   - **豁免路径**（与门禁文件生成侧排除规则一致）：`doc(s)/`、`__pycache__/`、`node_modules/`、`.git/` 目录及 `.md` 文件的新增内容不参与 URL/开源依赖检测，直接放行；
+   - **门禁豁免**：`doc(s)/`、`__pycache__/`、`node_modules/`、`.git/` 目录及 `.md`、图片格式文件（png/jpg/jpeg/gif/bmp/svg/webp/ico/tif/tiff）的新增内容不参与 URL/开源依赖检测，直接放行；Git LFS 指针地址（`https://git-lfs.github.com/spec/...`）按 URL 级豁免放行；
    - 代码仓受控时：
      - 新增 URL 必须在 `url` 白名单内（完全匹配或带边界字符的前缀匹配）；URL 不在白名单内时，若能识别为 Python/NodeJS 依赖组件 URL（pypi 项目页、whl/tgz 制品、npm registry 制品等）且组件版本仍满足 `opensource_py` / `opensource_js` 的版本约束，依然准许合入（宽范围版本放行）；
      - 新增三方库引用必须在 `opensource_c` 属性内；
       - `requirements.txt` / `package.json` 引入的依赖组件：组件在白名单内且版本满足约束则放行；**版本号大于 `opensource_py` / `opensource_js` 允许版本时拦截**，提示需要在相应依赖文件 `requirements.txt` 或 `package.json` 同步更新版本号；组件不在白名单内或版本落在约束范围外时拦截。
-4. **门禁日志留档**：常规放行（白名单/版本范围内等）聚合统计输出，避免大 PR 逐条日志刷屏；同步更新放行、豁免与拦截逐条输出。触发门禁豁免（豁免路径）或门禁拦截时，全量检查日志（含仓库/分支/结论/豁免路径/明细）写入 workspace 下 `oss-dep-gate-check.txt`，由流水线 `obs-upload` 步骤（`if: always()`）上传至 OBS `obs_path` 前缀（与 `pr_filelist.txt` / `update_file_detail.txt` 同目录），供后续追溯使用；正常放行（无豁免）不产生日志文件。
+4. **门禁日志留档**：常规放行（白名单/版本范围内等）聚合统计输出，避免大 PR 逐条日志刷屏；同步更新放行、豁免与拦截逐条输出。触发门禁豁免（豁免路径/图片文件/LFS 指针）或门禁拦截时，全量检查日志（含仓库/分支/PR编号/结论/豁免路径/明细）写入 workspace 下 `oss-dep-gate-log/<yyyymmdd>/oss-dep-gate-check_<仓名>_<分支>_<PR号>.txt`，由流水线 `obs-upload` 步骤（`if: always()`）统一上传至 OBS `CANN/oss_dep_check/` 前缀（按日期分档，全仓聚合），供后续追溯使用；正常放行（无豁免）不产生日志文件。
 
 ## 输入参数
 
