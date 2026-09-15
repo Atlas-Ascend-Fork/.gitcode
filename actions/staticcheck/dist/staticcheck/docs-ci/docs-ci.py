@@ -399,6 +399,7 @@ if __name__ == "__main__":
     repo_name = sys.argv[5]  # 仓名
     org = sys.argv[6]  # cann
     tool_name = sys.argv[7]
+    pr_num_id = sys.argv[8]
     if tool_name != 'md_check':
         print(f'[Waring] skip check {tool_name}')
         sys.exit(0)
@@ -535,6 +536,8 @@ if __name__ == "__main__":
         summary_lines.append("</details>")
         ends_info_tag = True
     if ends_info_tag:
-        summary_lines.append('⚠️ 详细告警信息请查看日志或 StaticCheck.csv 产物')
+        # https://ascend-ci.obs.cn-north-4.myhuaweicloud.com/opencann/ops-nn_3653/ci/package/7/StaticCheck.csv
+        download_report_url = f"https://ascend-ci.obs.cn-north-4.myhuaweicloud.com/{org}/{repo_name}/ci/package/{pr_num_id}/StaticCheck.csv"
+        summary_lines.append(f'⚠️ 详细告警信息请查看日志或 <a href={download_report_url}>StaticCheck.csv</a> 产物')
     git_diff.gen_summary_file(summary_lines)
     sys.exit(result_num)  # 输出告警个数

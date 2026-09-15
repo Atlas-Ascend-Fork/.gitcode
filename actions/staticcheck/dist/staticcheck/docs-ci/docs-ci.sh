@@ -13,6 +13,7 @@ GIT_TARGET_BRANCH=$3
 COMMIT_ID=$4
 tool_name=$5
 ORGANIZATION_NAME=$6
+GIT_PR_NUMBER=$7
 
 
 # 工具检查前先安装npm依赖
@@ -23,7 +24,7 @@ npm i
 
 echo "python3 ${script_dir}/docs-ci.py ${WORKSPACE} ${pr_filelist} ${script_dir} ${GIT_TARGET_BRANCH} ${REPOSITORY_NAME} ${ORGANIZATION_NAME} ${tool_name}"
 python3 -u ${script_dir}/docs-ci.py  \
-    ${WORKSPACE} ${pr_filelist} ${script_dir} ${GIT_TARGET_BRANCH} ${REPOSITORY_NAME} ${ORGANIZATION_NAME} ${tool_name}
+    ${WORKSPACE} ${pr_filelist} ${script_dir} ${GIT_TARGET_BRANCH} ${REPOSITORY_NAME} ${ORGANIZATION_NAME} ${tool_name} ${GIT_PR_NUMBER}
 return_value=$?
 
 echo "exit ${tool_name} status: ${return_value}"
