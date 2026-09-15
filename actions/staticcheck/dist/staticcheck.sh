@@ -29,7 +29,7 @@ echo "传入的参数: $sc_tool"
 #         sc_scan_cmd="$SCRIPT_DIR/staticcheck/docs-ci/docs-ci.sh $WORK_CODE_DIR $REPOSITORY_NAME $GIT_TARGET_BRANCH $COMMIT_ID $sc_tool"
 #         ;;
 # esac
-sc_scan_cmd="$SCRIPT_DIR/staticcheck/docs-ci/docs-ci.sh $WORK_CODE_DIR $REPOSITORY_NAME $GIT_TARGET_BRANCH $COMMIT_ID $sc_tool $ORG_NAME"
+sc_scan_cmd="$SCRIPT_DIR/staticcheck/docs-ci/docs-ci.sh $WORK_CODE_DIR $REPOSITORY_NAME $GIT_TARGET_BRANCH $COMMIT_ID $sc_tool $ORG_NAME $GIT_PR_NUMBER"
 echo $sc_scan_cmd
 bash $sc_scan_cmd
 return_value=$?
