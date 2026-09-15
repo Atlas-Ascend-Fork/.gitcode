@@ -255,6 +255,14 @@ repos:
         ubuntu20.04:x86:lv6_dev_mobile
       Compile_Ascend_X86_mobile_station_ubuntu24:
         ubuntu24.04:x86:lv6
+      Compile_Ascend_X86_experimental:
+        ubuntu20.04:x86:lv6
+      Compile_Ascend_ARM_experimental:
+        ubuntu20.04:arm:lv6
+      Compile_Ascend_X86_experimental_ubuntu24:
+        ubuntu24.04:x86:lv6
+      Compile_Ascend_ARM_experimental_ubuntu24:
+        ubuntu24.04:arm:lv6
       Compile_X86_monitor:
         ubuntu20.04:x86:lv6_monitor
       Compile_ARM_monitor:
