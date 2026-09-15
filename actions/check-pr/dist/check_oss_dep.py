@@ -40,13 +40,15 @@ opensource_py / opensource_js。
    全部通过则门禁通过，否则门禁拦截并以非 0 退出。
    常规放行（白名单/版本范围内等）聚合统计输出，避免大 PR 逐条日志刷屏；
    同步更新放行、豁免与拦截逐条输出。
-   触发门禁豁免（豁免路径）或门禁拦截时，全量检查日志写入 workspace 下
-   oss-dep-gate-check.txt，由流水线 obs-upload 上传至 OBS 留档供后续使用。
+   触发门禁豁免（豁免路径/图片文件/Git LFS 指针地址）或门禁拦截时，全量检查
+   日志写入 workspace/oss-dep-gate-log/<yyyymmdd>/oss-dep-gate-check_<仓名>_
+   <分支>_<PR号>.txt，由流水线 obs-upload 上传至 OBS（CANN/oss_dep_check/
+   前缀，按日期分档）留档供后续使用。
    脚本内部异常按拦截处理（fail-closed）；patch/门禁文件缺失等数据类
    失败按放行处理（fail-open，避免 CI 基础设施故障误伤）。
 
 用法：
-    python3 check_oss_dep.py <WORKSPACE> <REPOSITORY_NAME> <GIT_TARGET_BRANCH>
+    python3 check_oss_dep.py <WORKSPACE> <REPOSITORY_NAME> <GIT_TARGET_BRANCH> [PR_NUMBER]
 
 退出码：0 门禁通过；1 门禁拦截
 """
@@ -126,16 +128,26 @@ FULLWIDTH_CUT_CHARS = '，。；：？！、（）「」『』《》〈〉【】
 PREFIX_BOUNDARY_CHARS = ('/', '?', '#', '&', ';', '}')
 
 # 门禁豁免路径：与门禁文件生成侧（sbom 扫描）的排除规则保持一致，
-# doc(s)/__pycache__/node_modules/.git 目录及 .md 文件不做 URL/开源依赖检测，
-# 这些路径的新增内容不参与门禁判定，直接放行
+# doc(s)/__pycache__/node_modules/.git 目录、.md 文件及图片格式文件不做
+# URL/开源依赖检测；Git LFS 指针文件内容（version https://git-lfs.../spec/v1）
+# 虽为文本但属版本控制元数据，随图片/媒体豁免一并不参与检测
 EXEMPT_PATH_RE = re.compile(
     r'(^|/)(\.git|__pycache__|node_modules|docs?)(/|$)', re.IGNORECASE)
 
+# 豁免的图片及常见二进制媒体文件后缀
+EXEMPT_MEDIA_EXTS = ('.png', '.jpg', '.jpeg', '.gif', '.bmp', '.svg',
+                     '.webp', '.ico', '.tif', '.tiff')
+
+# Git LFS 指针 spec 地址（LFS 指针文件首行 version https://git-lfs.github.com/spec/v1）
+GIT_LFS_SPEC_RE = re.compile(r'^https?://git-lfs\.github\.com/spec/',
+                             re.IGNORECASE)
+
 
 def is_exempt_path(path):
-    """门禁豁免路径：doc(s)/__pycache__/node_modules/.git 目录及 .md 文件"""
+    """门禁豁免路径：doc(s)/__pycache__/node_modules/.git 目录、.md 与图片文件"""
     p = str(path).replace('\\', '/')
-    if p.lower().endswith('.md'):
+    lower = p.lower()
+    if lower.endswith('.md') or lower.endswith(EXEMPT_MEDIA_EXTS):
         return True
     return EXEMPT_PATH_RE.search(p) is not None
 
@@ -558,18 +570,28 @@ def log_error(msg):
     _emit("ERROR", msg)
 
 
-def write_gate_log(workspace, repo_name, target_branch, verdict, exempt_files):
+def write_gate_log(workspace, repo_name, target_branch, verdict,
+                   exempt_files, pr_number=''):
     """
-    门禁豁免/拦截时将全量检查日志写入 workspace 下的 oss-dep-gate-check.txt
-    （命名与上传 glob 对齐，模仿 precommit 的 pre-commit.txt 产物模式），
-    由流水线 obs-upload 步骤上传至 OBS（obs_path 前缀）供后续使用。
+    门禁豁免/拦截时将全量检查日志写入
+    workspace/oss-dep-gate-log/<yyyymmdd>/oss-dep-gate-check_<仓名>_<分支>_<PR号>.txt
+    （文件名携带 仓名/分支/PR 编号，目录按日期分档），由流水线 obs-upload
+    上传至 OBS（CANN/oss_dep_check/ 前缀）供后续使用。
     """
-    path = os.path.join(workspace, "oss-dep-gate-check.txt")
+    pr_tag = re.sub(r'[^A-Za-z0-9._-]', '-', str(pr_number).strip()) or 'unknown'
+    branch_tag = re.sub(r'[^A-Za-z0-9._-]', '-', str(target_branch)) or 'unknown'
+    filename = 'oss-dep-gate-check_{}_{}_{}.txt'.format(
+        repo_name, branch_tag, pr_tag)
+    out_dir = os.path.join(workspace, 'oss-dep-gate-log', time.strftime('%Y%m%d'))
+    path = os.path.join(out_dir, filename)
     try:
+        if not os.path.isdir(out_dir):
+            os.makedirs(out_dir)
         with open(path, "w", encoding="utf-8") as f:
             f.write("OSS 依赖门禁检查日志\n")
             f.write("仓库: {}\n".format(repo_name))
             f.write("目标分支: {}\n".format(target_branch))
+            f.write("PR 编号: {}\n".format(pr_tag))
             f.write("检查时间: {}\n".format(
                 time.strftime("%Y-%m-%d %H:%M:%S")))
             f.write("检查结论: {}\n".format(verdict))
@@ -808,6 +830,7 @@ REASON_ZH = {
     'url_intro': 'URL引入',
     'known_component': '组件在白名单',
     'whitelist': 'URL在白名单内',
+    'lfs_pointer': 'Git LFS指针地址',
 }
 
 
@@ -930,10 +953,12 @@ def check_dep_version(ecosystem, name, spec, wl_specs, files, sync_specs=None):
 def check_url_entry(url, files, url_wl, url_exact, py_wl, js_wl, py_sync, js_sync):
     """
     单个新增 URL 的门禁判定（url 白名单 + py/js 组件宽范围版本放行 +
-    依赖文件同步声明豁免）。
-    返回 (放行与否, 原因标签)：常规放行原因（whitelist/in_range/known_component，
-    见 REASON_ZH）由调用方聚合输出；同步更新放行与拦截原因逐条输出日志。
+    依赖文件同步声明豁免 + Git LFS 指针地址豁免）。
+    返回 (放行与否, 原因标签)：常规放行原因（whitelist/in_range/known_component/
+    lfs_pointer，见 REASON_ZH）由调用方聚合输出；同步更新放行与拦截原因逐条输出日志。
     """
+    if GIT_LFS_SPEC_RE.match(url):
+        return True, 'lfs_pointer'
     candidates = url_candidates(url)
     if any(url_in_whitelist(c, url_wl, url_exact) for c in candidates):
         return True, 'whitelist'
@@ -994,12 +1019,16 @@ def check_url_entry(url, files, url_wl, url_exact, py_wl, js_wl, py_sync, js_syn
 def main():
     if len(sys.argv) < 4:
         log_error("参数不足，用法: python3 check_oss_dep.py "
-                  "<WORKSPACE> <REPOSITORY_NAME> <GIT_TARGET_BRANCH>")
+                  "<WORKSPACE> <REPOSITORY_NAME> <GIT_TARGET_BRANCH> "
+                  "[PR_NUMBER]")
         return 1
 
     workspace = sys.argv[1]
     repo_name = sys.argv[2]
     target_branch = sys.argv[3] or "master"
+    # PR 编号（日志文件名携带）：优先命令行参数，其次 CI 环境变量 MERGE_ID
+    pr_number = (sys.argv[4] if len(sys.argv) > 4
+                 else os.environ.get('MERGE_ID', ''))
 
     # 1. 获取开发者提交的代码 patch
     diff_text = load_patch(workspace, target_branch)
@@ -1025,7 +1054,7 @@ def main():
         if exempt_files:
             log_info("开发者修改仅涉及豁免路径，门禁通过")
             write_gate_log(workspace, repo_name, target_branch,
-                           "放行（门禁豁免）", exempt_files)
+                           "放行（门禁豁免）", exempt_files, pr_number)
         else:
             log_info("开发者修改代码不包含URL/三方库/依赖组件，门禁通过")
         return 0
@@ -1150,7 +1179,7 @@ def main():
     if blocked:
         log_error("门禁检查未通过：引入的URL/三方库/依赖组件不合规")
         write_gate_log(workspace, repo_name, target_branch,
-                       "拦截（门禁不通过）", exempt_files)
+                       "拦截（门禁不通过）", exempt_files, pr_number)
         return 1
 
     verdict = "放行（含门禁豁免）" if exempt_files else "放行"
@@ -1158,7 +1187,7 @@ def main():
     log_info("URL/三方库/开源依赖门禁检查通过")
     if exempt_files:
         write_gate_log(workspace, repo_name, target_branch,
-                       verdict, exempt_files)
+                       verdict, exempt_files, pr_number)
     return 0
 
 
