@@ -19,6 +19,7 @@ class PreCommitChecker(CodeCheckerBaseClass):
         self.block = block
         self.env_dist = os.environ
         self.target_branch = self.env_dist.get("TARGET_BRANCH")
+        self.org = self.env_dist.get("ATOMGIT_REPOSITORY_OWNER","cann")
 
     def run(self):
         logging.info("pre-commit begin!!!")
@@ -63,7 +64,7 @@ class PreCommitChecker(CodeCheckerBaseClass):
             "| xargs pre-commit run --show-diff-on-failure --files"
         )
         check_result = self.run_cmd(cmd, os.getcwd(), shell=True, capture_output=True)
-        
+
         full_output = unquote(check_result.stdout)
         normal_output = ""
         for line in full_output.splitlines(keepends=True):
@@ -185,8 +186,8 @@ class PreCommitChecker(CodeCheckerBaseClass):
                     summary_lines.append(raw)
                     summary_lines.append("```")
                     summary_lines.append("</details>")
-                summary_lines.append("\n> ⚠️ 完整 diff 信息请查看日志或 `pre-commit.txt` 产物")
-
+                download_report_url = f"https://ascend-ci.obs.cn-north-4.myhuaweicloud.com/{self.org}/{self.repository_name}/ci/package/{self.pr_id}/pre-commit.txt"
+                summary_lines.append(f"\n> ⚠️ 完整 diff 信息请查看日志或 <a href={download_report_url}> pre-commit.txt </a> 产物")
             with open(summary_path, "a", encoding="utf-8") as f:
                 f.write("\n".join(summary_lines) + "\n")
 
@@ -235,15 +236,15 @@ class PreCommitChecker(CodeCheckerBaseClass):
             modified = False
             repos = config_data.get("repos", [])
             new_repos = []
-            
+
             for repo in repos:
                 hooks = repo.get("hooks", [])
                 # 过滤掉 id 为 oat-check 的 hook
                 new_hooks = [h for h in hooks if h.get("id") != "oat-check"]
-                
+
                 if len(new_hooks) != len(hooks):
                     modified = True
-                
+
                 # 如果还有其他 hook 保留，没有就删掉整个 repo
                 if new_hooks:
                     repo["hooks"] = new_hooks
