@@ -109,3 +109,6 @@ hcomm:
 metadef:
   - docs/api
   - docs/zh/api
+
+asc-tools:
+  - skills
