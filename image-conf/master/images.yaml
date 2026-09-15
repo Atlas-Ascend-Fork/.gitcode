@@ -1458,3 +1458,7 @@ repos:
     stages:
       Compile_Ascend_ARM:
         ubuntu22.04:arm:image
+  mat-chem-sim-pred:
+    stages:
+      Compile_Ascend_ARM:
+        ubuntu24.04_gcc15:arm:lv6
