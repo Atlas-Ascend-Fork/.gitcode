@@ -3,6 +3,7 @@
 
 import argparse
 import json
+import os
 import re
 import sys
 import time
@@ -347,6 +348,13 @@ def main():
         for j in failed_jobs:
             print(f"    {j.get('name', 'N/A')}  ->  {j.get('id', 'N/A')}")
         print()
+
+    # 输出 pipeline_failed 供后续步骤消费(如 failure-analyze):
+    #   true=存在失败 job; false=无失败; 未输出=本步骤自身异常
+    out_file = os.environ.get("ATOMGIT_OUTPUT")
+    if out_file:
+        with open(out_file, "a", encoding="utf-8") as f:
+            f.write("pipeline_failed=%s\n" % ("true" if failed_jobs else "false"))
 
     # 根据 PR 编号和任务执行结果打标签
     if args.apply_label and args.pr_number:

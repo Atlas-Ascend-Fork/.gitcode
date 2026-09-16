@@ -1,0 +1,46 @@
+name: 'failure-analyze'
+author: 'CANN'
+version: '1.0.0'
+description: '流水线失败时触发 Agent 分析失败原因(调用 agent-hub trigger 接口), 建议置于 Test_finish 的 query_pipeline 之后'
+inputs:
+  owner:
+    description: 仓库所属组织/用户
+    required: true
+  repo:
+    description: 仓库名称
+    required: true
+  run_id:
+    description: 本次运行的 run_id
+    required: true
+  pr_number:
+    description: PR 编号(选填, 组装分析上下文)
+    required: false
+  enable:
+    description: 总开关(true=启用失败分析; 空/false=跳过); 建议接 vars.FAILURE_ANALYZE_ENABLE, 支持按仓库灰度
+    required: false
+    default: "false"
+  pipeline_failed:
+    description: query_pipeline 步骤输出(false=成功跳过; true=失败触发; 缺失=其自身异常, 兜底触发)
+    required: false
+  session_id:
+    description: agent-hub 事件型 Session ID
+    required: true
+  event_key:
+    description: 事件 Key, 需与 Session trigger_config.event_key 匹配
+    required: false
+    default: pipeline_failed
+  enable_pr_comment:
+    description: PR 评论回写开关(true=要求 Agent 将分析结果回写到 PR 评论区; 空/false=仅输出报告; 建议接 vars.PR_COMMENT_ENABLE)
+    required: false
+    default: "false"
+  agent_hub_token:
+    description: agent-hub 认证 token
+    required: true
+  agent_hub_url:
+    description: agent-hub 服务地址
+    required: false
+    default: https://cannbot.hicann.cn/agent-hub
+
+runs:
+  using: 'node16'
+  main: 'dist/main.js'
