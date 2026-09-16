@@ -1474,3 +1474,7 @@ repos:
         ubuntu24.04_gcc15:x86:lv6
       PreSmoke_A900:
         ubuntu24.04:arm:smoke
+  mat-chem-sim-pred:
+    stages:
+      Compile_Ascend_ARM:
+        ubuntu24.04_gcc15:arm:lv6
