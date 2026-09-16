@@ -81,7 +81,7 @@ jobs:
         with:
           repo_name: ${{ env.repo_name }}
           workspace: ${{ steps.process_checkout.outputs.path }}
-          target_branch: ${{ env.target_branch }}
+          target_branch: ${{ env.TARGET_BRANCH }}
       -
         name: upload
         uses: obs-upload
