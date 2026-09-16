@@ -7,7 +7,7 @@
 source ${SCRIPT_DIR}/assert.sh
 cat ${WORKSPACE}/pr_filelist.txt
 
-LOG_HEAD "Build check PR changes"
+LOG_HEAD "Build check PR changes,this is ${GIT_TARGET_BRANCH}"
 cd ${SCRIPT_DIR} || exit
 
 LOG_HEAD "check binary files"
