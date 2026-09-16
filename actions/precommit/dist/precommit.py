@@ -91,10 +91,10 @@ class PreCommitChecker(CodeCheckerBaseClass):
         with open(diff_log_path, "a", encoding="utf-8") as fa:
             fa.write(oat_context)
 
-        # 写入步骤摘要到 ATOMGIT_STEP_SUMMARY
+        # 写入步骤摘要到 ATOMGIT_STEP_SUMMARY(仅失败时, 成功不输出)
         summary_path = os.environ.get("ATOMGIT_STEP_SUMMARY", "")
-        if summary_path:
-            passed = check_result.returncode == 0
+        passed = check_result.returncode == 0
+        if summary_path and not passed:
             status_icon = "✅" if passed else "❌"
             summary_lines = [
                 f"## {status_icon} Pre-commit 检查结果\n",

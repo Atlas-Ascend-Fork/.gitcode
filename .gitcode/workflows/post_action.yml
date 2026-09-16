@@ -10,6 +10,7 @@ jobs:
     steps:
       - 
         name: query_pipeline
+        identifier: query_pipeline
         uses: cann/.gitcode/actions/query-pipeline@master
         with:
           owner: ${{ env.org_name }}
@@ -18,6 +19,22 @@ jobs:
           token: ${{ secrets.GIT_TOKEN }}
           pr_number: ${{ env.MERGE_ID }}
           apply_label: ${{ vars.APPLY_LABEL }}
+      -
+        name: failure_analyze
+        identifier: failure_analyze
+        uses: cann/.gitcode/actions/failure-analyze@master
+        if: ${{ always() }}
+        with:
+          owner: ${{ env.org_name }}
+          repo: ${{ env.repo_name }}
+          run_id: ${{ atomgit.workflow_run_id }}
+          pr_number: ${{ env.MERGE_ID }}
+          enable: ${{ vars.FAILURE_ANALYZE_ENABLE }}
+          pipeline_failed: ${{ steps.query_pipeline.outputs.pipeline_failed }}
+          enable_pr_comment: ${{ vars.PR_COMMENT_ENABLE }}
+          session_id: ${{ vars.AGENT_SESSION_ID }}
+          event_key: ${{ vars.AGENT_EVENT_KEY }}
+          agent_hub_token: ${{ secrets.AGENT_HUB_TOKEN }}
     runs-on: ["self-hosted", "arch=x64", "spec=slim"]
     container:
       image: swr.cn-north-4.myhuaweicloud.com/ci_cann/ubuntu20.04.05_x86:k8s_v1.1006
