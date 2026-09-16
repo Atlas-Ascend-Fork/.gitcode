@@ -1472,3 +1472,5 @@ repos:
         ubuntu24.04_gcc15:x86:lv6
       API_Check:
         ubuntu24.04_gcc15:x86:lv6
+      PreSmoke_A900:
+        ubuntu24.04:arm:smoke
