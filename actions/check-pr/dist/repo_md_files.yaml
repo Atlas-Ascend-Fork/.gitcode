@@ -13,6 +13,8 @@ common:
 
 asc-devkit:
   '*':
+    - docs/en/api
+    - docs/en/guide
     - docs/zh/api
     - docs/zh/guide
     - docs/zh/vitepress
@@ -37,11 +39,19 @@ driver:
     - docs/zh/Ascend_910B_DCMI_API
     - docs/zh/Ascend_910_93_DCMI_API
     - docs/zh/msnpureport
-    - docs/en/msnpureport
     - docs/zh/Ascend_950_DCMI_API
     - docs/zh/Ascend_950_HCCN_Tool
     - docs/zh/Ascend_950_npu-smi
     - docs/zh/Ascend_950_upgrade-tool
+    - docs/zh/nda
+    - docs/en/Ascend_910B_DCMI_API
+    - docs/en/Ascend_910_93_DCMI_API
+    - docs/en/msnpureport
+    - docs/en/Ascend_950_DCMI_API
+    - docs/en/Ascend_950_HCCN_Tool
+    - docs/en/Ascend_950_npu-smi
+    - docs/en/Ascend_950_upgrade-tool
+    - docs/en/nda
 
 driver-dev:
   '*':
@@ -69,6 +79,12 @@ ge:
     - docs/zh/user_guides/atc_tools
     - docs/zh/user_guides/llm_datadist
     - docs/zh/user_guides/dflow
+    - docs/en/api
+    - docs/en/user_guides/graph_dev
+    - docs/en/user_guides/env_vars
+    - docs/en/user_guides/atc_tools
+    - docs/en/user_guides/llm_datadist
+    - docs/en/user_guides/dflow
 
 pypto:
   '*':
@@ -86,6 +102,12 @@ oam-tools:
     - docs/zh/msaicerr
     - docs/zh/profiling
     - docs/zh/design
+    - docs/en/asys
+    - docs/en/env-vars
+    - docs/en/hccl_test
+    - docs/en/msaicerr
+    - docs/en/profiling
+    - docs/en/design
 
 graph-autofusion:
   '*':
@@ -97,6 +119,8 @@ hixl:
   '*':
     - docs/zh/api
     - docs/zh/guide
+    - docs/en/api
+    - docs/en/guide
     - .agents
     - .claude
     - .codex
@@ -124,9 +148,8 @@ hcomm:
 
 metadef:
   '*':
-    - docs/api
     - docs/zh/api
-
+    - docs/en/api
 asc-tools:
   '*':
     - skills
@@ -134,3 +157,10 @@ asc-tools:
 ops-ras:
   '*':
     - docs
+
+docs:
+  '*':
+    - docs/zh/app-dev
+    - docs/zh/troubleshooting
+    - docs/en/app-dev
+    - docs/en/troubleshooting
