@@ -7,6 +7,7 @@
 | Action | 说明 |
 | --- | --- |
 | [get-pr](get-pr/README.md) | 获取 PR 相对目标分支的变更文件清单 |
+| [failure-analyze](failure-analyze/README.md) | 流水线失败时触发 Agent 分析失败原因（agent-hub trigger，建议置于 Test_finish） |
 | [check-pr](check-pr/README.md) | 检查 PR 变更内容（二进制文件、Markdown 链接） |
 | [staticcheck](staticcheck/README.md) | 静态检查（MarkdownLint、docs-ci 文档规范） |
 | [precommit](precommit/README.md) | 基于 `.pre-commit-config.yaml` 的代码格式检查 |
