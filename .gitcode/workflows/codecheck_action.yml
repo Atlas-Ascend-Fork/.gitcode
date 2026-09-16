@@ -9,6 +9,10 @@ on:
       codecheck_image_version:
         required: true
         type: string
+      oss_dep_check_prefix:
+        required: false
+        type: string
+        default: 'CANN/oss_dep_check'
 
 
 jobs:
@@ -83,6 +87,18 @@ jobs:
           workspace: ${{ steps.process_checkout.outputs.path }}
           target_branch: ${{ env.TARGET_BRANCH }}
       -
+        name: get_log_date
+        identifier: get_log_date
+        if: ${{ always() }}
+        run: |
+          LOG_DIR="${{ steps.process_checkout.outputs.path }}/oss-dep-gate-log"
+          if [ -d "$LOG_DIR" ]; then
+            LOG_DATE=$(ls "$LOG_DIR" | head -n 1)
+          else
+            LOG_DATE=$(date +%Y%m%d)
+          fi
+          echo "log_date=$LOG_DATE" >> $GITHUB_OUTPUT
+      -
         name: upload
         uses: obs-upload
         if: ${{ always() }}
@@ -92,7 +108,7 @@ jobs:
           access-key: ${{secrets.AK}}
           secret-key: ${{secrets.SK}}
           artifact-path: "${{ steps.process_checkout.outputs.path }}/oss-dep-gate-log/*/*.txt"
-          object-prefix: CANN/oss_dep_check/
+          object-prefix: ${{ inputs.oss_dep_check_prefix }}/${{ steps.get_log_date.outputs.log_date }}/
     runs-on: ["self-hosted", "arch=x64", "spec=slim"]
     container:
       image: swr.cn-north-4.myhuaweicloud.com/ci_cann/${{ inputs.codecheck_image_version }}
