@@ -1,3 +1,7 @@
+# 屏蔽路径配置：仓名 -> 分支 -> 路径列表
+# common 对所有仓、所有分支生效
+# '*' 为默认名单：目标分支为 master 或未配置该分支时使用
+# 配置了具体分支（非 master）时，仅使用该分支的名单，不再合并 '*'
 common:
   - .claude
   - .opencode
@@ -8,107 +12,125 @@ common:
   - docs/en/guide
 
 asc-devkit:
-  - docs/zh/api
-  - docs/zh/guide
-  - docs/zh/vitepress
-  - docs/api
-  - docs/guide
-  - .agent
-  - .claude
-  - .codex
-  - .opencode
+  '*':
+    - docs/zh/api
+    - docs/zh/guide
+    - docs/zh/vitepress
+    - docs/api
+    - docs/guide
+    - .agent
+    - .claude
+    - .codex
+    - .opencode
 
 amct:
-  - docs
-  - .claude
-  - .opencode
-  - AGENTS.md
-  - skills
-  - .agents
+  '*':
+    - docs
+    - .claude
+    - .opencode
+    - AGENTS.md
+    - skills
+    - .agents
 
 driver:
-  - docs/zh/Ascend_910B_DCMI_API
-  - docs/zh/Ascend_910_93_DCMI_API
-  - docs/zh/msnpureport
-  - docs/en/msnpureport
-  - docs/zh/Ascend_950_DCMI_API
-  - docs/zh/Ascend_950_HCCN_Tool
-  - docs/zh/Ascend_950_npu-smi
-  - docs/zh/Ascend_950_upgrade-tool
+  '*':
+    - docs/zh/Ascend_910B_DCMI_API
+    - docs/zh/Ascend_910_93_DCMI_API
+    - docs/zh/msnpureport
+    - docs/en/msnpureport
+    - docs/zh/Ascend_950_DCMI_API
+    - docs/zh/Ascend_950_HCCN_Tool
+    - docs/zh/Ascend_950_npu-smi
+    - docs/zh/Ascend_950_upgrade-tool
 
 driver-dev:
-  - docs/zh/Ascend_910B_DCMI_API
-  - docs/zh/Ascend_910_93_DCMI_API
-  - docs/zh/msnpureport
-  - docs/en/msnpureport
-  - docs/zh/Ascend_950_DCMI_API
-  - docs/zh/Ascend_950_HCCN_Tool
-  - docs/zh/Ascend_950_npu-smi
-  - docs/zh/Ascend_950_upgrade-tool
+  '*':
+    - docs/zh/Ascend_910B_DCMI_API
+    - docs/zh/Ascend_910_93_DCMI_API
+    - docs/zh/msnpureport
+    - docs/en/msnpureport
+    - docs/zh/Ascend_950_DCMI_API
+    - docs/zh/Ascend_950_HCCN_Tool
+    - docs/zh/Ascend_950_npu-smi
+    - docs/zh/Ascend_950_upgrade-tool
 
 runtime:
-  - docs
-  - .claude
+  '*':
+    - docs
+    - .claude
 
 ge:
-  - .claude
-  - .opencode
-  - docs/zh/api
-  - docs/zh/user_guides/graph_dev
-  - docs/zh/user_guides/env_vars
-  - docs/zh/user_guides/atc_tools
-  - docs/zh/user_guides/llm_datadist
-  - docs/zh/user_guides/dflow
+  '*':
+    - .claude
+    - .opencode
+    - docs/zh/api
+    - docs/zh/user_guides/graph_dev
+    - docs/zh/user_guides/env_vars
+    - docs/zh/user_guides/atc_tools
+    - docs/zh/user_guides/llm_datadist
+    - docs/zh/user_guides/dflow
 
 pypto:
-  - docs/zh
-  - docs/en
-  - .opencode
-  - .agents
-  - AGENTS.md
+  '*':
+    - docs/zh
+    - docs/en
+    - .opencode
+    - .agents
+    - AGENTS.md
 
 oam-tools:
-  - docs/zh/asys
-  - docs/zh/env-vars
-  - docs/zh/hccl_test
-  - docs/zh/msaicerr
-  - docs/zh/profiling
-  - docs/zh/design
+  '*':
+    - docs/zh/asys
+    - docs/zh/env-vars
+    - docs/zh/hccl_test
+    - docs/zh/msaicerr
+    - docs/zh/profiling
+    - docs/zh/design
 
 graph-autofusion:
-  - .claude
-  - .opencode
-  - AGENTS.md
+  '*':
+    - .claude
+    - .opencode
+    - AGENTS.md
 
 hixl:
-  - docs/zh/api
-  - docs/zh/guide
-  - .agents
-  - .claude
-  - .codex
-  - .opencode
-  - AGENTS.md
-  - CLAUDE.md 
+  '*':
+    - docs/zh/api
+    - docs/zh/guide
+    - .agents
+    - .claude
+    - .codex
+    - .opencode
+    - AGENTS.md
+    - CLAUDE.md
 
 hccl:
-  - docs/zh/api_ref
-  - docs/zh/user_guide
-  - docs/zh/architecture
-  - docs/en/api_ref
-  - docs/en/user_guide
-  - docs/en/architecture
+  '*':
+    - docs/zh/api_ref
+    - docs/zh/user_guide
+    - docs/zh/architecture
+    - docs/en/api_ref
+    - docs/en/user_guide
+    - docs/en/architecture
 
 hcomm:
-  - docs/zh/api_ref
-  - docs/zh/comm_op_dev_guide
-  - docs/zh/architecture
-  - docs/en/api_ref
-  - docs/en/comm_op_dev_guide
-  - docs/en/architecture
+  '*':
+    - docs/zh/api_ref
+    - docs/zh/comm_op_dev_guide
+    - docs/zh/architecture
+    - docs/en/api_ref
+    - docs/en/comm_op_dev_guide
+    - docs/en/architecture
 
 metadef:
-  - docs/api
-  - docs/zh/api
+  '*':
+    - docs/api
+    - docs/zh/api
 
 asc-tools:
-  - skills
+  '*':
+    - skills
+
+ops-ras:
+  '*':
+    - docs
