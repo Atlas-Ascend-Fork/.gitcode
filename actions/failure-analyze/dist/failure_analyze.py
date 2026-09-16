@@ -1,0 +1,104 @@
+#!/usr/bin/env python3
+"""流水线失败时触发 Agent 分析失败原因。
+
+设计(零 GitCode API 查询):
+  - 流水线成败由 query_pipeline 步骤输出的 pipeline_failed 变量传递
+      pipeline_failed == "false" → 流水线成功, 跳过
+      pipeline_failed == "true"  → 存在失败 Job, 触发分析
+      变量缺失                   → query_pipeline 自身异常(如限流), 兜底触发
+  - 分析内容直接给 run 链接, 由 Agent 侧技能(gitcode-ci-api 等)自行拉取数据
+  - 触发调用失败仅告警不阻断(业务上恒 exit 0, 除非参数缺失)
+"""
+
+import json
+import os
+import sys
+import urllib.error
+import urllib.request
+
+
+def env(name, default=""):
+    return os.environ.get(name, default).strip()
+
+
+def post_trigger(url, token, payload, timeout=60):
+    """POST trigger, 返回 (http_code, body)"""
+    data = json.dumps(payload, ensure_ascii=False).encode("utf-8")
+    req = urllib.request.Request(url, data=data, method="POST")
+    req.add_header("Authorization", f"Bearer {token}")
+    req.add_header("Content-Type", "application/json")
+    try:
+        with urllib.request.urlopen(req, timeout=timeout) as resp:
+            return resp.status, resp.read().decode("utf-8", errors="replace")
+    except urllib.error.HTTPError as e:
+        return e.code, e.read().decode("utf-8", errors="replace")
+    except Exception as e:
+        return -1, str(e)
+
+
+def main():
+    enable = env("ENABLE", "false").lower() in ("true", "1", "yes")
+    if not enable:
+        print("失败分析未启用(enable=false, 建议配置 vars.FAILURE_ANALYZE_ENABLE=true 开启), 跳过")
+        return 0
+    owner = env("OWNER")
+    repo = env("REPO")
+    run_id = env("RUN_ID")
+    pr_number = env("PR_NUMBER")
+    pipeline_failed = env("PIPELINE_FAILED").lower()
+    session_id = env("SESSION_ID")
+    event_key = env("EVENT_KEY") or "gate_check"
+    hub_token = env("AGENT_HUB_TOKEN")
+    hub_url = env("AGENT_HUB_URL", "https://cannbot.hicann.cn/agent-hub")
+    enable_pr_comment = env("ENABLE_PR_COMMENT", "false").lower() in ("true", "1", "yes")
+
+    if not (owner and repo and run_id):
+        print("未提供 owner/repo/run_id, 跳过失败分析")
+        return 0
+    if not session_id:
+        print("未配置 session_id(建议配置 vars.AGENT_SESSION_ID), 跳过失败分析")
+        return 0
+
+    # ---- 1. 依据 query_pipeline 传递的变量判断 ----
+    if pipeline_failed == "false":
+        print("流水线成功(query_pipeline: pipeline_failed=false), 无需失败分析")
+        return 0
+    if pipeline_failed == "true":
+        reason = "query_pipeline 检测到失败 Job"
+    else:
+        reason = "query_pipeline 未输出结果(自身执行异常, 如 API 限流), 兜底触发分析"
+
+    # ---- 2. 组装分析内容(简洁: 技能用法/输出格式/回写规则由 agent 定义约束, 不在指令里重复) ----
+    run_url = f"https://gitcode.com/{owner}/{repo}/actions/runs/{run_id}"
+    pr_part = f"(PR#{pr_number}) " if pr_number else ""
+    content = f"分析流水线失败: {owner}/{repo} {pr_part}{run_url}"
+    # PR 评论回写开关: 开启时追加一句; 关闭时不再提(agent 定义默认即不回写)
+    if enable_pr_comment and pr_number:
+        content += f"\n分析结果回写到 PR#{pr_number} 评论区。"
+
+    print(f"触发 Agent 失败分析: session={session_id}, event_key={event_key}({reason})")
+    print(f"分析内容: {content}")
+
+    # ---- 3. 触发 Agent ----
+    code, body = post_trigger(
+        f"{hub_url.rstrip('/')}/agenthubs/api/agents/sessions/{session_id}/trigger",
+        hub_token, {"content": content, "event_key": event_key})
+
+    if 200 <= code < 300:
+        print(f"✅ Agent 分析已触发(HTTP {code}): {body[:300]}")
+        summary_path = os.environ.get("ATOMGIT_STEP_SUMMARY")
+        if summary_path:
+            with open(summary_path, "a", encoding="utf-8") as f:
+                f.write(
+                    "## 🤖 失败原因分析\n\n"
+                    f"{reason}\n"
+                    f"流水线: {run_url}\n"
+                    f"已触发 Agent 分析(Session #{session_id}), 结果请查看 agent-hub 任务。\n\n")
+        return 0
+
+    print(f"WARNING: Agent 分析触发失败(HTTP {code}): {body[:200]} —— 不阻断流水线")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

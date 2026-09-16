@@ -41,7 +41,8 @@ if data:
     print(f"{level}")
 
 summary_path = os.environ.get("ATOMGIT_STEP_SUMMARY", "")
-if summary_path:
+if summary_path and status == "fail":
+    # 仅失败时输出步骤摘要, 成功不输出
     summary_lines = [
         f"## {status_icon} API 接口校验结果\n",
     ]

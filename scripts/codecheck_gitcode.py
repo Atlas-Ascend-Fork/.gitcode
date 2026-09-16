@@ -288,6 +288,8 @@ class CodeCheck(object):
             self.result = "no pass"
 
     def _write_summary(self, result):
+        if result == "pass":
+            return  # 成功不输出步骤摘要
         summary_path = os.getenv("ATOMGIT_STEP_SUMMARY")
         if not summary_path:
             return
