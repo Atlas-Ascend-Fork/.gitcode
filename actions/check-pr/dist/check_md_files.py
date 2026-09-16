@@ -48,26 +48,38 @@ def read_pr_file(pr_file: str) -> list[str]:
     return md_list
 
 
-def read_yaml(md_yaml: str, repo: str) -> list[str]:
-    """读取 YAML 配置，合并 common 和指定 repo 的路径白名单"""
+def _pick_branch(cfg, branch: str) -> list[str]:
+    """按分支提取屏蔽路径：配置了具体分支（非 master）时仅取该分支名单；
+    分支未配置或传入 master 时回退到 '*'；list 视为旧格式（全分支生效）"""
+    if isinstance(cfg, dict):
+        if branch != "master" and branch in cfg:
+            return list(cfg[branch])
+        return list(cfg.get("*", []))
+    if isinstance(cfg, list):
+        return list(cfg)
+    return []
+
+
+def read_yaml(md_yaml: str, repo: str, branch: str) -> list[str]:
+    """读取 YAML 配置，合并 common 和指定 repo+branch 的屏蔽路径"""
     p = Path(md_yaml)
     if not p.is_file():
         logger.error("YAML 配置不存在: %s", md_yaml)
         return []
 
     with open(p, "r", encoding="utf-8") as f:
-        content = yaml.safe_load(f)
+        content = yaml.safe_load(f) or {}
 
-    all_paths: list[str] = list(content.get("common", []))
-    repo_paths = content.get(repo)
-    if repo_paths:
-        all_paths.extend(repo_paths)
+    common_paths = _pick_branch(content.get("common"), branch)
+    repo_paths = _pick_branch(content.get(repo), branch)
+    all_paths = common_paths + repo_paths
 
-    logger.info("加载白名单路径 %d 条 (common=%d, %s=%d)",
+    logger.info("加载屏蔽路径 %d 条 (common=%d, %s@%s=%d)",
                 len(all_paths),
-                len(content.get("common", [])),
+                len(common_paths),
                 repo,
-                len(repo_paths or []))
+                branch,
+                len(repo_paths))
     return all_paths
 
 
@@ -155,7 +167,7 @@ def check_md_files(
     return illegal
 
 
-def main(repo: str, md_yaml: str, pr_file: str, workspace: str) -> int:
+def main(repo: str, branch: str, md_yaml: str, pr_file: str, workspace: str) -> int:
     """主入口函数，返回退出码"""
     ws = Path(workspace)
     if not ws.is_dir():
@@ -167,7 +179,7 @@ def main(repo: str, md_yaml: str, pr_file: str, workspace: str) -> int:
         logger.info("PR 中没有 .md 文件，跳过检查")
         return 0
 
-    repo_md_paths = read_yaml(md_yaml, repo)
+    repo_md_paths = read_yaml(md_yaml, repo, branch)
 
     illegal_list = check_md_files(md_list, repo_md_paths, ws)
 
@@ -180,8 +192,8 @@ def main(repo: str, md_yaml: str, pr_file: str, workspace: str) -> int:
 
 
 if __name__ == "__main__":
-    if len(sys.argv) != 5:
-        logger.error("Usage: %s <repo> <md_yaml> <pr_file> <workspace>", sys.argv[0])
+    if len(sys.argv) != 6:
+        logger.error("Usage: %s <repo> <branch> <md_yaml> <pr_file> <workspace>", sys.argv[0])
         sys.exit(2)
 
     sys.exit(main(*sys.argv[1:]))

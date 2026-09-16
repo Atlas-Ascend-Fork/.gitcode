@@ -57,7 +57,7 @@ if [[ "${REPOSITORY_NAME}" == @(metadef|driver|driver-dev|amct|asc-devkit|pypto|
    [ "${GIT_TARGET_BRANCH}" != "feature/community-tasks" ] && \
    [ "${GIT_TARGET_BRANCH}" != "feature/tensor_api_from_9.0.0" ];then
     echo "check md files"
-    python3  ${SCRIPT_DIR}/check_md_files.py ${REPOSITORY_NAME} ${SCRIPT_DIR}/repo_md_files.yaml ${WORKSPACE}/pr_filelist_mod.txt ${WORKSPACE}
+    python3  ${SCRIPT_DIR}/check_md_files.py ${REPOSITORY_NAME} ${GIT_TARGET_BRANCH} ${SCRIPT_DIR}/repo_md_files.yaml ${WORKSPACE}/pr_filelist_mod.txt ${WORKSPACE}
     DP_ASSERT_EQUAL "$?" "0" "Check ${REPOSITORY_NAME} md files " "true"
 fi
 
