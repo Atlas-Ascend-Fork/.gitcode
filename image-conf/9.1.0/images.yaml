@@ -328,7 +328,7 @@ repos:
       Compile_X86_monitor_9_0_0:
         ubuntu20.04:x86:lv6_monitor_9_0_0
       Pre_Compile:
-        ubuntu20.04:arm:lv5
+        ubuntu24.04:arm:lv6
       Pre_Compile_ubuntu24:
         ubuntu24.04:arm:lv6
       API_Check:
