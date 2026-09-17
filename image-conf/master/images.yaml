@@ -1252,7 +1252,7 @@ repos:
         ubuntu24.04:x86:lv6
       Compile_Ascend_ARM_A2:
         ubuntu24.04:arm:lv6
-      Compile_Ascend_X86_A5:
+      Compile_Ascend_X86_A5:pto-as
         ubuntu24.04:x86:lv6
       Compile_Ascend_ARM_A5:
         ubuntu24.04:arm:lv6
@@ -1272,9 +1272,9 @@ repos:
   pto-as:
     stages:
       Compile_Ascend_X86:
-        ubuntu24.04:x86:lv6
+        ubuntu24.04_gcc15:x86:lv6
       Compile_Ascend_ARM:
-        ubuntu24.04:arm:lv6
+        ubuntu24.04_gcc15:arm:lv6
       PreSmoke_A900:
         ubuntu24.04:arm:smoke
 
