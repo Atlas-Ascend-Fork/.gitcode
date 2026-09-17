@@ -9,6 +9,10 @@ on:
       codecheck_image_version:
         required: true
         type: string
+      oss_dep_check_prefix:
+        required: false
+        type: string
+        default: 'CANN/oss_dep_check'
 
 
 jobs:
@@ -81,18 +85,10 @@ jobs:
         with:
           repo_name: ${{ env.repo_name }}
           workspace: ${{ steps.process_checkout.outputs.path }}
-          target_branch: ${{ env.TARGET_BRANCH }}
-      -
-        name: upload
-        uses: obs-upload
-        if: ${{ always() }}
-        with:
-          endpoint: "https://obs.cn-north-4.myhuaweicloud.com"
-          bucket: "ascend-ci"
-          access-key: ${{secrets.AK}}
-          secret-key: ${{secrets.SK}}
-          artifact-path: "${{ steps.process_checkout.outputs.path }}/oss-dep-gate-log/*/*.txt"
-          object-prefix: CANN/oss_dep_check/
+          target_branch: ${{ env.target_branch }}
+          obs_ak: ${{ secrets.AK }}
+          obs_sk: ${{ secrets.SK }}
+          obs_gate_prefix: ${{ inputs.oss_dep_check_prefix }}
     runs-on: ["self-hosted", "arch=x64", "spec=slim"]
     container:
       image: swr.cn-north-4.myhuaweicloud.com/ci_cann/${{ inputs.codecheck_image_version }}
