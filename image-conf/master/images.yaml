@@ -1252,7 +1252,7 @@ repos:
         ubuntu24.04:x86:lv6
       Compile_Ascend_ARM_A2:
         ubuntu24.04:arm:lv6
-      Compile_Ascend_X86_A5:pto-as
+      Compile_Ascend_X86_A5
         ubuntu24.04:x86:lv6
       Compile_Ascend_ARM_A5:
         ubuntu24.04:arm:lv6
