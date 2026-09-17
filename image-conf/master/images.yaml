@@ -1458,3 +1458,10 @@ repos:
     stages:
       Compile_Ascend_ARM:
         ubuntu22.04:arm:image
+
+  oil-gas-ops-prospect:
+    stages:
+      Compile_Ascend_X86:
+        ubuntu24.04:x86:lv6
+      Compile_Ascend_ARM:
+        ubuntu24.04:arm:lv6
