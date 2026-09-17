@@ -1476,3 +1476,10 @@ repos:
     stages:
       Compile_Ascend_ARM:
         ubuntu24.04_gcc15:arm:lv6
+
+  oil-gas-ops-prospect:
+    stages:
+      Compile_Ascend_X86:
+        ubuntu24.04_gcc15:x86:lv6
+      Compile_Ascend_ARM:
+        ubuntu24.04_gcc15:arm:lv6
