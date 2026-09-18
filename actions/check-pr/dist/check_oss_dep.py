@@ -552,6 +552,21 @@ def is_url_spec(spec):
 LOG_RECORDS = []
 
 
+def _obs_upload(ak, sk, key, file_path):
+    """经容器内置 obsutil 上传文件至 OBS ascend-ci 桶，失败抛异常"""
+    subprocess.run(
+        ['obsutil', 'config', '-i=' + ak, '-k=' + sk,
+         '-e=obs.cn-north-4.myhuaweicloud.com'],
+        stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=30)
+    result = subprocess.run(
+        ['obsutil', 'cp', '-f', file_path, 'obs://ascend-ci/' + key],
+        stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=120)
+    if result.returncode != 0:
+        detail = result.stderr.decode('utf-8', errors='replace')[-300:]
+        raise RuntimeError('obsutil cp 退出码 {}: {}'.format(
+            result.returncode, detail))
+
+
 def _emit(level, msg):
     line = "[{}] check_oss_dep: {}".format(level, msg)
     print(line)
@@ -575,14 +590,16 @@ def write_gate_log(workspace, repo_name, target_branch, verdict,
     """
     门禁豁免/拦截时将全量检查日志写入
     workspace/oss-dep-gate-log/<yyyymmdd>/oss-dep-gate-check_<仓名>_<分支>_<PR号>.txt
-    （文件名携带 仓名/分支/PR 编号，目录按日期分档），由流水线 obs-upload
-    上传至 OBS（CANN/oss_dep_check/ 前缀）供后续使用。
+    （文件名携带 仓名/分支/PR 编号，目录按日期分档）。配置 OBS AK/SK 时，
+    同步将日志上传至 OBS CANN/oss_dep_check/<yyyymmdd>/ 前缀（按日期分档留档）；
+    上传失败不影响门禁结论。
     """
     pr_tag = re.sub(r'[^A-Za-z0-9._-]', '-', str(pr_number).strip()) or 'unknown'
     branch_tag = re.sub(r'[^A-Za-z0-9._-]', '-', str(target_branch)) or 'unknown'
     filename = 'oss-dep-gate-check_{}_{}_{}.txt'.format(
         repo_name, branch_tag, pr_tag)
-    out_dir = os.path.join(workspace, 'oss-dep-gate-log', time.strftime('%Y%m%d'))
+    log_date = time.strftime('%Y%m%d')
+    out_dir = os.path.join(workspace, 'oss-dep-gate-log', log_date)
     path = os.path.join(out_dir, filename)
     try:
         if not os.path.isdir(out_dir):
@@ -600,10 +617,22 @@ def write_gate_log(workspace, repo_name, target_branch, verdict,
             f.write("=" * 60 + "\n")
             f.write("\n".join(LOG_RECORDS) + "\n")
         log_info("门禁日志已写入: {}".format(path))
-        return path
     except Exception as e:
         log_warning("门禁日志写入失败: {}，不影响门禁结论".format(e))
         return None
+
+    ak = os.environ.get('INPUT_OBS_AK', '').strip()
+    sk = os.environ.get('INPUT_OBS_SK', '').strip()
+    if not ak or not sk:
+        log_info("未配置 OBS AK/SK，跳过门禁日志上传")
+        return path
+    key = 'CANN/oss_dep_check/{}/{}'.format(log_date, filename)
+    try:
+        _obs_upload(ak, sk, key, path)
+        log_info("门禁日志已上传 OBS: ascend-ci/{}".format(key))
+    except Exception as e:
+        log_warning("门禁日志上传 OBS 失败(不影响门禁结论): {}".format(e))
+    return path
 
 
 # ---------------- patch 获取与解析 ----------------

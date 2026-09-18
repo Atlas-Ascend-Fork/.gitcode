@@ -12,6 +12,14 @@ inputs:
   target_branch:
     required: false
     default: 'master'
+  obs_ak:
+    description: OBS Access Key（门禁日志留档上传用，为空则跳过上传）
+    required: false
+    default: ''
+  obs_sk:
+    description: OBS Secret Key（门禁日志留档上传用，为空则跳过上传）
+    required: false
+    default: ''
 
 runs:
   using: 'node16'
