@@ -270,7 +270,7 @@ repos:
         ubuntu24.04:arm:lv6
       Compile_Ascend_ARM_ubuntu24:
         ubuntu24.04_gcc15:arm:lv6
-      UT_Test_superkernel:
+      UT_Test_Cpp_superkernel:
         ubuntu24.04_gcc15:x86:lv6
       UT_Test_Python_superkernel:
         ubuntu24.04_gcc15:x86:lv6
@@ -282,6 +282,8 @@ repos:
         ubuntu24.04_gcc15:x86:lv6
       ST_Test_Python_superkernel:
         ubuntu24.04_gcc15:x86:lv6
+      ST_Test_Cpp_superkernel:
+        ubuntu24.04_gcc15:x86:lv6
       ST_Test_autofuse_framework:
         ubuntu24.04_gcc15:x86:lv6
       ST_Test_autofuse_ascendc_api:
@@ -292,6 +294,7 @@ repos:
         ubuntu24.04_gcc15:x86:lv6
       PreSmoke_A900_npupool:
         ubuntu24.04:arm:smoke
+
 
   hixl:
     os_mirror:
