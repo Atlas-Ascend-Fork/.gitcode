@@ -552,39 +552,19 @@ def is_url_spec(spec):
 LOG_RECORDS = []
 
 
-def _obs_put_object(ak, sk, key, file_path):
-    """门禁日志直传 OBS（ascend-ci 桶，头部签名 PUT，仅标准库），返回 HTTP 状态码"""
-    import base64
-    import hashlib
-    import hmac
-    import urllib.request
-    from email.utils import formatdate
-
-    bucket = 'ascend-ci'
-    date = formatdate(usegmt=True)
-    resource = '/{}/{}'.format(bucket, key)
-    content_type = 'text/plain'
-    string_to_sign = 'PUT\n\n{}\n{}\n{}'.format(content_type, date, resource)
-    signature = base64.b64encode(
-        hmac.new(sk.encode('utf-8'), string_to_sign.encode('utf-8'),
-                 hashlib.sha1).digest()).decode('utf-8')
-    url = 'https://{}.obs.cn-north-4.myhuaweicloud.com/{}'.format(bucket, key)
-    with open(file_path, 'rb') as f:
-        data = f.read()
-    req = urllib.request.Request(url, data=data, method='PUT')
-    req.add_header('Date', date)
-    req.add_header('Content-Type', content_type)
-    req.add_header('Authorization', 'OBS {}:{}'.format(ak, signature))
-    try:
-        with urllib.request.urlopen(req, timeout=30) as resp:
-            return resp.status
-    except urllib.error.HTTPError as e:
-        detail = ''
-        try:
-            detail = e.read().decode('utf-8', errors='replace')[:500]
-        except Exception:
-            pass
-        raise RuntimeError('HTTP {} {}'.format(e.code, detail))
+def _obs_upload(ak, sk, key, file_path):
+    """经容器内置 obsutil 上传文件至 OBS ascend-ci 桶，失败抛异常"""
+    subprocess.run(
+        ['obsutil', 'config', '-i=' + ak, '-k=' + sk,
+         '-e=obs.cn-north-4.myhuaweicloud.com'],
+        stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=30)
+    result = subprocess.run(
+        ['obsutil', 'cp', '-f', file_path, 'obs://ascend-ci/' + key],
+        stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=120)
+    if result.returncode != 0:
+        detail = result.stderr.decode('utf-8', errors='replace')[-300:]
+        raise RuntimeError('obsutil cp 退出码 {}: {}'.format(
+            result.returncode, detail))
 
 
 def _emit(level, msg):
@@ -648,8 +628,8 @@ def write_gate_log(workspace, repo_name, target_branch, verdict,
         return path
     key = 'CANN/oss_dep_check/{}/{}'.format(log_date, filename)
     try:
-        status = _obs_put_object(ak, sk, key, path)
-        log_info("门禁日志已上传 OBS: ascend-ci/{} (HTTP {})".format(key, status))
+        _obs_upload(ak, sk, key, path)
+        log_info("门禁日志已上传 OBS: ascend-ci/{}".format(key))
     except Exception as e:
         log_warning("门禁日志上传 OBS 失败(不影响门禁结论): {}".format(e))
     return path
