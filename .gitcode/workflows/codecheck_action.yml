@@ -82,6 +82,7 @@ jobs:
           repo_name: ${{ env.repo_name }}
           workspace: ${{ steps.process_checkout.outputs.path }}
           target_branch: ${{ env.TARGET_BRANCH }}
+          pr_number: ${{ atomgit.event.pull_request.number }}
       -
         name: upload
         uses: obs-upload
