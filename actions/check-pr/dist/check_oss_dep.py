@@ -552,14 +552,15 @@ def is_url_spec(spec):
 LOG_RECORDS = []
 
 
-def _obs_put_object(endpoint, bucket, ak, sk, key, file_path):
-    """OBS 头部签名 PUT（AWS V2 风格，仅标准库），返回 HTTP 状态码"""
+def _obs_put_object(ak, sk, key, file_path):
+    """门禁日志直传 OBS（ascend-ci 桶，头部签名 PUT，仅标准库），返回 HTTP 状态码"""
     import base64
     import hashlib
     import hmac
     import urllib.request
     from email.utils import formatdate
 
+    bucket = 'ascend-ci'
     date = formatdate(usegmt=True)
     resource = '/{}/{}'.format(bucket, key)
     content_type = 'text/plain'
@@ -567,8 +568,7 @@ def _obs_put_object(endpoint, bucket, ak, sk, key, file_path):
     signature = base64.b64encode(
         hmac.new(sk.encode('utf-8'), string_to_sign.encode('utf-8'),
                  hashlib.sha1).digest()).decode('utf-8')
-    host = endpoint.split('://', 1)[-1].rstrip('/')
-    url = 'https://{}.{}/{}'.format(bucket, host, key)
+    url = 'https://{}.obs.cn-north-4.myhuaweicloud.com/{}'.format(bucket, key)
     with open(file_path, 'rb') as f:
         data = f.read()
     req = urllib.request.Request(url, data=data, method='PUT')
@@ -611,7 +611,7 @@ def write_gate_log(workspace, repo_name, target_branch, verdict,
     门禁豁免/拦截时将全量检查日志写入
     workspace/oss-dep-gate-log/<yyyymmdd>/oss-dep-gate-check_<仓名>_<分支>_<PR号>.txt
     （文件名携带 仓名/分支/PR 编号，目录按日期分档）。配置 OBS AK/SK 时，
-    同步将日志上传至 OBS <obs_gate_prefix>/<yyyymmdd>/ 前缀（按日期分档留档）；
+    同步将日志上传至 OBS CANN/oss_dep_check/<yyyymmdd>/ 前缀（按日期分档留档）；
     上传失败不影响门禁结论。
     """
     pr_tag = re.sub(r'[^A-Za-z0-9._-]', '-', str(pr_number).strip()) or 'unknown'
@@ -646,15 +646,10 @@ def write_gate_log(workspace, repo_name, target_branch, verdict,
     if not ak or not sk:
         log_info("未配置 OBS AK/SK，跳过门禁日志上传")
         return path
-    endpoint = os.environ.get('INPUT_OBS_ENDPOINT', '').strip() \
-        or 'https://obs.cn-north-4.myhuaweicloud.com'
-    bucket = os.environ.get('INPUT_OBS_BUCKET', '').strip() or 'ascend-ci'
-    prefix = os.environ.get('INPUT_OBS_GATE_PREFIX', '').strip() \
-        or 'CANN/oss_dep_check'
-    key = '{}/{}/{}'.format(prefix.strip('/'), log_date, filename)
+    key = 'CANN/oss_dep_check/{}/{}'.format(log_date, filename)
     try:
-        status = _obs_put_object(endpoint, bucket, ak, sk, key, path)
-        log_info("门禁日志已上传 OBS: {}/{} (HTTP {})".format(bucket, key, status))
+        status = _obs_put_object(ak, sk, key, path)
+        log_info("门禁日志已上传 OBS: ascend-ci/{} (HTTP {})".format(key, status))
     except Exception as e:
         log_warning("门禁日志上传 OBS 失败(不影响门禁结论): {}".format(e))
     return path
