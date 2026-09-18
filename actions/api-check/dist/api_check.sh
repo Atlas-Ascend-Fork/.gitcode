@@ -31,7 +31,38 @@ def resolve(data):
     # 其余视为 info
     return "pass", "✅", "info"
 
+# 确定性违例类别: 服务端聚合成 warn, 但属于必须拦截的规范违例
+# (案例: PR cann/asc-devkit!5896 合入包内重复头文件 mmad_impl.h, 服务检出为 warn 被放行)
+BLOCK_CATEGORIES = [
+    "包内重复头文件", "包间重复头文件", "包间接口调用",
+    "包内接口调用", "废弃接口调用",
+]
+
+def block_category_violations(messages):
+    """逐类别解析 ***类别*** 分组: 类别有内容且非'未检出' -> 违例列表。"""
+    violations = []
+    current_cat = None
+    cat_items = {}
+    for msg in messages or []:
+        m = str(msg).strip()
+        if m.startswith("***") and m.endswith("***"):
+            current_cat = m.strip("*").strip()
+            cat_items.setdefault(current_cat, [])
+        elif current_cat is not None and m:
+            cat_items[current_cat].append(m)
+    for cat in BLOCK_CATEGORIES:
+        items = [m.lstrip("-").strip() for m in cat_items.get(cat, [])
+                 if m.strip() and "未检出" not in m]
+        if items:
+            violations.append((cat, items))
+    return violations
+
 status, status_icon, current_level = resolve(data)
+
+# 确定性违例强制判红(不依赖服务端聚合 level)
+block_violations = block_category_violations(all_messages or (data or {}).get('messages'))
+if block_violations:
+    status, status_icon, current_level = "fail", "❌", "error"
 
 if data:
     all_messages = data.get('messages', [])
