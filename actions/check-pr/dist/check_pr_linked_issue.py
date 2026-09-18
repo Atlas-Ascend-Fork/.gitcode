@@ -15,7 +15,7 @@ def log_error(msg):
 
 def main():
     repo = os.environ.get("REPOSITORY_NAME", "")
-    pr_number = os.environ.get("PR_NUMBER", "")
+    pr_number = sys.argv[1] if len(sys.argv) > 1 else os.environ.get("PR_NUMBER", "")
     owner = os.environ.get("ORG_NAME", "cann")
     token = (
         os.environ.get("ACCESS_TOKEN")
@@ -23,8 +23,9 @@ def main():
         or os.environ.get("GIT_TOKEN")
         or ""
     )
+    print(f"[INFO] check_pr_linked_issue: repo={repo!r}, merge_id={pr_number!r}")
     if not repo or not pr_number:
-        print(f"skip check_pr_linked_issue: repo={repo!r}, pr={pr_number!r}")
+        print(f"skip check_pr_linked_issue: repo={repo!r}, merge_id={pr_number!r}")
         return 0
 
     headers = {

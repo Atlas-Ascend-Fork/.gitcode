@@ -73,8 +73,8 @@ fi
 # PR 关联 issue 门禁：仅在以下仓生效，要求 PR 必须关联 open 状态的 issue
 if [[ "${REPOSITORY_NAME}" == @(pypto|pypto-gym) ]]; then
     LOG_HEAD "Check PR linked issues"
-    python3 ${SCRIPT_DIR}/check_pr_linked_issue.py
-    DP_ASSERT_EQUAL "$?" "0" "Check ${REPOSITORY_NAME} PR(${PR_NUMBER}) linked issues"
+    python3 ${SCRIPT_DIR}/check_pr_linked_issue.py "${MERGE_ID:-}"
+    DP_ASSERT_EQUAL "$?" "0" "Check ${REPOSITORY_NAME} PR(${MERGE_ID:-}) linked issues"
 else
     LOG_HEAD "check linked issue not enabled for ${REPOSITORY_NAME}, skip"
 fi
