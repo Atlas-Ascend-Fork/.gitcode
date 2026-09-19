@@ -272,6 +272,8 @@ repos:
         ubuntu24.04_gcc15:arm:lv6
       UT_Test_superkernel:
         ubuntu24.04_gcc15:x86:lv6
+      UT_Test_Cpp_superkernel:
+        ubuntu24.04_gcc15:x86:lv6
       UT_Test_Python_superkernel:
         ubuntu24.04_gcc15:x86:lv6
       UT_Test_autofuse_framework:
@@ -281,6 +283,8 @@ repos:
       UT_Test_report:
         ubuntu24.04_gcc15:x86:lv6
       ST_Test_Python_superkernel:
+        ubuntu24.04_gcc15:x86:lv6
+      ST_Test_Cpp_superkernel:
         ubuntu24.04_gcc15:x86:lv6
       ST_Test_autofuse_framework:
         ubuntu24.04_gcc15:x86:lv6
