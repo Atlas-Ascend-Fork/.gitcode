@@ -20,6 +20,10 @@ inputs:
     description: 私有仓库访问token，用于check_linked_issue查询PR关联issue
     required: false
     default: ''
+  pr_issue:
+    description: 仓库配置变量，为true时开启PR关联issue检测，未配置或false跳过
+    required: false
+    default: ''
 
 runs:
   using: 'node16'

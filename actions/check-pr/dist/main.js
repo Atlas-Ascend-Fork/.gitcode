@@ -44,6 +44,7 @@ async function run() {
         const targetBranch = core.getInput("target_branch", { required: false });
         const prNumber = core.getInput("pr_number", { required: false }) || "";
         const gitToken = core.getInput("git_token", { required: false }) || "";
+        const prIssue = core.getInput("pr_issue", { required: false }) || "";
         const scriptDir = __dirname;
         const scriptPath = path_1.default.resolve(scriptDir, "./check_pr.sh");
         await promises_1.default.access(scriptPath);
@@ -61,7 +62,8 @@ async function run() {
             SCRIPT_DIR: scriptDir,
             GIT_TARGET_BRANCH: targetBranch,
             PR_NUMBER: prNumber,
-            GIT_TOKEN: gitToken
+            GIT_TOKEN: gitToken,
+            PR_ISSUE: prIssue
         };
         // cwd 使用 dist 目录执行
         await execShellScript(scriptPath, [], scriptDir, env);
