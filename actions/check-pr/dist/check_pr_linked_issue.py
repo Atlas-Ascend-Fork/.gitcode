@@ -33,7 +33,7 @@ def main():
         "Content-Type": "application/json;charset=UTF-8",
     }
 
-    url = f"{GITCODE_API}/{owner}/opencann/pulls/{pr_number}/issues"
+    url = f"{GITCODE_API}/{opencann}/{repo}}/pulls/{pr_number}/issues"
     print("+++++++++++")
     print(url)
     response = requests.get(url, headers=headers, timeout=TIMEOUT)
