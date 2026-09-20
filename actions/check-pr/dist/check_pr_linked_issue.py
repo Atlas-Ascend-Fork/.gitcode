@@ -33,8 +33,7 @@ def main():
         "Content-Type": "application/json;charset=UTF-8",
     }
 
-    url = f"{GITCODE_API}/${owner}/{repo}/pulls/{pr_number}/issues"
-    print(url)
+    url = f"{GITCODE_API}/{owner}/{repo}/pulls/{pr_number}/issues"
     response = requests.get(url, headers=headers, timeout=TIMEOUT)
     if response.status_code not in [200, 201, 204]:
         log_error(f"Query PR({pr_number}) linked issues failed.")
@@ -59,12 +58,14 @@ def main():
             print(f"[WARN] skip linked issue entry without number: {str(issue)[:200]}")
             continue
         url = f"{GITCODE_API}/{owner}/{repo}/issues/{issue_number}"
-        response = requests.get(url, headers=headers, timeout=TIMEOUT)
-        if response.status_code not in [200, 201, 204]:
-            log_error(f"Query PR({pr_number}) linked issues({issue_number}) failed.")
-            log_error(response.text)
-            return 1
-        state = str(response.json().get("state", ""))
+        state = str(issue.get("state", ""))
+        if not state:
+            response = requests.get(url, headers=headers, timeout=TIMEOUT)
+            if response.status_code not in [200, 201, 204]:
+                log_error(f"Query PR({pr_number}) linked issues({issue_number}) failed.")
+                log_error(response.text)
+                return 1
+            state = str(response.json().get("state", ""))
         print(f"[INFO] linked issue {issue_number} state={state!r}")
         if state == "open":
             open_issues_numbers.append(str(issue_number))
