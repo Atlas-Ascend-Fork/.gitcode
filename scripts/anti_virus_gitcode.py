@@ -26,7 +26,8 @@ class CodeCheck(object):
         commit_id,
 	    codecheck_ip='https://apig.openlibing.com',
         gitxx_api='https://api.gitcode.com/api/v5/repos',
-        codecheck_prefix='/openlibing-anti-poison'
+        codecheck_prefix='/openlibing-anti-poison',
+        project_name="CANN"
     ):
         self.pr_url = None
         self.result = None
@@ -47,7 +48,7 @@ class CodeCheck(object):
         self.codecheck_prefix = codecheck_prefix
         self.gitcode_domain = "https://gitcode.com"
         self.repo_type = self._determine_repo_type()
-        self.project_name = "CANN"
+        self.project_name = project_name
         self.scanId = None
         self.comment= None
         self.MESSAGE = None

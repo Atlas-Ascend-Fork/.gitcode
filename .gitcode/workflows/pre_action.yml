@@ -94,6 +94,7 @@ jobs:
           token: ${{ secrets.GIT_TOKEN }}
           apply_label: ${{ vars.APPLY_LABEL }}
           run_url: https://gitcode.com/${{ env.org_name }}/${{ env.repo_name }}/actions/runs/${{ atomgit.workflow_run_id }}
+          actor: ${{ atomgit.actor }}
       - name: associate-pr-comment
         uses: associate-pr-comment
         if: env.online == 'true'

@@ -29,7 +29,8 @@ class CodeCheck(object):
         commit_id,
         codecheck_ip='https://apig.openlibing.com',
         gitxx_api='https://api.gitcode.com/api/v5/repos',
-        codecheck_prefix='/openlibing-sca'
+        codecheck_prefix='/openlibing-sca',
+        project_name="CANN"
     ):
         self.pr_url = None
         self.scanId = None
@@ -51,7 +52,7 @@ class CodeCheck(object):
         self.codecheck_prefix = codecheck_prefix
         self.gitcode_domain = "https://gitcode.com"
         self.repo_type = self._determine_repo_type()
-        self.project_name = "CANN"
+        self.project_name = project_name
         self.MESSAGE = None
         self.env_dist = os.environ
         self.gitcode_output = self.env_dist.get("ATOMGIT_OUTPUT")
