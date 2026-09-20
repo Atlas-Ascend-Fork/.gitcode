@@ -34,6 +34,8 @@ def main():
     }
 
     url = f"{GITCODE_API}/{owner}/{repo}/pulls/{pr_number}/issues"
+    print("+++++++++++")
+    print(url)
     response = requests.get(url, headers=headers, timeout=TIMEOUT)
     if response.status_code not in [200, 201, 204]:
         log_error(f"Query PR({pr_number}) linked issues failed.")
