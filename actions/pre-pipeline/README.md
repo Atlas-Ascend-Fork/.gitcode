@@ -23,6 +23,7 @@
 查询触发者对目标仓库的权限
       │
       ├─ permission ∈ {push, admin} 或 access_level ≥ 30 → ✅ 通过
+      ├─ permission ∈ {read, pull}(生态开发者等) → ✅ 通过(可推送自己的分支)
       ├─ HTTP 404(非仓库成员) → ❌ 失败
       └─ 未识别触发者(actor 为空) → 跳过检查
 ```
