@@ -72,17 +72,29 @@ jobs:
           key: |
             ${{ env.obs_path }}/pr_filelist.txt
             ${{ env.obs_path }}/pr_filelist_mod.txt
+            ${{ env.obs_path }}/update_file_detail.txt
           path: ${{ steps.process_checkout.outputs.path }}
       -
         name: check-pr
         identifier: check-pr
-        uses: cui_jiahao/.gitcode/actions/check-pr@master
+        uses: cann/.gitcode/actions/check-pr@master
         with:
           repo_name: ${{ env.repo_name }}
           workspace: ${{ steps.process_checkout.outputs.path }}
           target_branch: ${{ env.target_branch }}
           pr_number: ${{ atomgit.event.pull_request.number }}
           git_token: ${{ secrets.GIT_TOKEN }}
+      -  
+        name: upload
+        uses: obs-upload
+        if: ${{ always() }}
+        with:
+          endpoint: "https://obs.cn-north-4.myhuaweicloud.com"
+          bucket: "ascend-ci"
+          access-key: ${{secrets.AK}}
+          secret-key: ${{secrets.SK}}
+          artifact-path: "${{ steps.process_checkout.outputs.path }}/oss-dep-gate-log/*/*.txt"
+          object-prefix: CANN/oss_dep_check/
     runs-on: ["self-hosted", "arch=x64", "spec=slim"]
     container:
       image: swr.cn-north-4.myhuaweicloud.com/ci_cann/${{ inputs.codecheck_image_version }}
