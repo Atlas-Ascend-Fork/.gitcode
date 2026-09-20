@@ -72,8 +72,7 @@ def check_push_permission(owner, repo, pr_number, actor, token):
         return False, f"触发者 **{actor}** 非目标仓库 **{owner}/{repo}** 的成员, 不具备目标仓库的权限。"
     if permission in ("push", "admin"):
         return True, ""
-    if permission in ("read", "pull"):
-        return True, ""  # 生态开发者等, 默认通过(strict 判定不启用)
+    # 仅 push 及以上权限通过
     return False, (f"触发者 **{actor}** 对目标仓库 **{owner}/{repo}** "
                    f"仅有 **{permission or '只读'}** 权限, 不具备目标仓库的写权限。")
 
