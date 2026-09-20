@@ -16,14 +16,14 @@ def log_error(msg):
 def main():
     repo = os.environ.get("REPOSITORY_NAME", "")
     pr_number = sys.argv[1] if len(sys.argv) > 1 else os.environ.get("PR_NUMBER", "")
-    owner = os.environ.get("ORG_NAME", "cann")
+    owner = sys.argv[2] if len(sys.argv) > 2 else os.environ.get("ORG_NAME", "cann")
     token = (
         os.environ.get("ACCESS_TOKEN")
         or os.environ.get("gitcode_access_token")
         or os.environ.get("GIT_TOKEN")
         or ""
     )
-    print(f"[INFO] check_pr_linked_issue: repo={repo!r}, merge_id={pr_number!r}")
+    print(f"[INFO] check_pr_linked_issue: owner={owner!r}, repo={repo!r}, merge_id={pr_number!r}")
     if not repo or not pr_number:
         print(f"skip check_pr_linked_issue: repo={repo!r}, merge_id={pr_number!r}")
         return 0
@@ -34,7 +34,6 @@ def main():
     }
 
     url = f"{GITCODE_API}/opencann/{repo}/pulls/{pr_number}/issues"
-    print("+++++++++++")
     print(url)
     response = requests.get(url, headers=headers, timeout=TIMEOUT)
     if response.status_code not in [200, 201, 204]:
@@ -42,6 +41,7 @@ def main():
         log_error(response.text)
         return 1
     linked_issues = response.json()
+    print(f"[INFO] linked issues raw: {str(linked_issues)[:800]}")
     if not linked_issues:
         log_error(f"PR({pr_number}) is not linked to any issue. Please link to an open issue.")
         return 1
@@ -49,8 +49,14 @@ def main():
     open_issues_numbers = []
     close_issues_numbers = []
     for issue in linked_issues:
-        issue_number = issue.get("number", "")
-        if issue_number == "":
+        if not isinstance(issue, dict):
+            print(f"[WARN] skip non-dict linked issue entry: {str(issue)[:200]}")
+            continue
+        issue_number = issue.get("number")
+        if issue_number is None and isinstance(issue.get("issue"), dict):
+            issue_number = issue["issue"].get("number")
+        if issue_number is None:
+            print(f"[WARN] skip linked issue entry without number: {str(issue)[:200]}")
             continue
         url = f"{GITCODE_API}/{owner}/{repo}/issues/{issue_number}"
         response = requests.get(url, headers=headers, timeout=TIMEOUT)
@@ -59,6 +65,7 @@ def main():
             log_error(response.text)
             return 1
         state = str(response.json().get("state", ""))
+        print(f"[INFO] linked issue {issue_number} state={state!r}")
         if state == "open":
             open_issues_numbers.append(str(issue_number))
         else:
