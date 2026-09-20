@@ -33,9 +33,9 @@ def resolve(data):
 
 # 确定性违例类别: 服务端聚合成 warn, 但属于必须拦截的规范违例
 # (案例: PR cann/asc-devkit!5896 合入包内重复头文件 mmad_impl.h, 服务检出为 warn 被放行)
+# 注: 包内/包间接口调用暂不拦截, 存量代码命中面大, 需先完成存量治理后再纳入
 BLOCK_CATEGORIES = [
-    "包内重复头文件", "包间重复头文件", "包间接口调用",
-    "包内接口调用", "废弃接口调用",
+    "包内重复头文件", "包间重复头文件", "废弃接口调用",
 ]
 
 def block_category_violations(messages):
