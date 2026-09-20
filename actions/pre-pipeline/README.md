@@ -1,6 +1,6 @@
 # pre-pipeline
 
-流水线开始前给 PR 打上 `ci-pipeline-running` 标签，并移除 `ci-pipeline-passed` 和 `ci-pipeline-failed` 标签；传入 `run_url` 时在 PR 评论区发布流水线链接评论。
+流水线开始前给 PR 打上 `ci-pipeline-running` 标签，并移除 `ci-pipeline-passed` 和 `ci-pipeline-failed` 标签；传入 `run_url` 时在 PR 评论区发布流水线链接评论；传入 `actor` 时检查触发者是否具备**目标分支仓库**的权限（`target_repo` 可指定, 默认取 `owner/repo`），失败则发布「CI 流水线启动失败」评论并以退出码 1 终止。
 
 ## 输入参数
 
@@ -12,6 +12,7 @@
 | `token` | 是 | - | GitCode 个人访问令牌 |
 | `apply_label` | 否 | `false` | 是否执行打标签逻辑 |
 | `run_url` | 否 | `''` | 当前流水线运行链接, 传入则在 PR 评论区发布流水线链接评论 |
+| `actor` | 否 | `''` | 流水线触发者用户名, 用于目标仓库权限检查(失败在评论中说明) |
 
 ## 涉及的 API
 
