@@ -42,6 +42,8 @@ async function run() {
         const workspace = core.getInput("workspace", { required: true });
         const repoName = core.getInput("repo_name", { required: true });
         const targetBranch = core.getInput("target_branch", { required: false });
+        const prNumber = core.getInput("pr_number", { required: false }) || "";
+        const gitToken = core.getInput("git_token", { required: false }) || "";
         const scriptDir = __dirname;
         const scriptPath = path_1.default.resolve(scriptDir, "./check_pr.sh");
         await promises_1.default.access(scriptPath);
@@ -50,13 +52,16 @@ async function run() {
         core.info(`WORKSPACE：${workspace}`);
         core.info(`REPOSITORY_NAME：${repoName}`);
         core.info(`GIT_TARGET_BRANCH:${targetBranch}`);
+        core.info(`PR_NUMBER:${prNumber}`);
         // 环境变量注入 SCRIPT_DIR=dist目录路径
         const env = {
             ...process.env,
             WORKSPACE: workspace,
             REPOSITORY_NAME: repoName,
             SCRIPT_DIR: scriptDir,
-            GIT_TARGET_BRANCH: targetBranch
+            GIT_TARGET_BRANCH: targetBranch,
+            PR_NUMBER: prNumber,
+            GIT_TOKEN: gitToken
         };
         // cwd 使用 dist 目录执行
         await execShellScript(scriptPath, [], scriptDir, env);

@@ -69,3 +69,14 @@ if [[ "${REPOSITORY_NAME}" == @(asc-devkit|ops-math) ]]; then
 else
     LOG_HEAD "oss dep gate not enabled for ${REPOSITORY_NAME}, skip"
 fi
+
+# PR 关联 issue 门禁：仅在以下仓生效，要求 PR 必须关联 open 状态的 issue
+if [[ "${REPOSITORY_NAME}" == @(pypto|pypto-gym|asc-comm) ]]; then
+    LOG_HEAD "Check PR linked issues"
+    PR_OWNER=$(git -C ${WORKSPACE} remote get-url origin | sed -E 's#.*gitcode\.com[/:]([^/]+)/.*#\1#')
+    echo "PR owner: ${PR_OWNER}"
+    python3 ${SCRIPT_DIR}/check_pr_linked_issue.py "${MERGE_ID:-}" "${PR_OWNER}"
+    DP_ASSERT_EQUAL "$?" "0" "Check ${REPOSITORY_NAME} PR(${MERGE_ID:-}) linked issues"
+else
+    LOG_HEAD "check linked issue not enabled for ${REPOSITORY_NAME}, skip"
+fi

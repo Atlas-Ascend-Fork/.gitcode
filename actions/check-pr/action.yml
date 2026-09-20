@@ -12,6 +12,14 @@ inputs:
   target_branch:
     required: false
     default: 'master'
+  pr_number:
+    description: 触发检测的PR号，用于匹配放通名单（pr_skip_list.txt）
+    required: false
+    default: ''
+  git_token:
+    description: 私有仓库访问token，用于check_linked_issue查询PR关联issue
+    required: false
+    default: ''
 
 runs:
   using: 'node16'
