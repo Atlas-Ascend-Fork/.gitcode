@@ -33,7 +33,7 @@ def main():
         "Content-Type": "application/json;charset=UTF-8",
     }
 
-    url = f"{GITCODE_API}/opencann/{repo}/pulls/{pr_number}/issues"
+    url = f"{GITCODE_API}/${owner}/{repo}/pulls/{pr_number}/issues"
     print(url)
     response = requests.get(url, headers=headers, timeout=TIMEOUT)
     if response.status_code not in [200, 201, 204]:
