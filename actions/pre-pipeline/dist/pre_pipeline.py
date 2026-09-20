@@ -11,6 +11,7 @@ import urllib.error
 API_BASE = "https://api.gitcode.com"
 PR_LABELS_URL = "https://api.gitcode.com/api/v5/repos/{0}/{1}/pulls/{2}/labels"
 PR_COMMENT_URL = "https://api.gitcode.com/api/v5/repos/{0}/{1}/pulls/{2}/comments"
+PERMISSION_URL = "https://api.gitcode.com/api/v5/repos/{0}/{1}/collaborators/{2}/permission"
 LABEL_RUNNING = "ci-pipeline-running"
 LABEL_PASS = "ci-pipeline-passed"
 LABEL_FAIL = "ci-pipeline-failed"
@@ -50,6 +51,31 @@ def post_pr_comment(owner, repo, pr_number, body, token, max_retries=1):
         print(f"❌ PR 评论发布失败: HTTP {status}, {resp}")
         return False
     return False
+
+
+def get_user_permission(owner, repo, username, token):
+    """查询用户对仓库的权限, 返回 (ok, permission, role_name)"""
+    url = PERMISSION_URL.format(owner, repo, username)
+    status, resp = api_request(url, token)
+    if status != 200 or not isinstance(resp, dict) or resp.get("error_code"):
+        return False, None, None
+    return True, resp.get("permission", ""), resp.get("role_name", "")
+
+
+def check_push_permission(owner, repo, pr_number, actor, token):
+    """检查触发者是否具备目标仓库(owner/repo)的权限, 返回 (通过, 说明文本)"""
+    if not actor:
+        return True, ""  # 未识别触发者, 不拦截
+
+    ok, permission, role_name = get_user_permission(owner, repo, actor, token)
+    if not ok:
+        return False, f"触发者 **{actor}** 非目标仓库 **{owner}/{repo}** 的成员, 不具备目标仓库的权限。"
+    if permission in ("push", "admin"):
+        return True, ""
+    if permission in ("read", "pull"):
+        return True, ""  # 生态开发者等, 默认通过(strict 判定不启用)
+    return False, (f"触发者 **{actor}** 对目标仓库 **{owner}/{repo}** "
+                   f"仅有 **{permission or '只读'}** 权限, 不具备目标仓库的写权限。")
 
 
 def add_pr_label(owner, repo, pr_number, label, token, max_retries=1):
@@ -122,6 +148,7 @@ def main():
     parser.add_argument("--apply_label", type=lambda x: x.lower() in ("true", "1", "yes"),
                         default=False, help="是否执行打标签逻辑")
     parser.add_argument("--run_url", default="", help="当前流水线运行链接, 传入则发布 PR 评论")
+    parser.add_argument("--actor", default="", help="流水线触发者用户名, 用于源分支权限检查")
     args = parser.parse_args()
 
     print(f"{'=' * 70}")
@@ -131,6 +158,21 @@ def main():
     if not args.apply_label:
         print("apply_label 为 false，跳过打标签与评论")
         return
+
+    # 触发者目标仓库权限检查(失败则发布失败评论并终止)
+    perm_ok, perm_msg = check_push_permission(args.owner, args.repo, args.pr_number, args.actor, args.token)
+    if not perm_ok:
+        print(f"❌ 源分支权限检查不通过: {perm_msg}")
+        comment_body = (
+            "| ❌ CI 流水线启动失败 |\n"
+            "| --- |\n"
+            f"| ⚠️ 源分支权限: {perm_msg} |\n"
+            "| 处理: 由具备权限的成员触发, 或为触发者添加仓库权限 |\n"
+        )
+        if args.run_url:
+            comment_body += f"| 📋 执行详情: [点击查看流水线]({args.run_url}) |\n"
+        post_pr_comment(args.owner, args.repo, args.pr_number, comment_body, args.token)
+        sys.exit(1)
 
     # 发布流水线链接评论
     if args.run_url:

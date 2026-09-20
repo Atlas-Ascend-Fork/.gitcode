@@ -31,6 +31,7 @@ class CodeCheck(object):
         codecheck_ip="https://apig.openlibing.com",
         gitxx_api="https://api.gitcode.com/api/v5/repos",
         codecheck_prefix="/openlibing-codecheck/ci-portal/webhook/codecheck/v1/task",
+        project_name="CANN"
     ):
         self.pr_url = None
         self.result = None
@@ -51,7 +52,7 @@ class CodeCheck(object):
         self.codecheck_prefix = codecheck_prefix
         self.gitcode_domain = "https://gitcode.com"
         self.repo_type = self._determine_repo_type()
-        self.project_name = "CANN"
+        self.project_name = project_name
         self.uuid = None
         self.taskid = None
         self.MESSAGE = None

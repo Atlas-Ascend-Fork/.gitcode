@@ -25694,6 +25694,8 @@ async function run() {
         const token = core.getInput('token', { required: true });
         const applyLabel = core.getInput('apply_label', { required: false }) || 'false';
         const runUrl = core.getInput('run_url', { required: false }) || '';
+        const actor = core.getInput('actor', { required: false }) || '';
+        const targetRepo = core.getInput('target_repo', { required: false }) || `${owner}/${repo}`;
         const scriptPath = (0, path_1.resolve)(__dirname, './pre_pipeline.py');
         try {
             await (0, promises_1.access)(scriptPath);
@@ -25707,6 +25709,8 @@ async function run() {
         core.info(`pr_number：${prNumber}`);
         core.info(`apply_label：${applyLabel}`);
         core.info(`run_url：${runUrl || '(未传入)'}`);
+        core.info(`actor：${actor || '(未传入)'}`);
+        core.info(`target_repo：${targetRepo}`);
         await execPython(scriptPath, [
             '--owner', owner,
             '--repo', repo,
@@ -25714,6 +25718,7 @@ async function run() {
             '--token', token,
             '--apply_label', applyLabel,
             '--run_url', runUrl,
+            '--actor', actor,
         ]);
         core.info('pre_pipeline 脚本执行完成');
     }

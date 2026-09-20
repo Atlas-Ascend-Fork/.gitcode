@@ -146,7 +146,7 @@ def apply_label_by_jobs(owner, repo, pr_number, jobs, token):
     print(f"{'=' * 70}")
     print(f"  PR: #{pr_number}  任务总数: {len(jobs)}")
     success_statuses = {"COMPLETED", "SUCCEEDED", "SUCCESS"}
-    neutral_statuses = {"SKIPPED", "IGNORED", "INIT"}
+    neutral_statuses = {"SKIPPED", "IGNORED"}  # INIT(未执行)不算跳过, 有 INIT 即非成功
     failed_jobs = [j for j in jobs if j.get("status") in FAILED_STATUSES]
     non_success_jobs = [j for j in jobs if j.get("status") not in success_statuses and j.get("status") not in neutral_statuses]
     # 一次批量移除全部旧 CI 标签
@@ -291,6 +291,8 @@ def print_jobs(jobs_data, run_detail=None):
             failed += 1
         elif status in ("SKIPPED", "IGNORED"):
             skipped += 1
+        elif status == "INIT":
+            other += 1
         else:
             other += 1
 
