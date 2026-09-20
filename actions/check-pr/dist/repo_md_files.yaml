@@ -153,6 +153,8 @@ metadef:
 asc-tools:
   '*':
     - skills
+    - docs/zh/operator_compilation_tool
+    - docs/en/operator_compilation_tool
 
 ops-ras:
   '*':
