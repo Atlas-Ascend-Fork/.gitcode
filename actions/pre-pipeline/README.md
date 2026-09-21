@@ -14,6 +14,7 @@
 | `run_url` | 否 | `''` | 当前流水线运行链接, 传入则在 PR 评论区发布流水线链接评论 |
 | `actor` | 否 | `''` | 流水线触发者用户名, 用于目标仓库权限检查(失败在评论中说明) |
 | `target_repo` | 否 | `owner/repo` | 目标分支仓库全名(owner/repo), 权限检查的对象仓库 |
+| `pr_author` | 否 | `''` | PR 作者用户名(接 `atomgit.event.pull_request.user.login`), 作者本人触发直接通过 |
 
 ## 权限检查逻辑
 
@@ -55,5 +56,6 @@
     apply_label: 'true'
     run_url: https://gitcode.com/${{ env.org_name }}/${{ env.repo_name }}/actions/runs/${{ atomgit.workflow_run_id }}
     actor: ${{ atomgit.actor }}
+    pr_author: ${{ atomgit.event.pull_request.user.login }}
     target_repo: ${{ atomgit.event.pull_request.base.repo.full_name }}
 ```

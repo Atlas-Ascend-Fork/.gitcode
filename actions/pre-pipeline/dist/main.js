@@ -25696,6 +25696,7 @@ async function run() {
         const runUrl = core.getInput('run_url', { required: false }) || '';
         const actor = core.getInput('actor', { required: false }) || '';
         const targetRepo = core.getInput('target_repo', { required: false }) || `${owner}/${repo}`;
+        const prAuthor = core.getInput('pr_author', { required: false }) || '';
         const scriptPath = (0, path_1.resolve)(__dirname, './pre_pipeline.py');
         try {
             await (0, promises_1.access)(scriptPath);
@@ -25711,6 +25712,7 @@ async function run() {
         core.info(`run_url：${runUrl || '(未传入)'}`);
         core.info(`actor：${actor || '(未传入)'}`);
         core.info(`target_repo：${targetRepo}`);
+        core.info(`pr_author：${prAuthor || '(未传入)'}`);
         await execPython(scriptPath, [
             '--owner', owner,
             '--repo', repo,
@@ -25719,6 +25721,7 @@ async function run() {
             '--apply_label', applyLabel,
             '--run_url', runUrl,
             '--actor', actor,
+            '--pr_author', prAuthor,
         ]);
         core.info('pre_pipeline 脚本执行完成');
     }

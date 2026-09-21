@@ -62,18 +62,12 @@ def get_user_permission(owner, repo, username, token):
     return True, resp.get("permission", ""), resp.get("role_name", "")
 
 
-def check_push_permission(owner, repo, pr_number, actor, token):
+def check_push_permission(owner, repo, actor, pr_author, token):
     """检查触发者是否具备目标仓库(owner/repo)的权限, 返回 (通过, 说明文本)"""
     if not actor:
         return True, ""  # 未识别触发者, 不拦截
-
-    # PR 作者本人触发 → 通过
-    pr_url = f"{API_BASE}/api/v5/repos/{owner}/{repo}/pulls/{pr_number}"
-    status, pr = api_request(pr_url, token)
-    if status == 200 and isinstance(pr, dict):
-        pr_author = (pr.get("user") or {}).get("login") or ""
-        if actor == pr_author:
-            return True, ""
+    if actor == pr_author:
+        return True, ""  # PR 作者本人触发 → 通过
 
     ok, permission, role_name = get_user_permission(owner, repo, actor, token)
     if not ok:
@@ -150,6 +144,7 @@ def main():
     parser.add_argument("--owner", required=True, help="仓库所属组织/用户")
     parser.add_argument("--repo", required=True, help="仓库名称")
     parser.add_argument("--pr_number", type=int, required=True, help="PR 编号")
+    parser.add_argument("--pr_author", default="", help="PR 作者用户名(= atomgit.event.pull_request.user.login)")
     parser.add_argument("--token", required=True, help="GitCode 个人访问令牌")
     parser.add_argument("--apply_label", type=lambda x: x.lower() in ("true", "1", "yes"),
                         default=False, help="是否执行打标签逻辑")
@@ -166,7 +161,7 @@ def main():
         return
 
     # 触发者目标仓库权限检查(失败则发布失败评论并终止)
-    perm_ok, perm_msg = check_push_permission(args.owner, args.repo, args.pr_number, args.actor, args.token)
+    perm_ok, perm_msg = check_push_permission(args.owner, args.repo, args.actor, args.pr_author, args.token)
     if not perm_ok:
         print(f"❌ 目标仓库权限检查不通过: {perm_msg}")
         comment_body = (

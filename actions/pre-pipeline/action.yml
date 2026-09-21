@@ -31,6 +31,10 @@ inputs:
     description: '目标分支仓库全名(owner/repo), 用于权限检查; 默认取 owner/repo 输入'
     required: false
     default: ''
+  pr_author:
+    description: 'PR 作者用户名(= atomgit.event.pull_request.user.login), 作者本人触发直接通过'
+    required: false
+    default: ''
 
 runs:
   using: 'node16'
