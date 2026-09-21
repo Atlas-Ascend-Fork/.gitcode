@@ -86,14 +86,6 @@ def main():
 
     if 200 <= code < 300:
         print(f"✅ Agent 分析已触发(HTTP {code}): {body[:300]}")
-        summary_path = os.environ.get("ATOMGIT_STEP_SUMMARY")
-        if summary_path:
-            with open(summary_path, "a", encoding="utf-8") as f:
-                f.write(
-                    "## 🤖 失败原因分析\n\n"
-                    f"{reason}\n"
-                    f"流水线: {run_url}\n"
-                    f"已触发 Agent 分析(Session #{session_id}), 结果请查看 agent-hub 任务。\n\n")
         return 0
 
     print(f"WARNING: Agent 分析触发失败(HTTP {code}): {body[:200]} —— 不阻断流水线")
