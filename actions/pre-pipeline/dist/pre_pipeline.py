@@ -13,6 +13,8 @@ PR_LABELS_URL = "https://api.gitcode.com/api/v5/repos/{0}/{1}/pulls/{2}/labels"
 PR_COMMENT_URL = "https://api.gitcode.com/api/v5/repos/{0}/{1}/pulls/{2}/comments"
 PERMISSION_URL = "https://api.gitcode.com/api/v5/repos/{0}/{1}/collaborators/{2}/permission"
 LABEL_RUNNING = "ci-pipeline-running"
+# 可信角色白名单(子串匹配): 角色名含"维护者"(生态维护者/社区维护者等)的平台允许其触发流水线(v5 permission 粗粒度映射为 read), 放通
+TRUSTED_ROLES = ("维护者",)
 LABEL_PASS = "ci-pipeline-passed"
 LABEL_FAIL = "ci-pipeline-failed"
 
@@ -59,23 +61,27 @@ def get_user_permission(owner, repo, username, token):
     status, resp = api_request(url, token)
     if status != 200 or not isinstance(resp, dict) or resp.get("error_code"):
         return False, None, None
-    return True, resp.get("permission", ""), resp.get("role_name", "")
+    role = resp.get("role_name") or resp.get("role_name_cn") or ""
+    return True, resp.get("permission", ""), role
 
 
 def check_push_permission(owner, repo, actor, pr_author, token):
-    """检查触发者是否具备目标仓库(owner/repo)的权限, 返回 (通过, 说明文本)"""
+    """检查触发者权限, 返回 (通过, 失败原因)。
+    通过: PR 创建者本人 / push 及以上权限 / 可信角色(见 TRUSTED_ROLES)。
+    拦截: 非成员, 及 read 级其他角色(生态开发者/社区维护者等)。"""
     if not actor:
-        return True, ""  # 未识别触发者, 不拦截
+        return True, ""
     if actor == pr_author:
-        return True, ""  # PR 作者本人触发 → 通过
+        return True, ""  # PR 创建者本人可触发
 
     ok, permission, role_name = get_user_permission(owner, repo, actor, token)
     if not ok:
-        return False, f"触发者 **{actor}** 非目标仓库 **{owner}/{repo}** 的成员, 不具备目标仓库的权限。"
+        return False, f"触发者 **{actor}** 非仓库成员(需 push 及以上权限或由 PR 创建者本人触发)"
     if permission in ("push", "admin"):
         return True, ""
-    return False, (f"触发者 **{actor}** 对目标仓库 **{owner}/{repo}** "
-                   f"仅有 **{permission or '只读'}** 权限, 不具备目标仓库的写权限。")
+    if role_name and any(r in role_name for r in TRUSTED_ROLES):
+        return True, ""  # 可信角色放行(如生态维护者)
+    return False, f"触发者 **{actor}** 仅有 {permission} 权限(需 push 及以上权限或由 PR 创建者本人触发)"
 
 
 def add_pr_label(owner, repo, pr_number, label, token, max_retries=1):
@@ -161,14 +167,14 @@ def main():
         return
 
     # 触发者目标仓库权限检查(失败则发布失败评论并终止)
-    perm_ok, perm_msg = check_push_permission(args.owner, args.repo, args.actor, args.pr_author, args.token)
+    perm_ok, perm_reason = check_push_permission(args.owner, args.repo, args.actor, args.pr_author, args.token)
     if not perm_ok:
-        print(f"❌ 目标仓库权限检查不通过: {perm_msg}")
+        print(f"❌ 目标仓库权限检查不通过: {perm_reason}")
         comment_body = (
             "| ❌ CI 流水线启动失败 |\n"
             "| --- |\n"
-            f"| ⚠️ 目标仓库权限: {perm_msg} |\n"
-            "| 处理: 由具备权限的成员触发, 或为触发者添加仓库权限 |\n"
+            f"| 🚫 权限不足: {perm_reason} |\n"
+            f"| 处理: 由 PR 创建者或有 push 权限的成员触发 |\n"
         )
         if args.run_url:
             comment_body += f"| 📋 执行详情: [点击查看流水线]({args.run_url}) |\n"
