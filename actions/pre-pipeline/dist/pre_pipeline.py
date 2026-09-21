@@ -67,13 +67,19 @@ def check_push_permission(owner, repo, pr_number, actor, token):
     if not actor:
         return True, ""  # 未识别触发者, 不拦截
 
+    # PR 作者本人触发 → 通过
+    pr_url = f"{API_BASE}/api/v5/repos/{owner}/{repo}/pulls/{pr_number}"
+    status, pr = api_request(pr_url, token)
+    if status == 200 and isinstance(pr, dict):
+        pr_author = (pr.get("user") or {}).get("login") or ""
+        if actor == pr_author:
+            return True, ""
+
     ok, permission, role_name = get_user_permission(owner, repo, actor, token)
     if not ok:
         return False, f"触发者 **{actor}** 非目标仓库 **{owner}/{repo}** 的成员, 不具备目标仓库的权限。"
     if permission in ("push", "admin"):
         return True, ""
-    if permission in ("read", "pull"):
-        return True, ""  # 生态开发者等, 默认通过(strict 判定不启用)
     return False, (f"触发者 **{actor}** 对目标仓库 **{owner}/{repo}** "
                    f"仅有 **{permission or '只读'}** 权限, 不具备目标仓库的写权限。")
 
