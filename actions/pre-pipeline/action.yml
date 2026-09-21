@@ -1,7 +1,7 @@
 name: 'pre-pipeline'
 author: 'CANN'
 version: '1.1.0'
-description: '流水线开始前给 PR 打上 ci-pipeline-running 标签, 并发布流水线链接评论'
+description: '流水线开始前给 PR 打上 ci-pipeline-running 标签, 发布流水线链接评论, 检查触发者目标仓库权限'
 inputs:
   owner:
     description: '仓库所属组织/用户'
@@ -21,6 +21,18 @@ inputs:
     default: 'false'
   run_url:
     description: '当前流水线运行链接, 传入则在 PR 评论区发布流水线链接评论'
+    required: false
+    default: ''
+  actor:
+    description: '流水线触发者用户名, 用于目标仓库权限检查(失败会在流水线评论中说明)'
+    required: false
+    default: ''
+  target_repo:
+    description: '目标分支仓库全名(owner/repo), 用于权限检查; 默认取 owner/repo 输入'
+    required: false
+    default: ''
+  pr_author:
+    description: 'PR 作者用户名(= atomgit.event.pull_request.user.login), 作者本人触发直接通过'
     required: false
     default: ''
 

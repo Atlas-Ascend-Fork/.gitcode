@@ -16,7 +16,7 @@ query_pipeline 步骤输出 pipeline_failed 变量
                   POST agent-hub trigger
                   content = run 链接( Agent 侧技能自行拉取数据 )
                         │
-              HTTP 2xx ──> ✅ 已触发(写入步骤摘要)
+              HTTP 2xx ──> ✅ 已触发(仅日志)
               非 2xx   ──> WARNING 不阻断(本步骤恒 exit 0)
 ```
 
