@@ -29,8 +29,8 @@ class CodeCheck(object):
         commit_id,
         codecheck_ip='https://apig.openlibing.com',
         gitxx_api='https://api.gitcode.com/api/v5/repos',
+        project_name="CANN",
         codecheck_prefix='/openlibing-sca',
-        project_name="CANN"
     ):
         self.pr_url = None
         self.scanId = None
@@ -327,6 +327,12 @@ def init_args():
         default="https://api.gitcode.com/api/v5/repos",
         help="Gitxx API endpoint",
     )
+    parser.add_argument(
+        "--project_name",
+        type=str,
+        default="CANN",
+        help="Project name in Codecheck",
+    )
     parser.add_argument("--pr_id", type=int, required=True, help="Pull Request ID")
     parser.add_argument("--commit_id", type=str, required=True, help="Commit ID")
     parser.add_argument(
@@ -354,5 +360,6 @@ if __name__ == "__main__":
         args.commit_id,
         args.codecheck_ip,
         args.gitxx_api,
+        args.project_name
     )
     codecheck.run()
