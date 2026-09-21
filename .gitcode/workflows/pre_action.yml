@@ -86,7 +86,7 @@ jobs:
     name: Test_pre_pipeline
     steps:
       - name: pre_pipeline
-        uses: tanghaoran7/.gitcode/actions/pre-pipeline@master
+        uses: cann/.gitcode/actions/pre-pipeline@master
         with:
           owner: ${{ env.org_name }}
           repo: ${{ env.repo_name }}
