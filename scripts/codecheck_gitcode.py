@@ -30,8 +30,8 @@ class CodeCheck(object):
         commit_id,
         codecheck_ip="https://apig.openlibing.com",
         gitxx_api="https://api.gitcode.com/api/v5/repos",
-        codecheck_prefix="/openlibing-codecheck/ci-portal/webhook/codecheck/v1/task",
-        project_name="CANN"
+        project_name="CANN",
+        codecheck_prefix="/openlibing-codecheck/ci-portal/webhook/codecheck/v1/task"
     ):
         self.pr_url = None
         self.result = None
@@ -380,7 +380,7 @@ def init_args():
     parser.add_argument(
         "--project_name",
         type=str,
-        default="default_project",
+        default="CANN",
         help="Project name in Codecheck",
     )
     parser.add_argument("--commit_id", type=str, required=True, help="Commit ID")
@@ -408,7 +408,8 @@ if __name__ == "__main__":
         args.pr_id,
         args.commit_id,
         args.codecheck_ip,
-        args.gitxx_api
+        args.gitxx_api,
+        args.project_name
     )
     codecheck.run()
 
