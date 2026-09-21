@@ -771,6 +771,8 @@ repos:
         ubuntu24.04_gcc15:x86:lv6
       UT_Test_mmpa:
         ubuntu24.04_gcc15:x86:lv6
+      UT_Test_acc:
+        ubuntu24.04_gcc15:x86:lv6
       UT_Test_camodel:
         ubuntu24.04_gcc15:x86:lv6
       Smoke_A900_npupool:
