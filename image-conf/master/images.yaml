@@ -1165,27 +1165,19 @@ repos:
         openeuler:arm:driver
 
   ops-rand:
-    os_mirror:
-      ubuntu24.04:
-        x86:
-          api_check: ubuntu24.04.3_x86:lv6_v1.1076
     stages:
       Compile_Ascend_X86:
         ubuntu24.04:x86:lv6
       Compile_Ascend_X86_ubuntu24:
-        ubuntu24.04:x86:lv6
+        ubuntu24.04_gcc15:x86:lv6
       Compile_Ascend_ARM:
         ubuntu24.04:arm:lv6
       Compile_Ascend_ARM_ubuntu24:
-        ubuntu24.04:arm:lv6
+        ubuntu24.04_gcc15:arm:lv6
       API_Check:
-        ubuntu24.04:x86:api_check
+        ubuntu24.04_gcc15:x86:lv6
 
   ops-tensor:
-    os_mirror:
-      ubuntu24.04:
-        x86:
-          api_check: ubuntu24.04.3_x86:lv6_v1.1076
     stages:
       Compile_Ascend_X86:
         ubuntu24.04:x86:lv6
@@ -1246,10 +1238,6 @@ repos:
         ubuntu24.04:x86:UT_x86
 
   ops-blas:
-    os_mirror:
-      ubuntu24.04:
-        x86:
-          api_check: ubuntu24.04.3_x86:lv6_v1.1076
     stages:
       Compile_Ascend_X86_A2:
         ubuntu24.04:x86:lv6
@@ -1260,15 +1248,15 @@ repos:
       Compile_Ascend_ARM_A5:
         ubuntu24.04:arm:lv6
       Compile_Ascend_X86_A2_ubuntu24:
-        ubuntu24.04:x86:lv6
+        ubuntu24.04_gcc15:x86:lv6
       Compile_Ascend_ARM_A2_ubuntu24:
-        ubuntu24.04:arm:lv6
+        ubuntu24.04_gcc15:arm:lv6
       Compile_Ascend_X86_A5_ubuntu24:
-        ubuntu24.04:x86:lv6
+        ubuntu24.04_gcc15:x86:lv6
       Compile_Ascend_ARM_A5_ubuntu24:
-        ubuntu24.04:arm:lv6
+        ubuntu24.04_gcc15:arm:lv6
       UT_Test:
-        ubuntu24.04:x86:lv6
+        ubuntu24.04_gcc15:x86:lv6
       PreSmoke_A900:
         ubuntu24.04:arm:smoke
 
@@ -1353,29 +1341,25 @@ repos:
       Check_patches:
         ubuntu22.04:x86:torchtitan
   ops-multimodal-fusion:
-    os_mirror:
-      ubuntu24.04:
-        arm:
-          lv6: ubuntu24.04_arm:lv6_v1.1091
     stages:
       Compile_Ascend_X86:
         ubuntu24.04:x86:lv6
       Compile_Ascend_ARM:
         ubuntu24.04:arm:lv6
       Compile_Ascend_X86_ubuntu24:
-        ubuntu24.04:x86:lv6
+        ubuntu24.04_gcc15:x86:lv6
       Compile_Ascend_ARM_ubuntu24:
-        ubuntu24.04:arm:lv6
+        ubuntu24.04_gcc15:arm:lv6
   ops-gnn:
     stages:
       Compile_Ascend_X86_Python_ubuntu24:
-        ubuntu24.04:x86:lv6
+        ubuntu24.04_gcc15:x86:lv6
       Compile_Ascend_ARM_Python_ubuntu24:
-        ubuntu24.04:arm:lv6
+        ubuntu24.04_gcc15:arm:lv6
       Compile_Ascend_X86_ubuntu24:
-        ubuntu24.04:x86:lv6
+        ubuntu24.04_gcc15:x86:lv6
       Compile_Ascend_ARM_ubuntu24:
-        ubuntu24.04:arm:lv6
+        ubuntu24.04_gcc15:arm:lv6
       Compile_Ascend_X86_Python_openeuler:
         openeuler24.03:x86:lv6
       Compile_Ascend_ARM_Python_openeuler:
