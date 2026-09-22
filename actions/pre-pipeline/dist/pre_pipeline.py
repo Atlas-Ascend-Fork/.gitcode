@@ -11,6 +11,7 @@ import urllib.error
 API_BASE = "https://api.gitcode.com"
 PR_LABELS_URL = "https://api.gitcode.com/api/v5/repos/{0}/{1}/pulls/{2}/labels"
 PR_COMMENT_URL = "https://api.gitcode.com/api/v5/repos/{0}/{1}/pulls/{2}/comments"
+PR_INFO_URL = "https://api.gitcode.com/api/v5/repos/{0}/{1}/pulls/{2}"
 PERMISSION_URL = "https://api.gitcode.com/api/v5/repos/{0}/{1}/collaborators/{2}/permission"
 LABEL_RUNNING = "ci-pipeline-running"
 # 可信角色白名单(子串匹配): 角色名含"维护者"(生态维护者/社区维护者等)的平台允许其触发流水线(v5 permission 粗粒度映射为 read), 放通
@@ -53,6 +54,25 @@ def post_pr_comment(owner, repo, pr_number, body, token, max_retries=1):
         print(f"❌ PR 评论发布失败: HTTP {status}, {resp}")
         return False
     return False
+
+
+def check_pr_conflict(owner, repo, pr_number, token):
+    """检测 PR 冲突状态, 返回 (通过, 冲突描述)。
+    冲突 PR 的 merge_commit_sha 不存在, pre_action 的 Checkout 会先行失败,
+    故冲突检测必须在流水线最早阶段(pre-pipeline)执行。"""
+    url = PR_INFO_URL.format(owner, repo, pr_number)
+    status, resp = api_request(url, token)
+    if status != 200 or not isinstance(resp, dict):
+        print(f"WARNING: 获取 PR 信息失败(HTTP {status}), 跳过冲突检测")
+        return True, ""
+    conflict = (resp.get("mergeable_state") or {}).get("conflict_passed")
+    if conflict is False:
+        return False, f"PR #{pr_number} 与目标分支存在冲突(conflict_passed=False), 无法自动合并"
+    if conflict is True:
+        print(f"✅ PR #{pr_number} 无冲突(conflict_passed=True)")
+    else:
+        print("WARNING: 无法解析 conflict_passed 字段, 跳过冲突检测")
+    return True, ""
 
 
 def get_user_permission(owner, repo, username, token):
@@ -175,6 +195,21 @@ def main():
             "| --- |\n"
             f"| 🚫 权限不足: {perm_reason} |\n"
             f"| 处理: 由 PR 创建者或有 push 权限的成员触发 |\n"
+        )
+        if args.run_url:
+            comment_body += f"| 📋 执行详情: [点击查看流水线]({args.run_url}) |\n"
+        post_pr_comment(args.owner, args.repo, args.pr_number, comment_body, args.token)
+        sys.exit(1)
+
+    # PR 冲突检测(冲突时后续 Checkout/get-pr 必失败, 最早阶段拦截)
+    conflict_ok, conflict_reason = check_pr_conflict(args.owner, args.repo, args.pr_number, args.token)
+    if not conflict_ok:
+        print(f"❌ PR 冲突检测不通过: {conflict_reason}")
+        comment_body = (
+            "| ❌ CI 流水线启动失败 |\n"
+            "| --- |\n"
+            f"| ⚠️ {conflict_reason} |\n"
+            f"| 处理: 请先解决 PR 与目标分支的冲突, 再重新触发流水线 |\n"
         )
         if args.run_url:
             comment_body += f"| 📋 执行详情: [点击查看流水线]({args.run_url}) |\n"

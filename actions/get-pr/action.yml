@@ -14,7 +14,7 @@ inputs:
     description: 仓库名称
     required: false
   pr_number:
-    description: PR 编号，传入时调用 API 检测冲突状态
+    description: PR 编号
     required: false
   git_token:
     description: 私有仓库访问token，公开仓库无需传入
