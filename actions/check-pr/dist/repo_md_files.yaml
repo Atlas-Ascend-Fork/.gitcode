@@ -159,6 +159,8 @@ asc-tools:
 ops-ras:
   '*':
     - docs
+  9.2.0:
+    - .
 
 docs:
   '*':
