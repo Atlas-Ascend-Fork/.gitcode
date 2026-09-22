@@ -82,7 +82,10 @@ jobs:
           repo_name: ${{ env.repo_name }}
           workspace: ${{ steps.process_checkout.outputs.path }}
           target_branch: ${{ env.TARGET_BRANCH }}
-      -
+          pr_number: ${{ atomgit.event.pull_request.number }}
+          git_token: ${{ secrets.GIT_TOKEN }}
+          pr_issue: ${{ vars.PR_ISSUE }}
+      -  
         name: upload
         uses: obs-upload
         if: ${{ always() }}
