@@ -1190,7 +1190,7 @@ repos:
       UT_Test:
         ubuntu24.04:x86:lv6
       API_Check:
-        ubuntu24.04:x86:api_check
+        ubuntu24.04_gcc15:x86:lv6
 
   ops-fft:
     os_mirror:
