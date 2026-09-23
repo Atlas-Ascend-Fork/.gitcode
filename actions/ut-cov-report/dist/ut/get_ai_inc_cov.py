@@ -460,7 +460,8 @@ def change_addinfo_data_from(output, code_dir):
 
 
 def make_diff_file(
-    info_path, out_dir, work_dir, filter_path_list, branch, classify_name
+    info_path, out_dir, work_dir, filter_path_list, branch, classify_name,
+    proj_path
 ):
     """
     功能描述：生成代码变更信息差异文件
@@ -472,6 +473,11 @@ def make_diff_file(
     返回值：生成差异文件成功返回True，否则返回相应异常值
     异常描述：
     """
+    patch_file = fetch_pr_patch(proj_path)
+    patch_sections = load_patch_sections(patch_file) if patch_file else {}
+    CI_LOG.cilog_info(
+        THIS_FILE_NAME, "PR patch sections: %s", len(patch_sections)
+    )
     # 获取有用例覆盖文件列表
     cover_file_list = get_lcov_file_from_info(
         info_path, work_dir, classify_name)
@@ -851,6 +857,7 @@ changed_files_list is :%s,out_dir is :%s,RC_config_value is :%s,threshold is :%s
         filter_path_list,
         params_dict[PARA_KEY_BRANCH],
         component_name,
+        proj_path,
     )
     CI_LOG.cilog_info(THIS_FILE_NAME, "del_file_list is %s", del_file_list)
     if make_result == GENERATE_DIFF_SUCC:
