@@ -14,6 +14,16 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+ALL_ENGLISH_SKIP_EXCLUDED_REPOS = {"pypto"}
+
+
+def is_english_md(file_path: str) -> bool:
+    """英文文档判定：路径含 en 目录段（en/*.md），或文件名以 _en.md 结尾"""
+    parts = file_path.replace("\\", "/").split("/")
+    if "en" in parts[:-1]:
+        return True
+    return file_path.endswith("_en.md")
+
 
 def read_pr_file(pr_file: str) -> list[str]:
     """读取 PR 文件列表（git diff --name-status 格式），仅保留 .md 文件"""
@@ -146,7 +156,7 @@ def check_md_files(
             continue
 
         try:
-            pair_rel_str = str(pair_full_path.relative_to(workspace))
+            pair_rel_str = str(pair_full_path.relative_to(workspace)).replace("\\", "/")
         except ValueError:
             logger.warning("配对路径超出工作区范围: %s", pair_full_path)
             continue
@@ -177,6 +187,10 @@ def main(repo: str, branch: str, md_yaml: str, pr_file: str, workspace: str) -> 
     md_list = read_pr_file(pr_file)
     if not md_list:
         logger.info("PR 中没有 .md 文件，跳过检查")
+        return 0
+
+    if repo not in ALL_ENGLISH_SKIP_EXCLUDED_REPOS and all(is_english_md(md) for md in md_list):
+        logger.info("PR 修改的全部是英文文档（en/ 或 *_en.md），跳过检查，共 %d 个文件", len(md_list))
         return 0
 
     repo_md_paths = read_yaml(md_yaml, repo, branch)
