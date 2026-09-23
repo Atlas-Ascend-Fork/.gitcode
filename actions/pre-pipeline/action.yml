@@ -1,6 +1,6 @@
 name: 'pre-pipeline'
 author: 'CANN'
-version: '1.1.0'
+version: '1.2.1'
 description: '流水线开始前给 PR 打上 ci-pipeline-running 标签, 发布流水线链接评论, 检查触发者目标仓库权限'
 inputs:
   owner:
