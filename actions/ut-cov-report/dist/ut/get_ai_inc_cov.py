@@ -721,8 +721,7 @@ def main():
     out_dir = os.path.abspath(os.path.join(proj_path, addinfo_dir))
     if not os.path.exists(out_dir):
         os.makedirs(out_dir)
-    work_dir = os.path.abspath(os.path.join(
-        THIS_FILE_PATH, "../../../../../../"))
+    work_dir = os.path.dirname(os.path.abspath(proj_path))
     component_name = proj_path.split("/")[-1]
     if classify_name_list[0] == "canndev":
         classify_rule_path = os.path.join(
