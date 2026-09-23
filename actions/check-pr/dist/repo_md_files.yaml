@@ -108,6 +108,7 @@ oam-tools:
     - docs/en/msaicerr
     - docs/en/profiling
     - docs/en/design
+    - skills
 
 graph-autofusion:
   '*':
@@ -159,6 +160,8 @@ asc-tools:
 ops-ras:
   '*':
     - docs
+  9.2.0:
+    - .
 
 docs:
   '*':
