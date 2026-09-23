@@ -11,6 +11,16 @@ INC_COV="$4"
 OUTDIR="$5"
 THRESHOLD="$6"
 test_type="$8"
+# 增量 diff 基线：浅克隆默认只拉 PR merge sha，需要把基分支 ref 拉下来，
+# 否则 get_ai_inc_cov.py 里 `git diff origin/${BRANCH} HEAD` 会报 bad revision
+if [ -d "${TARGETS}/.git" ] && [ -n "${BRANCH}" ]; then
+    if git -C "${TARGETS}" fetch --no-tags origin "${BRANCH}" >/dev/null 2>&1; then
+        git -C "${TARGETS}" update-ref "refs/remotes/origin/${BRANCH}" FETCH_HEAD
+        echo "[INFO] base branch origin/${BRANCH} fetched for incremental diff"
+    else
+        echo "[WARN] fetch origin/${BRANCH} failed, incremental diff baseline may be unavailable"
+    fi
+fi
 if [ "${INC_COV}X" == "TrueX" ]
 then
     echo "FULL_COVERAGE_CONFIG is ${FULL_COVERAGE_CONFIG}"
