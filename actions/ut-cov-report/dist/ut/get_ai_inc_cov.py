@@ -10,6 +10,52 @@ import ci_log as CI_LOG
 import create_change_xml as change_xml
 import get_classify_rule_content as get_classify_rule
 
+
+def load_patch_sections(patch_file):
+    """解析 pre 流水线产出的 update_file_detail.txt（unified diff），
+    按文件拆分为 {仓内相对路径: diff行列表}"""
+    sections = {}
+    current_path = None
+    buf = []
+    with open(patch_file, "r", encoding="utf-8", errors="replace") as f:
+        for line in f:
+            if line.startswith("diff --git "):
+                if current_path and buf:
+                    sections[current_path] = buf
+                m = re.search(r" b/(.+)$", line.rstrip("\n"))
+                current_path = m.group(1).strip() if m else None
+                buf = [line]
+            elif current_path:
+                buf.append(line)
+    if current_path and buf:
+        sections[current_path] = buf
+    return sections
+
+
+def fetch_pr_patch(proj_path):
+    """获取 PR 的 unified diff：优先用已下载的 update_file_detail.txt，
+    否则从 OBS 匿名拉取（pre 流水线已上传到 OBS_PATH 前缀下）。
+    返回 patch 文件路径，获取失败返回 None"""
+    patch_file = os.path.join(proj_path, "update_file_detail.txt")
+    if os.path.exists(patch_file):
+        return patch_file
+    obs_path = os.environ.get("OBS_PATH", "")
+    if not obs_path:
+        return None
+    patch_url = (
+        "https://ascend-ci.obs.cn-north-4.myhuaweicloud.com/"
+        "{}/update_file_detail.txt".format(obs_path)
+    )
+    rc = os.system(
+        "curl -fsSL --max-time 120 -o {} {} 2>/dev/null".format(patch_file, patch_url)
+    )
+    if rc == 0 and os.path.exists(patch_file):
+        CI_LOG.cilog_info(
+            THIS_FILE_NAME, "PR patch downloaded from OBS: %s", patch_url
+        )
+        return patch_file
+    return None
+
 THIS_FILE_NAME = __file__
 THIS_FILE_PATH = os.path.dirname(os.path.realpath(THIS_FILE_NAME))
 sys.path.append(os.path.join(THIS_FILE_PATH, ".."))
@@ -297,6 +343,11 @@ def generate_modify_file_info(filter_path_list, proj_path):
           2.proj_path:ut/st工程路径
     返回值：返回info文件路径
     """
+    patch_file = fetch_pr_patch(proj_path)
+    patch_sections = load_patch_sections(patch_file) if patch_file else {}
+    CI_LOG.cilog_info(
+        THIS_FILE_NAME, "PR patch sections: %s", len(patch_sections)
+    )
     coverage_info_path = os.path.abspath(
         os.path.join(proj_path, "coverage_add.info"))
     create_info_cmd = f"touch {coverage_info_path}"
@@ -458,15 +509,21 @@ def make_diff_file(
             delete_count += 1
             delete_file_list.append(code_path)
             continue
-        # 通过git diff命令获取到相关差异信息
-        os.chdir(os.path.split(code_dir)[0])
-        cmd = f"git diff origin/{branch} HEAD -- {code_dir}"
-        status, output = change_xml.execute(cmd)
-        if not status:
-            CI_LOG.cilog_error(
-                THIS_FILE_NAME, "git diff execute error ,output is %s", output
+        # 优先使用 pre 流水线产出的 PR diff（免 git fetch 基分支）
+        output = patch_sections.get(code_path) or patch_sections.get("./" + code_path)
+        if output is not None:
+            CI_LOG.cilog_info(
+                THIS_FILE_NAME, "diff from update_file_detail: %s", code_path
             )
-            return GENERATE_DIFF_FAIL, delete_file_list
+        else:
+            os.chdir(os.path.split(code_dir)[0])
+            cmd = f"git diff origin/{branch} HEAD -- {code_dir}"
+            status, output = change_xml.execute(cmd)
+            if not status:
+                CI_LOG.cilog_error(
+                    THIS_FILE_NAME, "git diff execute error ,output is %s", output
+                )
+                return GENERATE_DIFF_FAIL, delete_file_list
         CI_LOG.cilog_info(
             THIS_FILE_NAME, "get output succ, output is %s", output)
         addinfo_data = change_addinfo_data_from(output, code_dir)
