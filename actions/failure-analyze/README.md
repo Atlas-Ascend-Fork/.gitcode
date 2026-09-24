@@ -35,7 +35,7 @@ query_pipeline 步骤输出 pipeline_failed 变量
 | `pr_number` | 否 | PR 编号（组装分析上下文） |
 | `pipeline_failed` | 否 | query_pipeline 步骤输出：`false`=成功跳过；`true`=失败触发；**缺失=其自身异常，兜底触发** |
 | `session_id` | 是 | agent-hub 事件型 Session ID（预先创建，绑定失败分析 Agent） |
-| `event_key` | 否 | 事件 Key，需与 Session `trigger_config.event_key` 匹配，默认 `gate_check` |
+| `event_key` | 否 | 事件 Key，需与 Session `trigger_config.event_key` 匹配，默认 `pipeline_failed` |
 | `enable_pr_comment` | 否 | **PR 评论回写开关**(默认 false)：true=要求 Agent 将分析结果回写到 PR 评论区；false=仅输出报告 |
 | `agent_hub_token` | 是 | agent-hub 认证 token |
 | `agent_hub_url` | 否 | agent-hub 地址，默认 `https://cannbot.hicann.cn/agent-hub` |
