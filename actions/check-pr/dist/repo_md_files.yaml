@@ -68,6 +68,7 @@ runtime:
   '*':
     - docs
     - .claude
+    - python/docs
 
 ge:
   '*':
@@ -133,19 +134,15 @@ hccl:
   '*':
     - docs/zh/api_ref
     - docs/zh/user_guide
-    - docs/zh/architecture
     - docs/en/api_ref
     - docs/en/user_guide
-    - docs/en/architecture
 
 hcomm:
   '*':
     - docs/zh/api_ref
     - docs/zh/comm_op_dev_guide
-    - docs/zh/architecture
     - docs/en/api_ref
     - docs/en/comm_op_dev_guide
-    - docs/en/architecture
 
 metadef:
   '*':
