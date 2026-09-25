@@ -33,6 +33,7 @@ query_pipeline 步骤输出 pipeline_failed 变量
 | `repo` | 是 | 仓库名称 |
 | `run_id` | 是 | 本次运行的 run_id |
 | `pr_number` | 否 | PR 编号（组装分析上下文） |
+| `enable` | 否 | 总开关，默认 `false`；设置为 `true` 后启用失败分析，建议接入 `vars.FAILURE_ANALYZE_ENABLE` |
 | `pipeline_failed` | 否 | query_pipeline 步骤输出：`false`=成功跳过；`true`=失败触发；**缺失=其自身异常，兜底触发** |
 | `session_id` | 是 | agent-hub 事件型 Session ID（预先创建，绑定失败分析 Agent） |
 | `event_key` | 否 | 事件 Key，需与 Session `trigger_config.event_key` 匹配，默认 `gate_check` |
