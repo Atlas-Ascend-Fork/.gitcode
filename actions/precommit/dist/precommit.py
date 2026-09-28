@@ -41,9 +41,22 @@ class PreCommitChecker(CodeCheckerBaseClass):
 
         # 2. install lintrunner
         logging.info("------------------------------------2. install lintrunner-----------------------------------")
-        self.run_cmd('pip3 config set global.index-url https://mirrors.huaweicloud.com/repository/pypi/simple', os.getcwd(), shell=True)
-        self.run_cmd('pip3 install --upgrade pip', os.getcwd(), shell=True)
-        self.run_cmd('pip3 install -q pre-commit>=4.0.0', os.getcwd(), shell=True)
+        pip_index_primary = 'https://mirrors.huaweicloud.com/repository/pypi/simple'
+        pip_index_fallback = self.env_dist.get('PIP_FALLBACK_INDEX', 'https://pypi.org/simple')
+        self.run_cmd('pip3 config set global.index-url %s' % pip_index_primary, os.getcwd(), shell=True)
+        for cmd in ('pip3 install --upgrade pip', 'pip3 install -q "pre-commit>=4.0.0"'):
+            result = self.run_cmd(cmd, os.getcwd(), shell=True, capture_output=True)
+            if result is not None and result.returncode == 0:
+                continue
+            logging.warning("主源 %s 安装失败, 改用备用源 %s 重试: %s" % (pip_index_primary, pip_index_fallback, cmd))
+            if result is not None and result.stderr:
+                logging.warning(result.stderr[-1500:])
+            retry = self.run_cmd('%s --index-url %s' % (cmd, pip_index_fallback), os.getcwd(), shell=True, capture_output=True)
+            if retry is None or retry.returncode != 0:
+                logging.error(
+                    "pre-commit 工具安装失败(主源 %s 与备用源 %s 均不可用), 属于 CI 环境瞬时故障, 与 PR 代码无关, 请重跑流水线"
+                    % (pip_index_primary, pip_index_fallback))
+                sys.exit(1)
 
         # 3. pre-commit检测changes files
         logging.info(
