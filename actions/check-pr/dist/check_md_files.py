@@ -107,7 +107,7 @@ def _get_pair_path(original: Path) -> Path | None:
     """根据原始路径生成对应的双语配对路径"""
     parts = list(original.parts)
 
-    # 1. 目录级双语：zh/ ↔ en/
+    # 1. 目录级双语：zh/ ? en/
     if "zh" in parts:
         new_parts = ["en" if part == "zh" else part for part in parts]
         return Path(*new_parts)
@@ -115,7 +115,7 @@ def _get_pair_path(original: Path) -> Path | None:
         new_parts = ["zh" if part == "en" else part for part in parts]
         return Path(*new_parts)
 
-    # 2. 文件名后缀级双语：xxx.md ↔ xxx_en.md
+    # 2. 文件名后缀级双语：xxx.md ? xxx_en.md
     stem = original.stem
     suffix = original.suffix  # e.g., ".md"
 
@@ -134,12 +134,19 @@ def check_md_files(
     mdlist: list[str],
     repo_md: list[str],
     workspace: Path,
+    skip_english: bool = False,
 ) -> list[str]:
-    """检查 MD 文件的双语配对完整性，返回缺失配对的文件列表"""
+    """检查 MD 文件双语配对一致性，返回缺失对应版本的文件列表"""
     illegal: list[str] = []
-    
+    skipped_english = 0
+
     md_set = set(mdlist)
     for md in mdlist:
+        if skip_english and is_english_md(md):
+            skipped_english += 1
+            logger.debug("英文文档，跳过检测: %s", md)
+            continue
+
         if is_in_paths(md, repo_md, workspace):
             logger.debug("白名单跳过: %s", md)
             continue
@@ -174,6 +181,8 @@ def check_md_files(
         else:
             logger.debug("配对检查通过: %s", md)
 
+    if skipped_english:
+        logger.info("按策略跳过 %d 个英文文档（en/ 或 *_en.md）", skipped_english)
     return illegal
 
 
@@ -189,19 +198,18 @@ def main(repo: str, branch: str, md_yaml: str, pr_file: str, workspace: str) -> 
         logger.info("PR 中没有 .md 文件，跳过检查")
         return 0
 
-    if repo not in ALL_ENGLISH_SKIP_EXCLUDED_REPOS and all(is_english_md(md) for md in md_list):
-        logger.info("PR 修改的全部是英文文档（en/ 或 *_en.md），跳过检查，共 %d 个文件", len(md_list))
-        return 0
+    # 英文文档逐个跳过检测（pypto 例外：其英文文档同样要求与中文同步）
+    skip_english = repo not in ALL_ENGLISH_SKIP_EXCLUDED_REPOS
 
     repo_md_paths = read_yaml(md_yaml, repo, branch)
 
-    illegal_list = check_md_files(md_list, repo_md_paths, ws)
+    illegal_list = check_md_files(md_list, repo_md_paths, ws, skip_english)
 
     if illegal_list:
         logger.error("双语配对修改检查失败，共 %d 个文件缺失对应版本", len(illegal_list))
         return 1
 
-    logger.info("✅ 所有 %d 个 MD 文件双语配对检查通过", len(md_list))
+    logger.info("? 所有 %d 个 MD 文件双语配对检查通过", len(md_list))
     return 0
 
 
