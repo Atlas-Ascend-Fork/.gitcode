@@ -54,7 +54,7 @@ global:
       arm:
         lv6: ubuntu24.04_arm:lv6_v2.1009
       x86:
-        lv6: ubuntu24.04_x86:lv6_v2.1009
+        lv6: ubuntu24.04_x86:lv6_v2.1010
 gray_global:
   os_mirror:
     ubuntu20.04:
@@ -1250,6 +1250,8 @@ repos:
         ubuntu24.04:arm:opencode
       UT_Test:
         ubuntu24.04:x86:UT_x86
+      git_ai:
+        ubuntu24.04_gcc15:x86:lv6
 
   ops-blas:
     stages:
