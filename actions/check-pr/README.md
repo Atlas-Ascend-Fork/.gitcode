@@ -13,7 +13,7 @@
      - 新增 URL 必须在 `url` 白名单内（完全匹配或带边界字符的前缀匹配）；URL 不在白名单内时，若能识别为 Python/NodeJS 依赖组件 URL（pypi 项目页、whl/tgz 制品、npm registry 制品等）且组件版本仍满足 `opensource_py` / `opensource_js` 的版本约束，依然准许合入（宽范围版本放行）；
      - 新增三方库引用必须在 `opensource_c` 属性内；
       - `requirements.txt` / `package.json` 引入的依赖组件：组件在白名单内且版本满足约束则放行；**版本号大于 `opensource_py` / `opensource_js` 允许版本时拦截**，提示需要在相应依赖文件 `requirements.txt` 或 `package.json` 同步更新版本号；组件不在白名单内或版本落在约束范围外时拦截。
-4. **门禁日志留档**：常规放行（白名单/版本范围内等）聚合统计输出，避免大 PR 逐条日志刷屏；同步更新放行、豁免与拦截逐条输出。触发门禁豁免（豁免路径/图片文件/LFS 指针）或门禁拦截时，全量检查日志（含仓库/分支/PR编号/结论/豁免路径/明细）写入 workspace 下 `oss-dep-gate-log/<yyyymmdd>/oss-dep-gate-check_<仓名>_<分支>_<PR号>.txt`，由流水线 `obs-upload` 步骤（`if: always()`）统一上传至 OBS `CANN/oss_dep_check/` 前缀（按日期分档，全仓聚合），供后续追溯使用；正常放行（无豁免）不产生日志文件。
+4. **门禁日志留档**：常规放行（白名单/版本范围内等）聚合统计输出，避免大 PR 逐条日志刷屏；同步更新放行、豁免与拦截逐条输出。触发门禁豁免（豁免路径/图片文件/LFS 指针）或门禁拦截时，全量检查日志（含仓库/分支/PR编号/结论/豁免路径/明细）写入 workspace 下 `oss-dep-gate-log/<yyyymmdd>/oss-dep-gate-check_<仓名>_<分支>_<PR号>.txt`；配置 `obs_ak` / `obs_sk` 时由脚本经 obsutil 直接上传至 OBS `CANN/oss_dep_check/<yyyymmdd>/` 前缀（按日期分档，全仓聚合），供后续追溯使用；上传失败仅告警、不影响门禁结论。正常放行（无豁免）不产生日志文件。
 
 ## 输入参数
 
@@ -22,6 +22,8 @@
 | `workspace` | 是 | 代码检出目录 |
 | `repo_name` | 是 | 仓库名称（部分仓库跳过 Markdown 链接检查；URL/三方库门禁以仓库名作为门禁文件 key） |
 | `target_branch` | 否 | 目标分支，默认 `master`，决定读取的门禁文件 `oss_dep_security_gate_<branch>.json` |
+| `obs_ak` | 否 | OBS Access Key，用于门禁日志留档上传；为空则仅本地落盘、跳过上传 |
+| `obs_sk` | 否 | OBS Secret Key，用于门禁日志留档上传；为空则仅本地落盘、跳过上传 |
 
 ## 产物
 
