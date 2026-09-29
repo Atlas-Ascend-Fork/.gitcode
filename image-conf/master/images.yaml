@@ -666,6 +666,8 @@ repos:
         ubuntu24.04_gcc15:x86:lv6
       UT_Test_tefusion:
         ubuntu24.04_gcc15:x86:lv6
+      UT_Test_hcce:
+        ubuntu24.04_gcc15:x86:lv6
       ST_Test_Report:
         ubuntu24.04_gcc15:x86:lv6
       ST_Test_dflow:
@@ -689,6 +691,8 @@ repos:
       ST_Test_fe:
         ubuntu24.04_gcc15:x86:lv6
       ST_Test_tefusion:
+        ubuntu24.04_gcc15:x86:lv6
+      ST_Test_hcce:
         ubuntu24.04_gcc15:x86:lv6
       API_Check:
         ubuntu24.04:x86:api_check
