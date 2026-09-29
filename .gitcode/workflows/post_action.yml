@@ -2,11 +2,17 @@ name: post_action
 
 on:
   workflow_call:
-  
+    outputs:
+      pipeline_failed:
+        description: "流水线是否失败：true/false"
+        value: ${{ jobs.JOB_finish.outputs.pipeline_failed }}
+
 
 jobs: 
   JOB_finish: 
     name: Test_finish
+    outputs:
+      pipeline_failed: ${{ steps.query_pipeline.outputs.pipeline_failed }}
     steps:
       - 
         name: query_pipeline
