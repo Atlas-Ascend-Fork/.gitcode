@@ -26,6 +26,14 @@ def read_cover_file(cover_file):
     return cover_list
 
 
+def _log_tail(s, head=10, tail=20):
+    """日志限流：保留前 head 行与后 tail 行，中间省略（防撑爆步骤日志 ~1MB 上限）"""
+    lines = s.splitlines()
+    if len(lines) <= head + tail:
+        return s
+    return "\n".join(lines[:head] + ["...(中间省略)..."] + lines[-tail:])
+
+
 def execute(cmd, timeout=3600, print_output_flag=False):
     """执行函数"""
     is_linux = platform.system() == "Linux"
@@ -72,14 +80,14 @@ def execute(cmd, timeout=3600, print_output_flag=False):
     for i in std_output_lines:
         std_output_lines_last.append(i)
     if print_output_flag is True:
-        print(str_std_output)
+        print(_log_tail(str_std_output))
 
     if "Traceback" in str_std_output:
-        print(str_std_output)
+        print(_log_tail(str_std_output))
         return False, std_output_lines_last
 
     if p.returncode != 0:
-        print(str_std_output)
+        print(_log_tail(str_std_output))
         return False, std_output_lines_last
     return True, std_output_lines_last
 

@@ -467,8 +467,10 @@ def make_diff_file(
                 THIS_FILE_NAME, "git diff execute error ,output is %s", output
             )
             return GENERATE_DIFF_FAIL, delete_file_list
+        # 日志限流：完整 diff 全文回显会撑爆平台单步骤 ~1MB 日志上限（超限被 SIGTERM）
         CI_LOG.cilog_info(
-            THIS_FILE_NAME, "get output succ, output is %s", output)
+            THIS_FILE_NAME, "get output succ, %d 行 diff, 首行: %s",
+            len(output), output[0] if output else "")
         addinfo_data = change_addinfo_data_from(output, code_dir)
         if not addinfo_data:
             delete_count += 1
