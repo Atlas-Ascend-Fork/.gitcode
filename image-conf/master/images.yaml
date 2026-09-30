@@ -29,9 +29,9 @@ global:
         dsl_ut: ascend-catlass-dsl:latest
     ubuntu24.04:
       arm:
-        lv6: ubuntu24.04_arm:lv6_v1.1127
-        smoke: ubuntu24.04_arm:pre_mindspore_A2_conda_v1.1045
-        smoke_A3: ubuntu24.04_arm:pre_mindspore_A3_conda_v1.1038
+        lv6: ubuntu24.04_arm:lv6_v1.1129
+        smoke: ubuntu24.04_arm:pre_mindspore_A2_conda_v1.1047
+        smoke_A3: ubuntu24.04_arm:pre_mindspore_A3_conda_v1.1040
         asnumpy: ubuntu24.04_arm:asnumpy_v1.1001
         opencode: ubuntu24.04_arm:opencode_ai_check_v1.1001
         lv6_monitor: ubuntu24.04_arm:lv6_v1.1106
@@ -39,7 +39,7 @@ global:
         boost_component: ubuntu:24.04.CANN900.arm.260730
         boost_component_2: atb_version_build_arm:latest
       x86:
-        lv6: ubuntu24.04_x86:lv6_v1.1145
+        lv6: ubuntu24.04_x86:lv6_v1.1147
         xla_npu: ubuntu_npu:v1.0
         asnumpy: ubuntu24.04_x86:asnumpy_v1.1002
         lv6_monitor: ubuntu24.04_x86:lv6_v1.1110
@@ -47,14 +47,14 @@ global:
         boost_component_2: atb_version_build_x86:latest
     openeuler24.03:
       arm:
-        lv6: openeuler24.03_arm:lv6_v1.1028
+        lv6: openeuler24.03_arm:lv6_v1.1030
       x86:
-        lv6: openeuler24.03_x86:lv6_v1.1028
+        lv6: openeuler24.03_x86:lv6_v1.1030
     ubuntu24.04_gcc15:
       arm:
-        lv6: ubuntu24.04_arm:lv6_v2.1009
+        lv6: ubuntu24.04_arm:lv6_v2.1011
       x86:
-        lv6: ubuntu24.04_x86:lv6_v2.1010
+        lv6: ubuntu24.04_x86:lv6_v2.1012
 gray_global:
   os_mirror:
     ubuntu20.04:
@@ -254,10 +254,6 @@ repos:
         ubuntu24.04:x86:lv6
 
   ops-cv:
-    os_mirror:
-      ubuntu24.04:
-        x86:
-          api_check: ubuntu24.04.3_x86:lv6_v1.1076
     stages:
       Compile_Ascend_X86:
         ubuntu24.04:x86:lv6
@@ -296,7 +292,7 @@ repos:
       Pre_Compile_ubuntu24:
         ubuntu24.04:arm:lv6
       API_Check:
-        ubuntu24.04:x86:api_check
+        ubuntu24.04:x86:lv6
       UT_Test:
         ubuntu24.04:x86:lv6
       UT_Test_ai-review:
@@ -440,11 +436,8 @@ repos:
   asc-devkit:
     os_mirror:
       ubuntu24.04:
-        arm:
-          lv6: ubuntu24.04_arm:lv6_v1.1125
         x86:
           api_check: ubuntu24.04.3_x86:lv6_v1.1076
-          lv6: ubuntu24.04_x86:lv6_v1.1143
     stages:
       Compile_Ascend_X86:
         ubuntu24.04:x86:lv6
@@ -1048,17 +1041,6 @@ repos:
       ST_Test:
         ubuntu24.04:x86:lv6
   asc-tools:
-    os_mirror:
-      ubuntu24.04:
-        arm:
-          lv6: ubuntu24.04_arm:lv6_v1.1125
-        x86:
-          lv6: ubuntu24.04_x86:lv6_v1.1143
-      ubuntu24.04_gcc15:
-        arm:
-          lv6: ubuntu24.04_arm:lv6_v2.1009
-        x86:
-          lv6: ubuntu24.04_x86:lv6_v2.1009
     stages:
       Compile_Ascend_X86:
         ubuntu24.04:x86:lv6
