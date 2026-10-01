@@ -14,14 +14,14 @@ body:
       description: 请给出有问题的文档链接
       placeholder: "https://www.hiascend.com/cann/document/detail/..."
     validations:
-      required: false
+      required: true
   - type: textarea
     attributes:
       label: 问题文档片段 / Document Section (Mandatory / 必填)
       description: 请引用或截图显示有问题的文档内容
       placeholder: 请复制粘贴文档中的问题内容或上传截图
     validations:
-      required: false
+      required: true
   - type: textarea
     attributes:
       label: 问题描述 / Issue Description (Mandatory / 必填)
@@ -33,7 +33,7 @@ body:
         - 链接失效
         - 其它
     validations:
-      required: false
+      required: true
   - type: textarea
     attributes:
       label: 改进建议 / Suggested Improvement (Optional / 选填)
