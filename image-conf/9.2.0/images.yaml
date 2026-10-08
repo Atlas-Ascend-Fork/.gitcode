@@ -29,7 +29,7 @@ global:
         dsl_ut: ascend-catlass-dsl:latest
     ubuntu24.04:
       arm:
-        lv6: ubuntu24.04_arm:lv6_v1.1126
+        lv6: ubuntu24.04_arm:lv6_v1.1130
         smoke: ubuntu24.04_arm:pre_mindspore_A2_conda_v1.1043
         smoke_A3: ubuntu24.04_arm:pre_mindspore_A3_conda_v1.1036
         asnumpy: ubuntu24.04_arm:asnumpy_v1.1001
@@ -40,7 +40,7 @@ global:
         boost_component: ubuntu:24.04.CANN900.arm.260730
         boost_component_2: atb_version_build_arm:latest
       x86:
-        lv6: ubuntu24.04_x86:lv6_v1.1144
+        lv6: ubuntu24.04_x86:lv6_v1.1148
         xla_npu: ubuntu_npu:v1.0
         asnumpy: ubuntu24.04_x86:asnumpy_v1.1002
         lv6_monitor: ubuntu24.04_x86:lv6_v1.1110
@@ -54,9 +54,9 @@ global:
         lv6: openeuler24.03_x86:lv6_v1.1025
     ubuntu24.04_gcc15:
       arm:
-        lv6: ubuntu24.04_arm:lv6_v2.1008
+        lv6: ubuntu24.04_arm:lv6_v2.1012
       x86:
-        lv6: ubuntu24.04_x86:lv6_v2.1008
+        lv6: ubuntu24.04_x86:lv6_v2.1013
 gray_global:
   os_mirror:
     ubuntu20.04:
