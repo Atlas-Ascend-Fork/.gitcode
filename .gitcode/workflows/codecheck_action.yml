@@ -21,6 +21,7 @@ jobs:
         uses: checkout
         with:
           ref: ${{ atomgit.event.pull_request.merge_commit_sha }}
+          allow-unsafe-pr-checkout: true
           token: ${{secrets.GIT_TOKEN}}
       -
         name: download
@@ -62,6 +63,7 @@ jobs:
         uses: checkout
         with:
           ref: ${{ atomgit.event.pull_request.merge_commit_sha }}
+          allow-unsafe-pr-checkout: true
           token: ${{secrets.GIT_TOKEN}}
       -
         name: download
@@ -125,6 +127,7 @@ jobs:
         uses: checkout
         with:
           ref: ${{ atomgit.event.pull_request.merge_commit_sha }}
+          allow-unsafe-pr-checkout: true
           token: ${{secrets.GIT_TOKEN}}
           path: "./runner"
       -
@@ -153,6 +156,7 @@ jobs:
         uses: checkout
         with:
           ref: ${{ atomgit.event.pull_request.merge_commit_sha }}
+          allow-unsafe-pr-checkout: true
           token: ${{secrets.GIT_TOKEN}}
           path: "./runner"
       -
@@ -185,6 +189,8 @@ jobs:
         uses: checkout
         with:
           ref: ${{ atomgit.event.pull_request.merge_commit_sha }}
+          allow-unsafe-pr-checkout: true
+          token: ${{secrets.GIT_TOKEN}}
           path: "./runner"
       -
         name: Checkout
