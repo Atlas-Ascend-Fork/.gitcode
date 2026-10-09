@@ -143028,6 +143028,10 @@ function getMarkdownTitleId(title) {
   return title.toLowerCase().replace(regex, "").replace(/ /g, "-");
 }
 __name(getMarkdownTitleId, "getMarkdownTitleId");
+function getGitcodeRenderedId(title) {
+  return title.toLowerCase().replace(/[^\p{L}\p{N}\s-]+/gu, "").replace(/\s+/g, " ").trim().replace(/ /g, "-").replace(/-+/g, "-").replace(/^-+/, "").replace(/-+$/, "");
+}
+__name(getGitcodeRenderedId, "getGitcodeRenderedId");
 function getMarkdownIds(content3) {
   const ids = /* @__PURE__ */ new Set();
   lib_default().use(import_markdown_it_anchor.default, {
@@ -143042,6 +143046,10 @@ function getMarkdownIds(content3) {
         i++;
       }
       ids.add(id);
+      const gitcodeId = getGitcodeRenderedId(getMarkdownPureTitle(title));
+      if (gitcodeId && !ids.has(gitcodeId)) {
+        ids.add(gitcodeId);
+      }
       return id;
     }, "slugify")
   }).parse(content3, {});
