@@ -94,7 +94,7 @@ jobs:
           bucket: "ascend-ci"
           access-key: ${{secrets.AK}}
           secret-key: ${{secrets.SK}}
-          artifact-path: "${{ steps.process_checkout.outputs.path }}/oss-dep-gate-log/*/*.txt"
+          artifact-path: "${{ steps.process_checkout.outputs.path }}/oss-dep-gate-log/*"
           object-prefix: CANN/oss_dep_check/
     runs-on: ["self-hosted", "arch=x64", "spec=slim"]
     container:
