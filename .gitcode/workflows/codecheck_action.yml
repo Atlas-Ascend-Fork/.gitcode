@@ -85,8 +85,17 @@ jobs:
           pr_number: ${{ atomgit.event.pull_request.number }}
           git_token: ${{ secrets.GIT_TOKEN }}
           pr_issue: ${{ vars.PR_ISSUE }}
-          obs_ak: ${{ secrets.AK }}
-          obs_sk: ${{ secrets.SK }}
+      -
+        name: upload
+        uses: obs-upload
+        if: ${{ always() }}
+        with:
+          endpoint: "https://obs.cn-north-4.myhuaweicloud.com"
+          bucket: "ascend-ci"
+          access-key: ${{secrets.AK}}
+          secret-key: ${{secrets.SK}}
+          artifact-path: "${{ steps.process_checkout.outputs.path }}/oss-dep-gate-log/*/*.txt"
+          object-prefix: CANN/oss_dep_check/
     runs-on: ["self-hosted", "arch=x64", "spec=slim"]
     container:
       image: swr.cn-north-4.myhuaweicloud.com/ci_cann/${{ inputs.codecheck_image_version }}
