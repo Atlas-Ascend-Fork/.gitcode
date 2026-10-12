@@ -9,14 +9,15 @@
 ```
 query_pipeline 步骤输出 pipeline_failed 变量
       │
-      ├─ "false" ──> 流水线成功, 跳过
+      ├─ "false" ──> 流水线成功, 跳过失败分析
+      │                └─ 开启 enable_success_review 时向 PR 写入 "/ai review force" 评论
       ├─ "true"  ──> 存在失败 Job, 触发分析
       └─ 缺失    ──> query_pipeline 自身异常(如 API 限流), 兜底触发
                         │
                   POST agent-hub trigger
                   content = run 链接( Agent 侧技能自行拉取数据 )
                         │
-              HTTP 2xx ──> ✅ 已触发(仅日志)
+              HTTP 2xx ──> ✅ 已触发(仅日志, 不写步骤摘要)
               非 2xx   ──> WARNING 不阻断(本步骤恒 exit 0)
 ```
 
@@ -37,6 +38,8 @@ query_pipeline 步骤输出 pipeline_failed 变量
 | `session_id` | 是 | agent-hub 事件型 Session ID（预先创建，绑定失败分析 Agent） |
 | `event_key` | 否 | 事件 Key，需与 Session `trigger_config.event_key` 匹配，默认 `gate_check` |
 | `enable_pr_comment` | 否 | **PR 评论回写开关**(默认 false)：true=要求 Agent 将分析结果回写到 PR 评论区；false=仅输出报告 |
+| `enable_success_review` | 否 | **成功评论开关**(默认 false, v1.1.0)：true=流水线成功时向 PR 写入 `/ai review force` 评论(成功态 AI 审查入口)；建议接 `vars.SUCCESS_AI_REVIEW_ENABLE` |
+| `git_token` | 否 | GitCode API 令牌(写 `/ai review force` 评论用, 需 PR 评论权限)；建议接 `secrets.GIT_TOKEN` |
 | `agent_hub_token` | 是 | agent-hub 认证 token |
 | `agent_hub_url` | 否 | agent-hub 地址，默认 `https://cannbot.hicann.cn/agent-hub` |
 
@@ -94,6 +97,8 @@ npm run all          # tsc → lib/ ; ncc → dist/main.js
     enable: ${{ vars.FAILURE_ANALYZE_ENABLE }}             # 总开关(未配置=不启用, 灰度仓库配 true)
     pipeline_failed: ${{ steps.query_pipeline.outputs.pipeline_failed }}
     enable_pr_comment: ${{ vars.PR_COMMENT_ENABLE }}   # 系统变量控制(未配置时默认 false)
+    enable_success_review: ${{ vars.SUCCESS_AI_REVIEW_ENABLE }}  # 成功时写 /ai review force 评论(未配置=关)
+    git_token: ${{ secrets.GIT_TOKEN }}                # 成功评论用 GitCode 令牌
     session_id: ${{ vars.AGENT_SESSION_ID }}            # 系统变量控制
     event_key: ${{ vars.AGENT_EVENT_KEY }}
     agent_hub_token: ${{ secrets.AGENT_HUB_TOKEN }}

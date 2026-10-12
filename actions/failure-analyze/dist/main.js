@@ -49,6 +49,8 @@ async function run() {
         const eventKey = core.getInput("event_key", { required: false }) || "gate_check";
         const agentHubToken = core.getInput("agent_hub_token", { required: true });
         const enablePrComment = core.getInput("enable_pr_comment", { required: false }) || "false";
+        const enableSuccessReview = core.getInput("enable_success_review", { required: false }) || "false";
+        const gitToken = core.getInput("git_token", { required: false });
         const agentHubUrl = core.getInput("agent_hub_url", { required: false })
             || "https://cannbot.hicann.cn/agent-hub";
         const scriptPath = path_1.default.resolve(__dirname, "./failure_analyze.py");
@@ -68,6 +70,7 @@ async function run() {
         core.info(`agent_hub_url：${agentHubUrl}`);
         core.info(`pipeline_failed：${pipelineFailed || "未指定(query_pipeline 异常时兜底触发)"}`);
         core.info(`enable_pr_comment：${enablePrComment}`);
+        core.info(`enable_success_review：${enableSuccessReview}`);
         const env = {
             ...process.env,
             ENABLE: enable,
@@ -80,6 +83,8 @@ async function run() {
             EVENT_KEY: eventKey,
             AGENT_HUB_TOKEN: agentHubToken,
             ENABLE_PR_COMMENT: enablePrComment,
+            ENABLE_SUCCESS_REVIEW: enableSuccessReview,
+            GIT_TOKEN: gitToken,
             AGENT_HUB_URL: agentHubUrl,
         };
         await execPythonScript(scriptPath, env);
