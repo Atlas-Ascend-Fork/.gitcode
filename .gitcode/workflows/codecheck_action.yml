@@ -86,6 +86,14 @@ jobs:
           git_token: ${{ secrets.GIT_TOKEN }}
           pr_issue: ${{ vars.PR_ISSUE }}
       -
+        name: gate_log_date
+        identifier: gate_log_date
+        if: ${{ always() }}
+        run: |
+          log_root="${{ steps.process_checkout.outputs.path }}/oss-dep-gate-log"
+          gate_date=$(ls "$log_root" 2>/dev/null | sort | tail -1)
+          echo "gate_date=${gate_date:-$(date +%Y%m%d)}" >> "$ATOMGIT_OUTPUT"
+      -
         name: upload
         uses: obs-upload
         if: ${{ always() }}
@@ -94,8 +102,8 @@ jobs:
           bucket: "ascend-ci"
           access-key: ${{secrets.AK}}
           secret-key: ${{secrets.SK}}
-          artifact-path: "${{ steps.process_checkout.outputs.path }}/oss-dep-gate-log/*"
-          object-prefix: CANN/oss_dep_check/
+          artifact-path: "${{ steps.process_checkout.outputs.path }}/oss-dep-gate-log/${{ steps.gate_log_date.outputs.gate_date }}/*.txt"
+          object-prefix: CANN/oss_dep_check/${{ steps.gate_log_date.outputs.gate_date }}/
     runs-on: ["self-hosted", "arch=x64", "spec=slim"]
     container:
       image: swr.cn-north-4.myhuaweicloud.com/ci_cann/${{ inputs.codecheck_image_version }}
