@@ -32,6 +32,8 @@ jobs:
           enable: ${{ vars.FAILURE_ANALYZE_ENABLE }}
           pipeline_failed: ${{ steps.query_pipeline.outputs.pipeline_failed }}
           enable_pr_comment: ${{ vars.PR_COMMENT_ENABLE }}
+          enable_success_review: ${{ vars.SUCCESS_AI_REVIEW_ENABLE }}
+          git_token: ${{ secrets.GIT_TOKEN }}
           session_id: ${{ vars.AGENT_SESSION_ID }}
           event_key: ${{ vars.AGENT_EVENT_KEY }}
           agent_hub_token: ${{ secrets.AGENT_HUB_TOKEN }}
