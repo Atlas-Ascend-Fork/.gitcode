@@ -1,6 +1,6 @@
 name: 'failure-analyze'
 author: 'CANN'
-version: '1.1.1'
+version: '1.1.2'
 description: '流水线失败时触发 Agent 分析失败原因(调用 agent-hub trigger 接口), 建议置于 Test_finish 的 query_pipeline 之后'
 inputs:
   owner:
@@ -34,11 +34,11 @@ inputs:
     required: false
     default: "false"
   enable_success_review:
-    description: 流水线成功时向 PR 写入 "/ai review" 评论的开关(true=写入; 空/false=跳过); 建议接 vars.SUCCESS_AI_REVIEW_ENABLE
+    description: 流水线成功时向 PR 写入 "/ai review force" 评论的开关(true=写入; 空/false=跳过); 建议接 vars.SUCCESS_AI_REVIEW_ENABLE
     required: false
     default: "false"
   git_token:
-    description: GitCode API 令牌(成功评论 "/ai review" 用, 需 PR 评论权限)
+    description: GitCode API 令牌(成功评论 "/ai review force" 用, 需 PR 评论权限)
     required: false
   agent_hub_token:
     description: agent-hub 认证 token

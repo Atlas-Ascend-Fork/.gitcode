@@ -5,7 +5,7 @@
   - 流水线成败由 query_pipeline 步骤输出的 pipeline_failed 变量传递
       pipeline_failed == "false" → 流水线成功, 跳过失败分析;
                                     若 enable_success_review=true 且有 pr_number/git_token,
-                                    则向 PR 写入 "/ai review" 评论(成功态 AI 审查入口)
+                                    则向 PR 写入 "/ai review force" 评论(成功态 AI 审查入口)
       pipeline_failed == "true"  → 存在失败 Job, 触发分析
       变量缺失                   → query_pipeline 自身异常(如限流), 兜底触发
   - 分析内容直接给 run 链接, 由 Agent 侧技能(gitcode-ci-api 等)自行拉取数据
@@ -93,12 +93,12 @@ def main():
         if not (pr_number and git_token):
             print(f"成功评论缺少前置条件(pr_number={'有' if pr_number else '无'}, git_token={'有' if git_token else '无'}), 跳过")
             return 0
-        print(f"流水线成功, 向 PR#{pr_number} 写入 /ai review 评论")
-        code, body = post_pr_comment(owner, repo, pr_number, "/ai review", git_token)
+        print(f"流水线成功, 向 PR#{pr_number} 写入 /ai review force 评论")
+        code, body = post_pr_comment(owner, repo, pr_number, "/ai review force", git_token)
         if 200 <= code < 300:
-            print(f"✅ /ai review 评论已写入 PR#{pr_number}(HTTP {code})")
+            print(f"✅ /ai review force 评论已写入 PR#{pr_number}(HTTP {code})")
         else:
-            print(f"WARNING: /ai review 评论写入失败(HTTP {code}): {body[:200]} —— 不阻断流水线")
+            print(f"WARNING: /ai review force 评论写入失败(HTTP {code}): {body[:200]} —— 不阻断流水线")
         return 0
     if pipeline_failed == "true":
         reason = "query_pipeline 检测到失败 Job"
