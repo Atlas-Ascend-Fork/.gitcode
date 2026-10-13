@@ -1467,3 +1467,7 @@ repos:
         ubuntu24.04_gcc15:x86:lv6
       Compile_Ascend_ARM:
         ubuntu24.04_gcc15:arm:lv6
+  cannbot-sentry:
+    stages:
+      UT_Test:
+        ubuntu24.04_gcc15:x86:lv6
