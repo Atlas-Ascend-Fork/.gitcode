@@ -18,32 +18,32 @@ def main():
     repos = data.get('repos', {})
 
     if target_repo not in repos:
-        print(f"ERROR: Repository '{target_repo}' not found.", file=sys.stderr)
-        sys.exit(1)
+        print(f"WARNING: Repository '{target_repo}' not found in config, using default images.", file=sys.stderr)
+        results = []
+    else:
+        repo_config = repos[target_repo]
+        stages = repo_config.get('stages', {})
+        repo_os_mirror = repo_config.get('os_mirror', {})
 
-    repo_config = repos[target_repo]
-    stages = repo_config.get('stages', {})
-    repo_os_mirror = repo_config.get('os_mirror', {})
+        results = []
 
-    results = []
+        for stage_name, ref in stages.items():
+            parts = ref.split(':')
+            if len(parts) != 3:
+                continue
+            os_ver, arch, tag = parts
 
-    for stage_name, ref in stages.items():
-        parts = ref.split(':')
-        if len(parts) != 3:
-            continue
-        os_ver, arch, tag = parts
+            # 查找顺序：repo → global → gray_global
+            image = (
+                repo_os_mirror.get(os_ver, {}).get(arch, {}).get(tag) or
+                global_os_mirror.get(os_ver, {}).get(arch, {}).get(tag) or
+                gray_global_os_mirror.get(os_ver, {}).get(arch, {}).get(tag)
+            )
 
-        # 查找顺序：repo → global → gray_global
-        image = (
-            repo_os_mirror.get(os_ver, {}).get(arch, {}).get(tag) or
-            global_os_mirror.get(os_ver, {}).get(arch, {}).get(tag) or
-            gray_global_os_mirror.get(os_ver, {}).get(arch, {}).get(tag)
-        )
-
-        if image is not None:
-            results.append(f"{stage_name}:{image}")
-        else:
-            print(f"WARNING: No image for {target_repo}.{stage_name} ({ref})", file=sys.stderr)
+            if image is not None:
+                results.append(f"{stage_name}:{image}")
+            else:
+                print(f"WARNING: No image for {target_repo}.{stage_name} ({ref})", file=sys.stderr)
 
     results += [
         "precommit:ubuntu20.04.05_x86:alpha113",

@@ -3,6 +3,7 @@
 
 import argparse
 import json
+import os
 import re
 import sys
 import time
@@ -21,6 +22,7 @@ STATUS_ICON = {
     "CANCELED": "⏹️",
     "CANCELLED": "⏹️",
     "SKIPPED": "⏭️",
+    "IGNORED": "⏭️",
     "RUNNING": "⏳",
     "QUEUED": "⏸️",
     "PENDING": "⏸️",
@@ -30,6 +32,7 @@ FAILED_STATUSES = {"FAILED", "FAILURE"}
 
 LABEL_PASS = "ci-pipeline-passed"
 LABEL_FAIL = "ci-pipeline-failed"
+LABEL_RUNNING = "ci-pipeline-running"
 
 
 def api_get(url, token):
@@ -111,6 +114,30 @@ def remove_pr_label(owner, repo, pr_number, label, token, max_retries=1):
     return False
 
 
+def remove_pr_labels_batch(owner, repo, pr_number, labels, token, max_retries=1):
+    """批量移除 PR 标签: DELETE /labels/name1,name2 (逗号分隔一次删除)"""
+    if not labels:
+        return True
+    names = ",".join(labels)
+    url = f"{PR_LABELS_URL.format(owner, repo, pr_number)}/{names}?access_token={token}"
+    for attempt in range(max_retries + 1):
+        status, body = api_request(url, token, "DELETE")
+        if status in (200, 204):
+            print(f"✅ 批量移除标签 [{names}] 成功")
+            return True
+        if status == 429 and attempt < max_retries:
+            wait = 10
+            print(f"⚠️ 批量移除标签触发限流，{wait}s 后重试 (attempt {attempt + 1}/{max_retries})")
+            time.sleep(wait)
+            continue
+        if status == 404:
+            print(f"ℹ️ 标签 [{names}] 不存在，无需移除")
+            return True
+        print(f"❌ 批量移除标签 [{names}] 失败: HTTP {status}, {body}")
+        return False
+    return False
+
+
 def apply_label_by_jobs(owner, repo, pr_number, jobs, token):
     if not pr_number:
         return
@@ -118,14 +145,22 @@ def apply_label_by_jobs(owner, repo, pr_number, jobs, token):
     print("  根据任务执行结果打标签")
     print(f"{'=' * 70}")
     print(f"  PR: #{pr_number}  任务总数: {len(jobs)}")
+    success_statuses = {"COMPLETED", "SUCCEEDED", "SUCCESS"}
+    neutral_statuses = {"SKIPPED", "IGNORED"}  # INIT(未执行)不算跳过, 有 INIT 即非成功
     failed_jobs = [j for j in jobs if j.get("status") in FAILED_STATUSES]
-    remove_pr_label(owner, repo, pr_number, LABEL_PASS, token)
-    remove_pr_label(owner, repo, pr_number, LABEL_FAIL, token)
-    if failed_jobs:
-        print(f"  失败任务数: {len(failed_jobs)}")
+    non_success_jobs = [j for j in jobs if j.get("status") not in success_statuses and j.get("status") not in neutral_statuses]
+    # 一次批量移除全部旧 CI 标签
+    remove_pr_labels_batch(owner, repo, pr_number, [LABEL_PASS, LABEL_FAIL, LABEL_RUNNING], token)
+    if non_success_jobs:
+        print(f"  非成功任务数: {len(non_success_jobs)} (失败: {len(failed_jobs)})")
+        for j in non_success_jobs:
+            print(f"    {j.get('display_name', j.get('name', 'N/A'))}: {j.get('status', 'N/A')}")
         add_pr_label(owner, repo, pr_number, LABEL_FAIL, token)
     else:
-        print(f"  失败任务数: 0")
+        skipped = [j for j in jobs if j.get("status") in neutral_statuses]
+        if skipped:
+            print(f"  跳过/忽略的任务数: {len(skipped)} (不影响标签)")
+        print(f"  全部任务成功")
         add_pr_label(owner, repo, pr_number, LABEL_PASS, token)
     print()
 
@@ -254,8 +289,10 @@ def print_jobs(jobs_data, run_detail=None):
             success += 1
         elif status in ("FAILED", "FAILURE"):
             failed += 1
-        elif status in ("SKIPPED",):
+        elif status in ("SKIPPED", "IGNORED"):
             skipped += 1
+        elif status == "INIT":
+            other += 1
         else:
             other += 1
 
@@ -313,6 +350,13 @@ def main():
         for j in failed_jobs:
             print(f"    {j.get('name', 'N/A')}  ->  {j.get('id', 'N/A')}")
         print()
+
+    # 输出 pipeline_failed 供后续步骤消费(如 failure-analyze):
+    #   true=存在失败 job; false=无失败; 未输出=本步骤自身异常
+    out_file = os.environ.get("ATOMGIT_OUTPUT")
+    if out_file:
+        with open(out_file, "a", encoding="utf-8") as f:
+            f.write("pipeline_failed=%s\n" % ("true" if failed_jobs else "false"))
 
     # 根据 PR 编号和任务执行结果打标签
     if args.apply_label and args.pr_number:

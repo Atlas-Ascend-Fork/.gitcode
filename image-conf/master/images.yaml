@@ -12,6 +12,8 @@ global:
         smoke_A3: ubuntu20.04.05_arm:mindspore_A3_v1.1041
         lv6_monitor: ubuntu20.04.05_arm:lv6_v1.1067
         lv6_monitor_9_0_0: ubuntu20.04.05_arm:lv6_v1.1089
+        boost_component: ubuntu:20.04.arm.cann_20260429060022
+        boost_component_cann920: ubuntu:20.04.arm.cann920_260828
       x86:
         lv1: ubuntu20.04.05_x86:lv1_v1.1003
         lv2: ubuntu20.04.05_x86:lv2_v1.1010
@@ -21,29 +23,39 @@ global:
         lv6: ubuntu20.04.05_x86:lv6_v1.1095
         lv6_monitor: ubuntu20.04.05_x86:lv6_v1.1069
         lv6_monitor_9_0_0: ubuntu20.04.05_x86:lv6_v1.1092
+        boost_component: ubuntu:20.04.x86.cann_20260429060022
+    ubuntu22.04:
+      x86:
+        dsl_ut: ascend-catlass-dsl:latest
     ubuntu24.04:
       arm:
-        lv6: ubuntu24.04_arm:lv6_v1.1092
-        smoke: ubuntu24.04_arm:pre_mindspore_A2_conda_v1.1026
-        smoke_A3: ubuntu24.04_arm:pre_mindspore_A3_conda_v1.1021
+        lv6: ubuntu24.04_arm:lv6_v1.1131
+        smoke: ubuntu24.04_arm:pre_mindspore_A2_conda_v1.1049
+        smoke_A3: ubuntu24.04_arm:pre_mindspore_A3_conda_v1.1042
         asnumpy: ubuntu24.04_arm:asnumpy_v1.1001
-        opencode: ubuntu24.04_arm:opencode_v1.1001
-        lv6_monitor: ubuntu24.04_arm:lv6_v1.1085
-        lv6_monitor_9_0_0: ubuntu24.04_arm:lv6_v1.1079
-        lv6_monitor_9.1.0_beta.1: ubuntu24.04_arm:lv6_v1.1086
+        opencode: ubuntu24.04_arm:opencode_ai_check_v1.1001
+        lv6_monitor: ubuntu24.04_arm:lv6_v1.1106
+        lv6_monitor_9.2.0_beta.2: ubuntu24.04_arm:lv6_v1.1122
+        boost_component: ubuntu:24.04.CANN900.arm.260730
+        boost_component_2: atb_version_build_arm:latest
       x86:
-        lv6: ubuntu24.04_x86:lv6_v1.1094
+        lv6: ubuntu24.04_x86:lv6_v1.1149
         xla_npu: ubuntu_npu:v1.0
         asnumpy: ubuntu24.04_x86:asnumpy_v1.1002
-        lv6_monitor: ubuntu24.04_x86:lv6_v1.1088
-        lv6_monitor_9_0_0: ubuntu24.04_x86:lv6_v1.1081
-        lv6_monitor_9.1.0_beta.1: ubuntu24.04_x86:lv6_v1.1089
+        lv6_monitor: ubuntu24.04_x86:lv6_v1.1110
+        lv6_monitor_9.2.0_beta.2: ubuntu24.04_x86:lv6_v1.1132
+        boost_component_2: atb_version_build_x86:latest
     openeuler24.03:
       arm:
-        lv6: openeuler24.03_arm:lv6_v1.1001
+        lv6: openeuler24.03_arm:lv6_v1.1032
       x86:
-        lv6: openeuler24.03_x86:lv6_v1.1001
-
+        lv6: openeuler24.03_x86:lv6_v1.1032
+    ubuntu24.04_gcc15:
+      arm:
+        lv6: ubuntu24.04_arm:lv6_v2.1013
+      x86:
+        lv6: ubuntu24.04_x86:lv6_v2.1014
+        lv6_0930: ubuntu24.04_x86:lv6_v2.1012
 gray_global:
   os_mirror:
     ubuntu20.04:
@@ -79,111 +91,99 @@ gray_global:
 
 repos:
   opbase:
-    os_mirror:
-      ubuntu24.04:
-        x86:
-          api_check: ubuntu24.04.3_x86:lv6_v1.1076
     stages:
       Compile_Ascend_X86:
         ubuntu24.04:x86:lv6
       Compile_Ascend_X86_ubuntu24:
-        ubuntu24.04:x86:lv6
+        ubuntu24.04_gcc15:x86:lv6
       Compile_Ascend_ARM:
         ubuntu24.04:arm:lv6
       Compile_Ascend_ARM_ubuntu24:
-        ubuntu24.04:arm:lv6
+        ubuntu24.04_gcc15:arm:lv6
       API_Check:
-        ubuntu24.04:x86:api_check
+        ubuntu24.04_gcc15:x86:lv6
       UT_Test:
-        ubuntu24.04:x86:lv6
+        ubuntu24.04_gcc15:x86:lv6
 
   ops-math:
-    os_mirror:
-      ubuntu24.04:
-        x86:
-          api_check: ubuntu24.04.3_x86:lv6_v1.1076
     stages:
       Compile_Ascend_X86:
         ubuntu24.04:x86:lv6
       Compile_Ascend_X86_ubuntu24:
-        ubuntu24.04:x86:lv6
+        ubuntu24.04_gcc15:x86:lv6
       Compile_Ascend_X86_mobile_station:
         ubuntu24.04:x86:lv6
       Compile_Ascend_X86_mobile_station_ubuntu24:
-        ubuntu24.04:x86:lv6
+        ubuntu24.04_gcc15:x86:lv6
       Compile_Ascend_X86_experimental:
         ubuntu24.04:x86:lv6
       Compile_Ascend_X86_experimental_ubuntu24:
-        ubuntu24.04:x86:lv6
+        ubuntu24.04_gcc15:x86:lv6
       Compile_Ascend_X86_A5:
         ubuntu24.04:x86:lv6
       Compile_Ascend_X86_A5_ubuntu24:
-        ubuntu24.04:x86:lv6
+        ubuntu24.04_gcc15:x86:lv6
       Compile_Ascend_ARM:
         ubuntu24.04:arm:lv6
       Compile_Ascend_ARM_ubuntu24:
-        ubuntu24.04:arm:lv6
+        ubuntu24.04_gcc15:arm:lv6
       Compile_Ascend_ARM_experimental:
         ubuntu24.04:arm:lv6
       Compile_Ascend_ARM_experimental_ubuntu24:
-        ubuntu24.04:arm:lv6
+        ubuntu24.04_gcc15:arm:lv6
       Compile_Ascend_single:
         ubuntu24.04:arm:lv6
       Compile_Ascend_single_ubuntu24:
-        ubuntu24.04:arm:lv6
+        ubuntu24.04_gcc15:arm:lv6
       Compile_Ascend_ARM_A5:
         ubuntu24.04:arm:lv6
       Compile_Ascend_ARM_A5_ubuntu24:
-        ubuntu24.04:arm:lv6
+        ubuntu24.04_gcc15:arm:lv6
       Compile_X86_monitor:
         ubuntu24.04:x86:lv6_monitor
       Compile_X86_monitor_9_0_0:
-        ubuntu24.04:x86:lv6_monitor_9_0_0
+        ubuntu24.04:x86:lv6_monitor_9.2.0_beta.2
       API_Check:
-        ubuntu24.04:x86:api_check
+        ubuntu24.04_gcc15:x86:lv6
       UT_Test:
-        ubuntu24.04:x86:lv6
+        ubuntu24.04_gcc15:x86:lv6
       UT_Test_ai-review:
         ubuntu24.04:arm:opencode
       UT_Test_experimental:
-        ubuntu24.04:x86:lv6
+        ubuntu24.04_gcc15:x86:lv6
       PreSmoke_A900:
         ubuntu24.04:arm:smoke
 
   ops-nn:
-    os_mirror:
-      ubuntu24.04:
-        x86:
-          api_check: ubuntu24.04.3_x86:lv6_v1.1076
     stages:
       Compile_Ascend_X86:
         ubuntu24.04:x86:lv6
       Compile_Ascend_X86_ubuntu24:
-        ubuntu24.04:x86:lv6
+        ubuntu24.04_gcc15:x86:lv6
       Compile_Ascend_X86_mobile_station:
         ubuntu24.04:x86:lv6
       Compile_Ascend_X86_mobile_station_ubuntu24:
-        ubuntu24.04:x86:lv6
+        ubuntu24.04_gcc15:x86:lv6
       Compile_Ascend_X86_950:
         ubuntu24.04:x86:lv6
       Compile_Ascend_X86_950_ubuntu24:
-        ubuntu24.04:x86:lv6
+        ubuntu24.04_gcc15:x86:lv6
       Compile_Ascend_ARM:
         ubuntu24.04:arm:lv6
       Compile_Ascend_ARM_ubuntu24:
-        ubuntu24.04:arm:lv6
+        ubuntu24.04_gcc15:arm:lv6
       Compile_Ascend_ARM_950:
         ubuntu24.04:arm:lv6
       Compile_Ascend_ARM_950_ubuntu24:
-        ubuntu24.04:arm:lv6
+        ubuntu24.04_gcc15:arm:lv6
       Compile_Ascend_single:
         ubuntu24.04:arm:lv6
       Compile_Ascend_single_ubuntu24:
-        ubuntu24.04:arm:lv6
+        ubuntu24.04_gcc15:arm:lv6
       Compile_Ascend_experimental:
         ubuntu24.04:arm:lv6
       Compile_Ascend_experimental_ubuntu24:
-        ubuntu24.04:arm:lv6
+        ubuntu24.04_gcc15:arm:lv6
       Compile_X86_monitor_910b:
         ubuntu24.04:x86:lv6_monitor
       Compile_X86_monitor_910c:
@@ -191,23 +191,23 @@ repos:
       Compile_X86_monitor:
         ubuntu24.04:x86:lv6_monitor
       Compile_X86_monitor_9_0_0:
-        ubuntu24.04:x86:lv6_monitor_9_0_0
+        ubuntu24.04:x86:lv6_monitor_9.2.0_beta.2
       Pre_Compile:
         ubuntu24.04:arm:lv6
       Pre_Compile_ubuntu24:
-        ubuntu24.04:arm:lv6
+        ubuntu24.04_gcc15:x86:lv6
       API_Check:
-        ubuntu24.04:x86:api_check
+        ubuntu24.04_gcc15:x86:lv6
       UT_Test_ai-review:
         ubuntu24.04:arm:opencode
       UT_Test_ophost:
-        ubuntu24.04:x86:lv6
+        ubuntu24.04_gcc15:x86:lv6
       UT_Test_opapi:
-        ubuntu24.04:x86:lv6
+        ubuntu24.04_gcc15:x86:lv6
       UT_Test_kernel:
-        ubuntu24.04:x86:lv6
+        ubuntu24.04_gcc15:x86:lv6
       UT_Test_opgraph:
-        ubuntu24.04:x86:lv6
+        ubuntu24.04_gcc15:x86:lv6
       PreSmoke_A900:
         ubuntu24.04:arm:smoke
 
@@ -255,10 +255,6 @@ repos:
         ubuntu24.04:x86:lv6
 
   ops-cv:
-    os_mirror:
-      ubuntu24.04:
-        x86:
-          api_check: ubuntu24.04.3_x86:lv6_v1.1076
     stages:
       Compile_Ascend_X86:
         ubuntu24.04:x86:lv6
@@ -291,13 +287,13 @@ repos:
       Compile_X86_monitor:
         ubuntu24.04:x86:lv6_monitor
       Compile_X86_monitor_9_0_0:
-        ubuntu24.04:x86:lv6_monitor_9_0_0
+        ubuntu24.04:x86:lv6_monitor_9.2.0_beta.2
       Pre_Compile:
         ubuntu24.04:arm:lv6
       Pre_Compile_ubuntu24:
         ubuntu24.04:arm:lv6
       API_Check:
-        ubuntu24.04:x86:api_check
+        ubuntu24.04:x86:lv6
       UT_Test:
         ubuntu24.04:x86:lv6
       UT_Test_ai-review:
@@ -310,44 +306,41 @@ repos:
         ubuntu24.04:arm:lv6
 
   ops-transformer:
-    os_mirror:
-      ubuntu24.04:
-          api_check: ubuntu24.04.3_x86:lv6_v1.1076
     stages:
       Compile_Ascend_X86:
         ubuntu24.04:x86:lv6
       Compile_Ascend_X86_ubuntu24:
-        ubuntu24.04:x86:lv6
+        ubuntu24.04_gcc15:x86:lv6
       Compile_Ascend_ARM:
         ubuntu24.04:arm:lv6
       Compile_Ascend_ARM_ubuntu24:
-        ubuntu24.04:arm:lv6
+        ubuntu24.04_gcc15:arm:lv6
       Compile_Ascend_X86_experimental:
         ubuntu24.04:x86:lv6
       Compile_Ascend_X86_experimental_ubuntu24:
-        ubuntu24.04:x86:lv6
+        ubuntu24.04_gcc15:x86:lv6
       Compile_Ascend_ARM_experimental:
         ubuntu24.04:arm:lv6
       Compile_Ascend_ARM_experimental_ubuntu24:
-        ubuntu24.04:arm:lv6
+        ubuntu24.04_gcc15:arm:lv6
       Compile_Ascend_X86_mobile_station:
         ubuntu24.04:x86:lv6
       Compile_Ascend_X86_mobile_station_ubuntu24:
-        ubuntu24.04:x86:lv6
+        ubuntu24.04_gcc15:x86:lv6
       Compile_X86_monitor:
-        ubuntu24.04:x86:lv6_monitor_9_0_0
+        ubuntu24.04:x86:lv6_monitor_9.2.0_beta.2
       Compile_X86_monitor_9_0_0:
-        ubuntu24.04:x86:lv6_monitor_9_0_0
+        ubuntu24.04:x86:lv6_monitor_9.2.0_beta.2
       Pre_Compile:
         ubuntu24.04:arm:lv6
       Pre_Compile_ubuntu24:
-        ubuntu24.04:arm:lv6
+        ubuntu24.04_gcc15:arm:lv6
       API_Check:
-        ubuntu24.04:x86:api_check
+        ubuntu24.04_gcc15:x86:lv6
       UT_Test_ai-review:
         ubuntu24.04:arm:opencode
       UT_Test:
-        ubuntu24.04:x86:lv6
+        ubuntu24.04_gcc15:x86:lv6
       PreSmoke_A900:
         ubuntu24.04:arm:smoke
 
@@ -364,83 +357,82 @@ repos:
       Compile_Ascend_X86:
         ubuntu24.04:x86:lv6
       Compile_Ascend_X86_ubuntu24:
-        ubuntu24.04:x86:lv6
+        ubuntu24.04_gcc15:x86:lv6
       Compile_Ascend_ARM:
         ubuntu24.04:arm:lv6
       Compile_Ascend_ARM_ubuntu24:
-        ubuntu24.04:arm:lv6
-      UT_Test_superkernel:
-        ubuntu24.04:x86:lv6
-      UT_Test_Python_superkenel:
-        ubuntu24.04:x86:lv6
+        ubuntu24.04_gcc15:arm:lv6
+      UT_Test_Cpp_superkernel:
+        ubuntu24.04_gcc15:x86:lv6
+      UT_Test_Python_superkernel:
+        ubuntu24.04_gcc15:x86:lv6
       UT_Test_autofuse_framework:
-        ubuntu24.04:x86:lv6
+        ubuntu24.04_gcc15:x86:lv6
       UT_Test_autofuse_ascendc_api:
-        ubuntu24.04:x86:lv6
-      ST_Test_Python_superkenel:
-        ubuntu24.04:x86:lv6
+        ubuntu24.04_gcc15:x86:lv6
+      UT_Test_report:
+        ubuntu24.04_gcc15:x86:lv6
+      ST_Test_Python_superkernel:
+        ubuntu24.04_gcc15:x86:lv6
+      ST_Test_Cpp_superkernel:
+        ubuntu24.04_gcc15:x86:lv6
       ST_Test_autofuse_framework:
-        ubuntu24.04:x86:lv6
+        ubuntu24.04_gcc15:x86:lv6
       ST_Test_autofuse_ascendc_api:
-        ubuntu24.04:x86:lv6
+        ubuntu24.04_gcc15:x86:lv6
       ST_Test_autofuse_e2e:
-        ubuntu24.04:x86:lv6
+        ubuntu24.04_gcc15:x86:lv6
+      ST_Test_report:
+        ubuntu24.04_gcc15:x86:lv6
       PreSmoke_A900_npupool:
         ubuntu24.04:arm:smoke
 
+
   hixl:
-    os_mirror:
-      ubuntu24.04:
-        x86:
-          api_check: ubuntu24.04.3_x86:lv6_v1.1076
     stages:
       Compile_Ascend_X86:
         ubuntu24.04:x86:lv6
       Compile_Ascend_X86_ubuntu24:
-        ubuntu24.04:x86:lv6
+        ubuntu24.04_gcc15:x86:lv6
       Compile_Ascend_ARM:
         ubuntu24.04:arm:lv6
       Compile_Ascend_ARM_ubuntu24:
-        ubuntu24.04:arm:lv6
+        ubuntu24.04_gcc15:arm:lv6
       UT_Test:
-        ubuntu24.04:x86:lv6
+        ubuntu24.04_gcc15:x86:lv6
       UT_Test_Python:
-        ubuntu24.04:x86:lv6
+        ubuntu24.04_gcc15:x86:lv6
       API_Check:
-        ubuntu24.04:x86:api_check
+        ubuntu24.04_gcc15:x86:lv6
       PreSmoke_A900:
         ubuntu24.04:arm:smoke
       Smoke_A3_npupool:
         ubuntu24.04:arm:smoke_A3
 
   hccl:
-    os_mirror:
-      ubuntu24.04:
-        x86:
-          api_check: ubuntu24.04.3_x86:lv6_v1.1076
     stages:
       Compile_Ascend_X86:
         ubuntu24.04:x86:lv6
       Compile_Ascend_X86_ubuntu24:
-        ubuntu24.04:x86:lv6
+        ubuntu24.04_gcc15:x86:lv6
       Compile_Ascend_ARM:
         ubuntu24.04:arm:lv6
       Compile_Ascend_ARM_ubuntu24:
-        ubuntu24.04:arm:lv6
+        ubuntu24.04_gcc15:arm:lv6
       UT_Test:
-        ubuntu24.04:x86:lv6
+        ubuntu24.04_gcc15:x86:lv6
       ST_Test:
-        ubuntu24.04:x86:lv6
+        ubuntu24.04_gcc15:x86:lv6
       API_Check:
-        ubuntu24.04:x86:api_check
+        ubuntu24.04_gcc15:x86:lv6
       PreSmoke_A900_npupool:
         ubuntu24.04:arm:smoke
       PreSmoke_A3_npupool:
         ubuntu24.04:arm:smoke_A3
       Compile_Ascend_X86_monitor:
-        ubuntu24.04:x86:lv6_monitor_9_0_0
+        ubuntu24.04:x86:lv6_monitor_9.2.0_beta.2
       Compile_Ascend_ARM_monitor:
-        ubuntu24.04:arm:lv6_monitor_9_0_0
+        ubuntu24.04:arm:lv6_monitor_9.2.0_beta.2
 
   asc-devkit:
     os_mirror:
@@ -569,11 +561,11 @@ repos:
   amct-graph:
     stages:
       Compile_Ascend_X86:
-        ubuntu24.04:x86:lv6
+        ubuntu24.04_gcc15:x86:lv6
       Compile_Ascend_ARM:
-        ubuntu24.04:arm:lv6
+        ubuntu24.04_gcc15:arm:lv6
       UT_Test:
-        ubuntu24.04:x86:lv6
+        ubuntu24.04_gcc15:x86:lv6
 
   atvc:
     stages:
@@ -600,13 +592,13 @@ repos:
       Compile_Ascend_X86:
         ubuntu24.04:x86:lv6
       Compile_Ascend_X86_ubuntu24:
-        ubuntu24.04:x86:lv6
+        ubuntu24.04_gcc15:x86:lv6
       Compile_Ascend_ARM:
         ubuntu24.04:arm:lv6
       Compile_Ascend_ARM_ubuntu24:
-        ubuntu24.04:arm:lv6
+        ubuntu24.04_gcc15:arm:lv6
       UT_Test:
-        ubuntu24.04:x86:lv6
+        ubuntu24.04_gcc15:x86:lv6
       PreSmoke_A900:
         ubuntu24.04:arm:smoke
 
@@ -616,103 +608,107 @@ repos:
         x86:
           api_check: ubuntu24.04.3_x86:lv6_v1.1076
     stages:
+      Compile_Ascend_X86:
+        ubuntu24.04:x86:lv6
+      Compile_Ascend_ARM:
+        ubuntu24.04:arm:lv6
       Compile_X86_compiler:
         ubuntu24.04:x86:lv6
       Compile_X86_compiler_ubuntu24:
-        ubuntu24.04:x86:lv6
+        ubuntu24.04_gcc15:x86:lv6
       Compile_X86_executor:
         ubuntu24.04:x86:lv6
       Compile_X86_executor_ubuntu24:
-        ubuntu24.04:x86:lv6
+        ubuntu24.04_gcc15:x86:lv6
       Compile_X86_dflow:
         ubuntu24.04:x86:lv6
       Compile_X86_dflow_ubuntu24:
-        ubuntu24.04:x86:lv6
+        ubuntu24.04_gcc15:x86:lv6
       Compile_ARM_compiler:
         ubuntu24.04:arm:lv6
       Compile_ARM_compiler_ubuntu24:
-        ubuntu24.04:arm:lv6
+        ubuntu24.04_gcc15:arm:lv6
       Compile_ARM_executor:
         ubuntu24.04:arm:lv6
       Compile_ARM_executor_ubuntu24:
-        ubuntu24.04:arm:lv6
+        ubuntu24.04_gcc15:arm:lv6
       Compile_ARM_dflow:
         ubuntu24.04:arm:lv6
       Compile_ARM_dflow_ubuntu24:
-        ubuntu24.04:arm:lv6
+        ubuntu24.04_gcc15:arm:lv6
       UT_Test_Report:
-        ubuntu24.04:x86:lv6
+        ubuntu24.04_gcc15:x86:lv6
       UT_Test_dflow:
-        ubuntu24.04:x86:lv6
+        ubuntu24.04_gcc15:x86:lv6
       UT_Test_ge_common:
-        ubuntu24.04:x86:lv6
+        ubuntu24.04_gcc15:x86:lv6
       UT_Test_parser:
-        ubuntu24.04:x86:lv6
+        ubuntu24.04_gcc15:x86:lv6
       UT_Test_python:
-        ubuntu24.04:x86:lv6
+        ubuntu24.04_gcc15:x86:lv6
       UT_Test_rt:
-        ubuntu24.04:x86:lv6
+        ubuntu24.04_gcc15:x86:lv6
       UT_Test_acl:
-        ubuntu24.04:x86:lv6
+        ubuntu24.04_gcc15:x86:lv6
       UT_Test_autofuse:
-        ubuntu24.04:x86:lv6
+        ubuntu24.04_gcc15:x86:lv6
       UT_Test_autofuse_ascendc_api:
-        ubuntu24.04:x86:lv6
+        ubuntu24.04_gcc15:x86:lv6
       UT_Test_executor:
-        ubuntu24.04:x86:lv6
+        ubuntu24.04_gcc15:x86:lv6
       UT_Test_fe:
-        ubuntu24.04:x86:lv6
+        ubuntu24.04_gcc15:x86:lv6
       UT_Test_tefusion:
-        ubuntu24.04:x86:lv6
+        ubuntu24.04_gcc15:x86:lv6
+      UT_Test_hcce:
+        ubuntu24.04_gcc15:x86:lv6
       ST_Test_Report:
-        ubuntu24.04:x86:lv6
+        ubuntu24.04_gcc15:x86:lv6
       ST_Test_dflow:
-        ubuntu24.04:x86:lv6
+        ubuntu24.04_gcc15:x86:lv6
       ST_Test_ge_common:
-        ubuntu24.04:x86:lv6
+        ubuntu24.04_gcc15:x86:lv6
       ST_Test_parser:
-        ubuntu24.04:x86:lv6
+        ubuntu24.04_gcc15:x86:lv6
       ST_Test_python:
-        ubuntu24.04:x86:lv6
+        ubuntu24.04_gcc15:x86:lv6
       ST_Test_rt:
-        ubuntu24.04:x86:lv6
+        ubuntu24.04_gcc15:x86:lv6
       ST_Test_autofuse:
-        ubuntu24.04:x86:lv6
+        ubuntu24.04_gcc15:x86:lv6
       ST_Test_autofuse_ascendc_api:
-        ubuntu24.04:x86:lv6
+        ubuntu24.04_gcc15:x86:lv6
       ST_Test_executor:
-        ubuntu24.04:x86:lv6
+        ubuntu24.04_gcc15:x86:lv6
       ST_Test_hetero:
-        ubuntu24.04:x86:lv6
+        ubuntu24.04_gcc15:x86:lv6
       ST_Test_fe:
-        ubuntu24.04:x86:lv6
+        ubuntu24.04_gcc15:x86:lv6_0930
       ST_Test_tefusion:
-        ubuntu24.04:x86:lv6
+        ubuntu24.04_gcc15:x86:lv6
+      ST_Test_hcce:
+        ubuntu24.04_gcc15:x86:lv6
       API_Check:
         ubuntu24.04:x86:api_check
       PreSmoke_A900_npupool:
         ubuntu24.04:arm:smoke
 
   metadef:
-    os_mirror:
-      ubuntu24.04:
-        x86:
-          api_check: ubuntu24.04.3_x86:lv6_v1.1076
     stages:
       Compile_Ascend_X86:
         ubuntu24.04:x86:lv6
       Compile_Ascend_X86_ubuntu24:
-        ubuntu24.04:x86:lv6
+        ubuntu24.04_gcc15:x86:lv6
       Compile_Ascend_ARM:
         ubuntu24.04:arm:lv6
       Compile_Ascend_ARM_ubuntu24:
-        ubuntu24.04:arm:lv6
+        ubuntu24.04_gcc15:arm:lv6
       UT_Test:
-        ubuntu24.04:x86:lv6
+        ubuntu24.04_gcc15:x86:lv6
       Smoke_A900_npupool:
         ubuntu24.04:arm:smoke
       API_Check:
-        ubuntu24.04:x86:api_check
+        ubuntu24.04_gcc15:x86:lv6
 
   runtime-dev:
     os_mirror:
@@ -746,49 +742,45 @@ repos:
         ubuntu24.04:x86:api_check
 
   runtime:
-    os_mirror:
-      ubuntu24.04:
-        x86:
-          api_check: ubuntu24.04.3_x86:lv6_v1.1076
     stages:
       Compile_Ascend_X86:
         ubuntu24.04:x86:lv6
       Compile_Ascend_X86_ubuntu24:
-        ubuntu24.04:x86:lv6
+        ubuntu24.04_gcc15:x86:lv6
       Compile_Ascend_ARM:
         ubuntu24.04:arm:lv6
       Compile_Ascend_ARM_ubuntu24:
-        ubuntu24.04:arm:lv6
+        ubuntu24.04_gcc15:arm:lv6
       UT_Test_acl:
-        ubuntu24.04:x86:lv6
+        ubuntu24.04_gcc15:x86:lv6
       UT_Test_rts_v201:
-        ubuntu24.04:x86:lv6
+        ubuntu24.04_gcc15:x86:lv6
       UT_Test_rts_david:
-        ubuntu24.04:x86:lv6
+        ubuntu24.04_gcc15:x86:lv6
       UT_Test_rts_910b:
-        ubuntu24.04:x86:lv6
+        ubuntu24.04_gcc15:x86:lv6
       UT_Test_rts_common:
-        ubuntu24.04:x86:lv6
+        ubuntu24.04_gcc15:x86:lv6
       UT_Test_rts_c:
-        ubuntu24.04:x86:lv6
+        ubuntu24.04_gcc15:x86:lv6
       UT_Test_platform:
-        ubuntu24.04:x86:lv6
+        ubuntu24.04_gcc15:x86:lv6
       UT_Test_qs:
-        ubuntu24.04:x86:lv6
+        ubuntu24.04_gcc15:x86:lv6
       UT_Test_aicpusd:
-        ubuntu24.04:x86:lv6
+        ubuntu24.04_gcc15:x86:lv6
       UT_Test_tsd:
-        ubuntu24.04:x86:lv6
+        ubuntu24.04_gcc15:x86:lv6
       UT_Test_dfx:
-        ubuntu24.04:x86:lv6
+        ubuntu24.04_gcc15:x86:lv6
       UT_Test_mmpa:
-        ubuntu24.04:x86:lv6
+        ubuntu24.04_gcc15:x86:lv6
       UT_Test_camodel:
-        ubuntu24.04:x86:lv6
+        ubuntu24.04_gcc15:x86:lv6
       Smoke_A900_npupool:
         ubuntu24.04:arm:smoke
       API_Check:
-        ubuntu24.04:x86:api_check
+        ubuntu24.04_gcc15:x86:lv6
 
   oam-tools:
     os_mirror:
@@ -814,23 +806,27 @@ repos:
         ubuntu24.04:arm:smoke
 
   oam-tools-diag:
-    os_mirror:
-      ubuntu24.04:
-        x86:
-          api_check: ubuntu24.04.3_x86:lv6_v1.1076
     stages:
       Compile_Ascend_X86:
         ubuntu24.04:x86:lv6
       Compile_Ascend_X86_ubuntu24:
-        ubuntu24.04:x86:lv6
+        ubuntu24.04_gcc15:x86:lv6
       Compile_Ascend_ARM:
         ubuntu24.04:arm:lv6
       Compile_Ascend_ARM_ubuntu24:
-        ubuntu24.04:arm:lv6
-      API_Check:
-        ubuntu24.04:x86:api_check
-      UT_Test:
+        ubuntu24.04_gcc15:arm:lv6
+      Compile_Ascend_X86_debug:
         ubuntu24.04:x86:lv6
+      Compile_Ascend_X86_debug_ubuntu24:
+        ubuntu24.04_gcc15:x86:lv6
+      Compile_Ascend_ARM_debug:
+        ubuntu24.04:arm:lv6
+      Compile_Ascend_ARM_debug_ubuntu24:
+        ubuntu24.04_gcc15:arm:lv6
+      API_Check:
+        ubuntu24.04_gcc15:x86:lv6
+      UT_Test:
+        ubuntu24.04_gcc15:x86:lv6
       PreSmoke_A900:
         ubuntu24.04:arm:smoke
 
@@ -919,29 +915,29 @@ repos:
   pypto:
     stages:
       Compile_Ascend_X86:
-        ubuntu24.04:x86:lv6
+        ubuntu24.04_gcc15:x86:lv6
       Compile_Ascend_X86_ubuntu24:
-        ubuntu24.04:x86:lv6
+        ubuntu24.04_gcc15:x86:lv6
       Compile_Ascend_ARM:
-        ubuntu24.04:arm:lv6
+        ubuntu24.04_gcc15:arm:lv6
       Compile_Ascend_ARM_ubuntu24:
-        ubuntu24.04:arm:lv6
+        ubuntu24.04_gcc15:arm:lv6
       UT_Test_Py3_ninja_simulation:
-        ubuntu24.04:x86:lv6
+        ubuntu24.04_gcc15:x86:lv6
       UT_Test_Py3_ninja:
-        ubuntu24.04:x86:lv6
+        ubuntu24.04_gcc15:x86:lv6
       UT_Test_Cpp_make_clang:
-        ubuntu24.04:x86:lv6
+        ubuntu24.04_gcc15:x86:lv6
       # UT_Test_Cpp_make_gnu: # 程定要求删除
       #   ubuntu24.04:x86:lv6
       UT_Test_Cpp_make_gnu_part_1:
-        ubuntu24.04:x86:lv6
+        ubuntu24.04_gcc15:x86:lv6
       UT_Test_Cpp_make_gnu_part_2:
-        ubuntu24.04:x86:lv6
+        ubuntu24.04_gcc15:x86:lv6
       UT_Test_Cpp_make_gnu_part_3:
-        ubuntu24.04:x86:lv6
+        ubuntu24.04_gcc15:x86:lv6
       UT_Test_report:
-        ubuntu24.04:x86:lv6
+        ubuntu24.04_gcc15:x86:lv6
 
   pypto-gym:
     stages:
@@ -970,45 +966,41 @@ repos:
   pto-isa:
     stages:
       Compile_Ascend_X86:
-        ubuntu24.04:x86:lv6
+        ubuntu24.04_gcc15:x86:lv6
       Compile_Ascend_X86_ubuntu24:
-        ubuntu24.04:x86:lv6
+        ubuntu24.04_gcc15:x86:lv6
       Compile_Ascend_ARM:
-        ubuntu24.04:arm:lv6
+        ubuntu24.04_gcc15:arm:lv6
       Compile_Ascend_ARM_ubuntu24:
-        ubuntu24.04:arm:lv6
+        ubuntu24.04_gcc15:arm:lv6
       Compile_Ascend_ARM_A5:
-        ubuntu24.04:arm:lv6
+        ubuntu24.04_gcc15:arm:lv6
       Compile_Ascend_X86_A5_ubuntu24:
-        ubuntu24.04:x86:lv6
+        ubuntu24.04_gcc15:x86:lv6
       UT_Test:
-        ubuntu24.04:x86:lv6
+        ubuntu24.04_gcc15:x86:lv6
       UT_Test_A3:
-        ubuntu24.04:x86:lv6
+        ubuntu24.04_gcc15:x86:lv6
       UT_Test_A5:
-        ubuntu24.04:x86:lv6
+        ubuntu24.04_gcc15:x86:lv6
       PreSmoke_A3_npupool:
         ubuntu24.04:arm:smoke_A3
       PreSmoke_npupool:
         ubuntu24.04:arm:smoke
   dvpp-dev:
-    os_mirror:
-      ubuntu24.04:
-        x86:
-          api_check: ubuntu24.04.3_x86:lv6_v1.1076
     stages:
       Compile_Ascend_X86:
         ubuntu24.04:x86:lv6
       Compile_Ascend_X86_ubuntu24:
-        ubuntu24.04:x86:lv6
+        ubuntu24.04_gcc15:x86:lv6
       Compile_Ascend_ARM:
         ubuntu24.04:arm:lv6
       Compile_Ascend_ARM_ubuntu24:
-        ubuntu24.04:arm:lv6
+        ubuntu24.04_gcc15:arm:lv6
       UT_Test:
-        ubuntu24.04:x86:lv6
+        ubuntu24.04_gcc15:x86:lv6
       API_Check:
-        ubuntu24.04:x86:lv6
+        ubuntu24.04_gcc15:x86:lv6
 
   acl-extend-dev:
     os_mirror:
@@ -1030,12 +1022,6 @@ repos:
         ubuntu24.04:x86:api_check
 
   cann-samples:
-    os_mirror:
-      ubuntu24.04:
-        arm:
-          lv6: ubuntu24.04_arm:lv6_v1.1048
-        x86:
-          lv6: ubuntu24.04_x86:lv6_v1.1048
     stages:
       Compile_Ascend_X86_ubuntu24:
         ubuntu24.04:x86:lv6
@@ -1054,23 +1040,19 @@ repos:
       ST_Test:
         ubuntu24.04:x86:lv6
   asc-tools:
-    os_mirror:
-      ubuntu24.04:
-        x86:
-          api_check: ubuntu24.04.3_x86:lv6_v1.1076
     stages:
       Compile_Ascend_X86:
         ubuntu24.04:x86:lv6
       Compile_Ascend_X86_ubuntu24:
-        ubuntu24.04:x86:lv6
+        ubuntu24.04_gcc15:x86:lv6
       Compile_Ascend_ARM:
         ubuntu24.04:arm:lv6
       Compile_Ascend_ARM_ubuntu24:
-        ubuntu24.04:arm:lv6
+        ubuntu24.04_gcc15:arm:lv6
       UT_Test:
-        ubuntu24.04:x86:lv6
+        ubuntu24.04_gcc15:x86:lv6
       API_Check:
-        ubuntu24.04:x86:api_check
+        ubuntu24.04:x86:lv6
       Presmoke_A900_npupool:
         ubuntu24.04:arm:smoke
 
@@ -1096,10 +1078,10 @@ repos:
   pyasc:
     os_mirror:
       ubuntu24.04:
-        arm:
-          lv6: ubuntu24.04_arm:lv6_v1.1080
         x86:
-          lv6: ubuntu24.04_x86:lv6_v1.1082
+          lv6: ubuntu24.04_x86:pyasc_20260820
+        arm:
+          lv6: ubuntu24.04_arm:pyasc_20260820
     stages:
       Compile_Ascend_X86:
         ubuntu24.04:x86:lv6
@@ -1117,39 +1099,36 @@ repos:
   tensorflow:
     stages:
       Compile_Ascend_X86:
-        ubuntu20.04:x86:lv6
-      Compile_Ascend_X86_ubuntu24:
         ubuntu24.04:x86:lv6
       Compile_Ascend_X86_TF:
-        ubuntu20.04:x86:lv6
-      Compile_Ascend_X86_TF_ubuntu24:
         ubuntu24.04:x86:lv6
       Compile_Ascend_ARM:
-        ubuntu20.04:arm:lv6
+        ubuntu24.04_gcc15:arm:lv6
+      Compile_Ascend_X86_ubuntu24:
+        ubuntu24.04_gcc15:x86:lv6
+      Compile_Ascend_X86_TF_ubuntu24:
+        ubuntu24.04_gcc15:x86:lv6
       Compile_Ascend_ARM_ubuntu24:
-        ubuntu24.04:arm:lv6
-      Compile_Ascend_ARM_TF_ubuntu24:
-        ubuntu24.04:arm:lv6
+        ubuntu24.04_gcc15:arm:lv6
       UT_Test:
-        ubuntu20.04:x86:lv6
+        ubuntu24.04_gcc15:x86:lv6
       ST_Test:
-        ubuntu20.04:x86:lv6
+        ubuntu24.04_gcc15:x86:lv6
 
   torchtitan-npu:
     os_mirror:
-      ubuntu22.04:
+      ubuntu24.04:
         arm:
-          torchtitan: ubuntu22.04_arm:9.0.0-910b-py3.11-v1.1001
+          torchtitan: ubuntu24.04_arm:wdy05
         x86:
-          torchtitan: ubuntu22.04_x86:9.0.0-910b-py3.11-v1.1001
-
+          torchtitan: ubuntu24.04_x86_64:wdy05
     stages:
       lint:
-        ubuntu22.04:x86:torchtitan
+        ubuntu24.04:x86:torchtitan
       UT_Test:
-        ubuntu22.04:x86:torchtitan
+        ubuntu24.04:x86:torchtitan
       PreSmoke_A900_npupool:
-        ubuntu22.04:arm:torchtitan
+        ubuntu24.04:arm:torchtitan
 
   cmake:
     stages:
@@ -1181,27 +1160,19 @@ repos:
         openeuler:arm:driver
 
   ops-rand:
-    os_mirror:
-      ubuntu24.04:
-        x86:
-          api_check: ubuntu24.04.3_x86:lv6_v1.1076
     stages:
       Compile_Ascend_X86:
         ubuntu24.04:x86:lv6
       Compile_Ascend_X86_ubuntu24:
-        ubuntu24.04:x86:lv6
+        ubuntu24.04_gcc15:x86:lv6
       Compile_Ascend_ARM:
         ubuntu24.04:arm:lv6
       Compile_Ascend_ARM_ubuntu24:
-        ubuntu24.04:arm:lv6
+        ubuntu24.04_gcc15:arm:lv6
       API_Check:
-        ubuntu24.04:x86:api_check
+        ubuntu24.04_gcc15:x86:lv6
 
   ops-tensor:
-    os_mirror:
-      ubuntu24.04:
-        x86:
-          api_check: ubuntu24.04.3_x86:lv6_v1.1076
     stages:
       Compile_Ascend_X86:
         ubuntu24.04:x86:lv6
@@ -1214,7 +1185,7 @@ repos:
       UT_Test:
         ubuntu24.04:x86:lv6
       API_Check:
-        ubuntu24.04:x86:api_check
+        ubuntu24.04_gcc15:x86:lv6
 
   ops-fft:
     os_mirror:
@@ -1247,6 +1218,10 @@ repos:
         ubuntu20.04:x86:lv6
 
   cannbot-skills:
+    os_mirror:
+      ubuntu24.04:
+        x86:
+          UT_x86: ubuntu24.04_x86:lv6_v1.1094
     stages:
       Compile_Ascend_X86:
         ubuntu24.04:x86:lv6
@@ -1255,13 +1230,11 @@ repos:
       UT_Test_check_opencode:
         ubuntu24.04:arm:opencode
       UT_Test:
-        ubuntu24.04:x86:lv6
+        ubuntu24.04:x86:UT_x86
+      git_ai:
+        ubuntu24.04_gcc15:x86:lv6
 
   ops-blas:
-    os_mirror:
-      ubuntu24.04:
-        x86:
-          api_check: ubuntu24.04.3_x86:lv6_v1.1076
     stages:
       Compile_Ascend_X86_A2:
         ubuntu24.04:x86:lv6
@@ -1272,24 +1245,24 @@ repos:
       Compile_Ascend_ARM_A5:
         ubuntu24.04:arm:lv6
       Compile_Ascend_X86_A2_ubuntu24:
-        ubuntu24.04:x86:lv6
+        ubuntu24.04_gcc15:x86:lv6
       Compile_Ascend_ARM_A2_ubuntu24:
-        ubuntu24.04:arm:lv6
+        ubuntu24.04_gcc15:arm:lv6
       Compile_Ascend_X86_A5_ubuntu24:
-        ubuntu24.04:x86:lv6
+        ubuntu24.04_gcc15:x86:lv6
       Compile_Ascend_ARM_A5_ubuntu24:
-        ubuntu24.04:arm:lv6
+        ubuntu24.04_gcc15:arm:lv6
       UT_Test:
-        ubuntu24.04:x86:lv6
+        ubuntu24.04_gcc15:x86:lv6
       PreSmoke_A900:
         ubuntu24.04:arm:smoke
 
   pto-as:
     stages:
       Compile_Ascend_X86:
-        ubuntu24.04:x86:lv6
+        ubuntu24.04_gcc15:x86:lv6
       Compile_Ascend_ARM:
-        ubuntu24.04:arm:lv6
+        ubuntu24.04_gcc15:arm:lv6
       PreSmoke_A900:
         ubuntu24.04:arm:smoke
 
@@ -1326,6 +1299,8 @@ repos:
         arm:
           smoke: ubuntu24.04_arm:pre_mindspore_A2_conda_v1.1013
     stages:
+      UT_Test:
+        ubuntu24.04:x86:lv6
       PreSmoke_A900:
         ubuntu24.04:arm:smoke
   asc-comm:
@@ -1363,34 +1338,136 @@ repos:
       Check_patches:
         ubuntu22.04:x86:torchtitan
   ops-multimodal-fusion:
-    os_mirror:
-      ubuntu24.04:
-        arm:
-          lv6: ubuntu24.04_arm:lv6_v1.1091
     stages:
       Compile_Ascend_X86:
         ubuntu24.04:x86:lv6
       Compile_Ascend_ARM:
         ubuntu24.04:arm:lv6
       Compile_Ascend_X86_ubuntu24:
-        ubuntu24.04:x86:lv6
+        ubuntu24.04_gcc15:x86:lv6
       Compile_Ascend_ARM_ubuntu24:
-        ubuntu24.04:arm:lv6
+        ubuntu24.04_gcc15:arm:lv6
   ops-gnn:
     stages:
       Compile_Ascend_X86_Python_ubuntu24:
-        ubuntu24.04:x86:lv6
+        ubuntu24.04_gcc15:x86:lv6
       Compile_Ascend_ARM_Python_ubuntu24:
-        ubuntu24.04:arm:lv6
+        ubuntu24.04_gcc15:arm:lv6
+      Compile_Ascend_X86_ubuntu24:
+        ubuntu24.04_gcc15:x86:lv6
+      Compile_Ascend_ARM_ubuntu24:
+        ubuntu24.04_gcc15:arm:lv6
+      Compile_Ascend_X86_Python_openeuler:
+        openeuler24.03:x86:lv6
+      Compile_Ascend_ARM_Python_openeuler:
+        openeuler24.03:arm:lv6
+      Compile_Ascend_X86_openeuler:
+        openeuler24.03:x86:lv6
+      Compile_Ascend_ARM_openeuler:
+        openeuler24.03:arm:lv6
+  npu-simulator:
+    stages:
       Compile_Ascend_X86_ubuntu24:
         ubuntu24.04:x86:lv6
       Compile_Ascend_ARM_ubuntu24:
         ubuntu24.04:arm:lv6
-      Compile_Ascend_X86_Python_openeuler:
-        openeuler24.03_x86:lv6
-      Compile_Ascend_ARM_Python_openeuler:
-        openeuler24.03_arm:lv6
-      Compile_Ascend_X86_openeuler:
-        openeuler24.03_x86:lv6
-      Compile_Ascend_ARM_openeuler:
-        openeuler24.03_arm:lv6
+      UT_Test:
+        ubuntu24.04:x86:lv6
+      Pre_smoke:
+        ubuntu24.04:x86:lv6
+
+  catlass:
+    stages:
+      Compile_Ascend_ARM:
+        ubuntu20.04:arm:boost_component_cann920
+      UT_dsl:    
+        ubuntu22.04:x86:dsl_ut
+      PreSmoke:
+        ubuntu20.04:arm:boost_component
+  ascend-boost-comm:
+    stages:
+      Compile_Ascend_ARM:
+        ubuntu24.04:arm:boost_component_2
+      Compile_Ascend_X86:
+        ubuntu24.04:x86:boost_component_2
+      UT:
+        ubuntu24.04:arm:boost_component_2
+  ascend-transformer-boost:
+    stages:
+      Compile_Ascend_X86:
+        ubuntu20.04:x86:boost_component
+      Compile_Ascend_ARM:
+        ubuntu20.04:arm:boost_component
+      UT_Test_ARM:
+        ubuntu20.04:arm:boost_component
+      UT_Test_X86:
+        ubuntu20.04:x86:boost_component
+  sip:
+    stages:
+      Compile_Ascend_X86:
+        ubuntu20.04:x86:boost_component
+      Compile_Ascend_ARM:
+        ubuntu20.04:arm:boost_component
+      UT_Test:
+        ubuntu20.04:arm:boost_component
+      PreSmoke:
+        ubuntu20.04:arm:boost_component
+  shmem:
+    stages:
+      Compile_Ascend_ARM:
+        ubuntu24.04:arm:boost_component
+      UT_Test:
+        ubuntu24.04:arm:boost_component
+  catccos:
+    stages:
+      UT_Test:
+        ubuntu24.04:arm:boost_component
+  ops-collections:
+    stages:
+      Compile_Ascend_ARM:
+        ubuntu24.04:arm:boost_component
+      UT_Test:
+        ubuntu24.04:arm:boost_component
+  pypto-vscode:
+    stages:
+      UT_Test:
+        ubuntu24.04_gcc15:x86:lv6
+  triton-inference-server-ge-backend:
+    os_mirror:
+      ubuntu22.04:
+        arm:
+          image: ubuntu22.04_arm:2.3.1-cann8.3.rc2-910b-utuntu22.04-py3.10-arm
+    stages:
+      Compile_Ascend_ARM:
+        ubuntu22.04:arm:image
+  crypto:
+    stages:
+      Compile_Ascend_X86:
+        ubuntu24.04:x86:lv6
+      Compile_Ascend_X86_ubuntu24:
+        ubuntu24.04_gcc15:x86:lv6
+      Compile_Ascend_ARM:
+        ubuntu24.04:arm:lv6
+      Compile_Ascend_ARM_ubuntu24:
+        ubuntu24.04_gcc15:arm:lv6
+      UT_Test:
+        ubuntu24.04_gcc15:x86:lv6
+      API_Check:
+        ubuntu24.04_gcc15:x86:lv6
+      PreSmoke_A900:
+        ubuntu24.04:arm:smoke
+  mat-chem-sim-pred:
+    stages:
+      Compile_Ascend_ARM:
+        ubuntu24.04_gcc15:arm:lv6
+
+  oil-gas-ops-prospect:
+    stages:
+      Compile_Ascend_X86:
+        ubuntu24.04_gcc15:x86:lv6
+      Compile_Ascend_ARM:
+        ubuntu24.04_gcc15:arm:lv6
+  cannbot-sentry:
+    stages:
+      UT_Test:
+        ubuntu24.04_gcc15:x86:lv6

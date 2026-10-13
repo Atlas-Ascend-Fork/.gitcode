@@ -1,0 +1,169 @@
+# 屏蔽路径配置：仓名 -> 分支 -> 路径列表
+# common 对所有仓、所有分支生效
+# 显式配置的分支键（含 master）优先生效；'*' 为默认名单，分支未配置时使用
+common:
+  - .claude
+  - .opencode
+  - AGENTS.md
+  - .codex
+  - .agents
+  - docs/en/api
+  - docs/en/guide
+
+asc-devkit:
+  '*':
+    - docs/en/api
+    - docs/en/guide
+    - docs/zh/api
+    - docs/zh/guide
+    - docs/zh/vitepress
+    - docs/api
+    - docs/guide
+    - .agent
+    - .claude
+    - .codex
+    - .opencode
+
+amct:
+  '*':
+    - docs
+    - .claude
+    - .opencode
+    - AGENTS.md
+    - skills
+    - .agents
+
+driver:
+  '*':
+    - docs/zh/Ascend_910B_DCMI_API
+    - docs/zh/Ascend_910_93_DCMI_API
+    - docs/zh/msnpureport
+    - docs/zh/Ascend_950_DCMI_API
+    - docs/zh/Ascend_950_HCCN_Tool
+    - docs/zh/Ascend_950_npu-smi
+    - docs/zh/Ascend_950_upgrade-tool
+    - docs/zh/nda
+    - docs/en/Ascend_910B_DCMI_API
+    - docs/en/Ascend_910_93_DCMI_API
+    - docs/en/msnpureport
+    - docs/en/Ascend_950_DCMI_API
+    - docs/en/Ascend_950_HCCN_Tool
+    - docs/en/Ascend_950_npu-smi
+    - docs/en/Ascend_950_upgrade-tool
+    - docs/en/nda
+
+driver-dev:
+  '*':
+    - docs/zh/Ascend_910B_DCMI_API
+    - docs/zh/Ascend_910_93_DCMI_API
+    - docs/zh/msnpureport
+    - docs/en/msnpureport
+    - docs/zh/Ascend_950_DCMI_API
+    - docs/zh/Ascend_950_HCCN_Tool
+    - docs/zh/Ascend_950_npu-smi
+    - docs/zh/Ascend_950_upgrade-tool
+
+runtime:
+  '*':
+    - docs
+    - .claude
+    - python/docs
+
+ge:
+  '*':
+    - .claude
+    - .opencode
+    - docs/zh/api
+    - docs/zh/user_guides/graph_dev
+    - docs/zh/user_guides/env_vars
+    - docs/zh/user_guides/atc_tools
+    - docs/zh/user_guides/llm_datadist
+    - docs/zh/user_guides/dflow
+    - docs/en/api
+    - docs/en/user_guides/graph_dev
+    - docs/en/user_guides/env_vars
+    - docs/en/user_guides/atc_tools
+    - docs/en/user_guides/llm_datadist
+    - docs/en/user_guides/dflow
+
+pypto:
+  '*':
+    - docs/zh
+    - docs/en
+    - .opencode
+    - .agents
+    - AGENTS.md
+
+oam-tools:
+  '*':
+    - docs/zh/asys
+    - docs/zh/env-vars
+    - docs/zh/hccl_test
+    - docs/zh/msaicerr
+    - docs/zh/profiling
+    - docs/zh/design
+    - docs/en/asys
+    - docs/en/env-vars
+    - docs/en/hccl_test
+    - docs/en/msaicerr
+    - docs/en/profiling
+    - docs/en/design
+    - skills
+  'master':
+    - docs
+
+graph-autofusion:
+  '*':
+    - .claude
+    - .opencode
+    - AGENTS.md
+
+hixl:
+  '*':
+    - docs/zh/api
+    - docs/zh/guide
+    - docs/en/api
+    - docs/en/guide
+    - .agents
+    - .claude
+    - .codex
+    - .opencode
+    - AGENTS.md
+    - CLAUDE.md
+
+hccl:
+  '*':
+    - docs/zh/api_ref
+    - docs/zh/user_guide
+    - docs/en/api_ref
+    - docs/en/user_guide
+
+hcomm:
+  '*':
+    - docs/zh/api_ref
+    - docs/zh/comm_op_dev_guide
+    - docs/en/api_ref
+    - docs/en/comm_op_dev_guide
+
+metadef:
+  '*':
+    - docs/zh/api
+    - docs/en/api
+asc-tools:
+  '*':
+    - skills
+    - docs/zh/operator_compilation_tool
+    - docs/en/operator_compilation_tool
+
+ops-ras:
+  '*':
+    - docs
+  9.2.0:
+    - .
+
+docs:
+  '*':
+    - docs/zh/app-dev
+    - docs/zh/troubleshooting
+    - docs/en/app-dev
+    - docs/en/troubleshooting

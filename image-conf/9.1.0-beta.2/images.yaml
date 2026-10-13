@@ -18,15 +18,13 @@ global:
         lv4: ubuntu20.04.05_x86:lv4_v1.1100
         lv5: ubuntu20.04.05_x86:lv5_v1.1100
         lv6: ubuntu20.04.05_x86:lv6_v1.1084
-        lv6_0422: ubuntu20.04.05_x86:lv6_v1.1078
         lv6_monitor: ubuntu20.04.05_x86:lv6_v1.1069
         lv6_monitor_9_0_0: ubuntu20.04.05_x86:lv6_v1.1082
     ubuntu24.04:
       arm:
-        lv6: ubuntu24.04_arm:lv6_v1.1062
+        lv6: ubuntu24.04_arm:lv6_v1.1089
       x86:
-        lv6: ubuntu24.04_x86:lv6_v1.1062
-        lv6_0429: ubuntu24.04_x86:lv6_v1.1058
+        lv6: ubuntu24.04_x86:lv6_v1.1092
         xla_npu: ubuntu_npu:v1.0
         asnumpy: ubuntu24.04_x86:asnumpy_v1.1002
 
@@ -356,13 +354,13 @@ repos:
         ubuntu24.04:arm:lv6
       UT_Test_superkernel:
         ubuntu24.04:x86:lv6
-      UT_Test_Python_superkenel:
+      UT_Test_Python_superkernel:
         ubuntu24.04:x86:lv6
       UT_Test_autofuse_framework:
         ubuntu24.04:x86:lv6
       UT_Test_autofuse_ascendc_api:
         ubuntu24.04:x86:lv6
-      ST_Test_Python_superkenel:
+      ST_Test_Python_superkernel:
         ubuntu24.04:x86:lv6
       ST_Test_autofuse_framework:
         ubuntu24.04:x86:lv6
@@ -486,17 +484,20 @@ repos:
       ubuntu24.04:
         x86:
           api_check: ubuntu24.04.3_x86:lv6_v1.1075
+          lv6: ubuntu24.04_x86:lv6_v1.1063
+        arm:
+          lv6: ubuntu24.04_arm:lv6_v1.1063
     stages:
       Compile_Ascend_X86:
-        ubuntu24.04_x86:lv6_v1.1063
+        ubuntu24.04:x86:lv6
       Compile_Ascend_X86_ubuntu24:
-        ubuntu24.04_x86:lv6_v1.1063
+        ubuntu24.04:x86:lv6
       Compile_Ascend_ARM:
-        ubuntu24.04_arm:lv6_v1.1063
+        ubuntu24.04:arm:lv6
       Compile_Ascend_ARM_ubuntu24:
-        ubuntu24.04_arm:lv6_v1.1063
+        ubuntu24.04:arm:lv6
       UT_Test:
-        ubuntu24.04_x86:lv6_v1.1063
+        ubuntu24.04:x86:lv6
       API_Check:
         ubuntu24.04:x86:api_check
       PreSmoke_A900_npupool:
@@ -514,15 +515,18 @@ repos:
       ubuntu24.04:
         x86:
           api_check: ubuntu24.04.3_x86:lv6_v1.1075
+          lv6: ubuntu24.04_x86:lv6_v1.1063
+        arm:
+          lv6: ubuntu24.04_arm:lv6_v1.1063
     stages:
       Compile_Ascend_X86:
         ubuntu20.04:x86:lv3
       Compile_Ascend_X86_ubuntu24:
-        ubuntu24.04_x86:lv6_v1.1063
+        ubuntu24.04:x86:lv6
       Compile_Ascend_ARM:
         ubuntu20.04:arm:lv3
       Compile_Ascend_ARM_ubuntu24:
-        ubuntu24.04_arm:lv6_v1.1063
+        ubuntu24.04:arm:lv6
       UT_Test:
         ubuntu20.04:x86:lv3
       ST_Test:
@@ -1271,6 +1275,12 @@ repos:
       UT_Test:
         ubuntu24.04:x86:lv6
   pto-as:
+    os_mirror:
+      ubuntu24.04:
+        x86:
+          lv6: ubuntu24.04_x86:lv6_v1.1062
+        arm:
+          lv6: ubuntu24.04_arm:lv6_v1.1062
     stages:
       Compile_Ascend_X86:
         ubuntu24.04:x86:lv6

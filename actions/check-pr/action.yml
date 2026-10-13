@@ -9,7 +9,21 @@ inputs:
   repo_name:
     description: 仓库名称
     required: true
-
+  target_branch:
+    required: false
+    default: 'master'
+  pr_number:
+    description: 触发检测的PR号，用于匹配放通名单（pr_skip_list.txt）
+    required: false
+    default: ''
+  git_token:
+    description: 私有仓库访问token，用于check_linked_issue查询PR关联issue
+    required: false
+    default: ''
+  pr_issue:
+    description: 仓库配置变量，为true时开启PR关联issue检测，未配置或false跳过
+    required: false
+    default: ''
 
 runs:
   using: 'node16'

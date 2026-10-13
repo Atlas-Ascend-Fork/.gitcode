@@ -1,6 +1,8 @@
 # revise-img
 
-根据 CI 仓库（默认 `cann/.gitcode`）中 `image-conf/<target_branch>/images.yaml` 的配置，解析指定仓库各构建阶段对应的镜像 tag。
+根据 CI 仓库中 `image-conf/<target_branch>/images.yaml` 的配置，解析指定仓库各构建阶段对应的镜像 tag。
+
+支持两种调用形式：形式1 直接用默认 CI 仓库（公开 `cann/.gitcode`）；形式2 传入评论与 token，由 action 后台切换到内部 CI 仓库的指定分支拉取配置（调用方无需感知仓库地址与鉴权）。
 
 ## 镜像配置结构
 
@@ -20,7 +22,19 @@
 | --- | --- | --- | --- |
 | `repo_name` | 是 | - | 仓库名称 |
 | `target_branch` | 是 | - | 目标分支（决定读取哪个版本的 `image-conf/<branch>/images.yaml`） |
-| `repo_url` | 否 | `https://gitcode.com/cann/.gitcode.git` | CI 仓库地址 |
+| `repo_url` | 否 | `https://gitcode.com/cann/.gitcode.git` | 形式1：CI 仓库地址（不切换仓/分支时传入） |
+| `comment` | 否 | - | 形式2：触发评论正文，action 从中解析 `@<分支>` 并切换到内部 CI 仓库 |
+| `token` | 否 | - | 形式2：拉取私有 CI 仓库的 git token |
+
+## 两种调用形式
+
+**形式1——不切换仓/分支**：传 `repo_url`，不传 `comment`/`token`。
+action 直接 `git clone <repo_url>` 默认分支。
+
+**形式2——切换到内部 CI 仓库指定分支**：传 `comment` + `token`，不传 `repo_url`。
+action 从 `comment` 解析 `@<分支>`（取最后一个 `@` 之后、空格之前的非空白串，如 `compile@feat-ci` → `feat-ci`、`a@b@c` → `c`），用 `token` 配置 git 鉴权后 `git clone -b <分支>` 切到内部 CI 仓库。仓库地址与鉴权不在调用方暴露，日志也不打印该地址。
+
+> `comment` 中无 `@` → 解析为空 → 退化为形式1（用 `repo_url`，未传则用默认 `cann/.gitcode.git`）。
 
 ## 输出
 
@@ -43,6 +57,8 @@ staticcheck:ubuntu24.04.03:v1.0
 
 ## 使用示例
 
+形式1（不切换）：
+
 ```yaml
 - name: revise_image
   identifier: revise_image
@@ -52,3 +68,17 @@ staticcheck:ubuntu24.04.03:v1.0
     target_branch: ${{ env.TARGET_BRANCH }}
     repo_url: ${{ vars.CI_PATH }}
 ```
+
+形式2（切换分支）：
+
+```yaml
+- name: revise_image
+  identifier: revise_image
+  uses: cann/.gitcode/actions/revise-img@master
+  with:
+    repo_name: ${{ env.repo_name }}
+    target_branch: ${{ env.TARGET_BRANCH }}
+    comment: ${{ atomgit.event.comment.body }}
+    token: ${{ secrets.GIT_TOKEN }}
+```
+

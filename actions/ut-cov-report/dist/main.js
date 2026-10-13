@@ -52,6 +52,7 @@ async function run() {
         // cov 模式专属
         const utProcess = core.getInput("ut_process");
         const utType = core.getInput("ut_type");
+        const language = core.getInput("language") || "cpp";
         // report 模式专属
         const utField = core.getInput("ut_field");
         const modules = core.getInput("modules");
@@ -62,6 +63,7 @@ async function run() {
         core.info(`coverage_num: ${coverageNum}`);
         core.info(`ut_process: ${utProcess}`);
         core.info(`ut_type: ${utType}`);
+        core.info(`language: ${language}`);
         core.info(`target_branch: ${targetBranch}`);
         core.info(`ut_field: ${utField}`);
         core.info(`modules: ${modules}`);
@@ -106,7 +108,8 @@ async function run() {
             env = {
                 ...baseEnv,
                 UT_PROCESS: utProcess,
-                UT_TYPE: utType
+                UT_TYPE: utType,
+                LANGUAGE: language
             };
         }
         await execShellScript(scriptPath, [], workspace, env);
@@ -122,7 +125,7 @@ function execShellScript(script, args, cwd, env) {
         const child = (0, child_process_1.execFile)("bash", [script, ...args], {
             cwd,
             env,
-            timeout: 300000,
+            timeout: 600000,
         });
         child.stdout?.on("data", (data) => {
             core.info(data.toString().trimEnd());
@@ -130,13 +133,18 @@ function execShellScript(script, args, cwd, env) {
         child.stderr?.on("data", (data) => {
             core.info("[shell stderr] " + data.toString().trimEnd());
         });
-        child.on("close", (code) => {
-            if (code === 0)
+        child.on("close", (code, signal) => {
+            if (code === 0) {
                 resolve();
-            else
-                reject(new Error(`ut_cov.sh 执行异常，退出码：${code}`));
+            } else {
+                core.error(`ut_cov.sh 异常退出: exit code=${code}, signal=${signal}`);
+                reject(new Error(`ut_cov.sh 执行异常, 退出码：${code}, signal: ${signal}`));
+            }
         });
-        child.on("error", (err) => reject(err));
+        child.on("error", (err) => {
+            core.error(`ut_cov.sh 执行错误: ${err.message}`);
+            reject(err);
+        });
     });
 }
 run();

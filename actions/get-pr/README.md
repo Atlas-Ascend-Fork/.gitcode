@@ -2,12 +2,17 @@
 
 拉取目标分支并生成 PR 变更文件清单，供后续检查步骤消费。
 
+> 冲突检测已迁移至 `pre-pipeline` 插件(2026-09): 冲突 PR 的 `merge_commit_sha` 不存在, 本插件前置的 Checkout 会先行失败, 冲突检测在流水线最早阶段(pre-pipeline)执行才能生效。
+
 ## 输入参数
 
 | 参数 | 必填 | 说明 |
 | --- | --- | --- |
 | `workspace` | 是 | 代码工作目录（已检出的仓库根目录） |
 | `target_branch` | 是 | 对比基准分支 |
+| `owner` | 否 | 仓库所属组织/用户 |
+| `repo` | 仓库名称 |
+| `pr_number` | 否 | PR 编号 |
 | `git_token` | 否 | 私有仓库访问 token，公开仓库无需传入 |
 
 ## 产物
@@ -35,5 +40,8 @@
   with:
     workspace: ${{ steps.process_checkout.outputs.path }}
     target_branch: ${{ env.TARGET_BRANCH }}
+    owner: ${{ env.org_name }}
+    repo: ${{ env.repo_name }}
+    pr_number: ${{ atomgit.event.pull_request.number }}
     git_token: ${{ secrets.GIT_TOKEN }}
 ```

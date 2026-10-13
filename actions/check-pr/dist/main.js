@@ -41,6 +41,10 @@ async function run() {
     try {
         const workspace = core.getInput("workspace", { required: true });
         const repoName = core.getInput("repo_name", { required: true });
+        const targetBranch = core.getInput("target_branch", { required: false });
+        const prNumber = core.getInput("pr_number", { required: false }) || "";
+        const gitToken = core.getInput("git_token", { required: false }) || "";
+        const prIssue = core.getInput("pr_issue", { required: false }) || "";
         const scriptDir = __dirname;
         const scriptPath = path_1.default.resolve(scriptDir, "./check_pr.sh");
         await promises_1.default.access(scriptPath);
@@ -48,12 +52,18 @@ async function run() {
         core.info(`脚本完整路径：${scriptPath}`);
         core.info(`WORKSPACE：${workspace}`);
         core.info(`REPOSITORY_NAME：${repoName}`);
+        core.info(`GIT_TARGET_BRANCH:${targetBranch}`);
+        core.info(`PR_NUMBER:${prNumber}`);
         // 环境变量注入 SCRIPT_DIR=dist目录路径
         const env = {
             ...process.env,
             WORKSPACE: workspace,
             REPOSITORY_NAME: repoName,
-            SCRIPT_DIR: scriptDir
+            SCRIPT_DIR: scriptDir,
+            GIT_TARGET_BRANCH: targetBranch,
+            PR_NUMBER: prNumber,
+            GIT_TOKEN: gitToken,
+            PR_ISSUE: prIssue
         };
         // cwd 使用 dist 目录执行
         await execShellScript(scriptPath, [], scriptDir, env);
@@ -69,7 +79,7 @@ function execShellScript(script, args, cwd, env) {
         const child = (0, child_process_1.execFile)("bash", [script, ...args], {
             cwd,
             env,
-            timeout: 120000
+            timeout: 600000
         });
         child.stdout?.on("data", (data) => {
             core.info(data.toString().trimEnd());
@@ -77,13 +87,18 @@ function execShellScript(script, args, cwd, env) {
         child.stderr?.on("data", (data) => {
             core.info("[shell stderr] " + data.toString().trimEnd());
         });
-        child.on("close", (code) => {
-            if (code === 0)
+        child.on("close", (code, signal) => {
+            if (code === 0) {
                 resolve();
-            else
-                reject(new Error(`check_pr.sh 异常退出，exit code: ${code}`));
+            } else {
+                core.error(`check_pr.sh 异常退出: exit code=${code}, signal=${signal}`);
+                reject(new Error(`check_pr.sh 异常退出, exit code: ${code}, signal: ${signal}`));
+            }
         });
-        child.on("error", (err) => reject(err));
+        child.on("error", (err) => {
+            core.error(`check_pr.sh 执行错误: ${err.message}`);
+            reject(err);
+        });
     });
 }
 run();

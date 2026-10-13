@@ -26,7 +26,8 @@ class CodeCheck(object):
         commit_id,
 	    codecheck_ip='https://apig.openlibing.com',
         gitxx_api='https://api.gitcode.com/api/v5/repos',
-        codecheck_prefix='/openlibing-anti-poison'
+        project_name="CANN",
+        codecheck_prefix='/openlibing-anti-poison',
     ):
         self.pr_url = None
         self.result = None
@@ -47,7 +48,7 @@ class CodeCheck(object):
         self.codecheck_prefix = codecheck_prefix
         self.gitcode_domain = "https://gitcode.com"
         self.repo_type = self._determine_repo_type()
-        self.project_name = "CANN"
+        self.project_name = project_name
         self.scanId = None
         self.comment= None
         self.MESSAGE = None
@@ -227,6 +228,26 @@ class CodeCheck(object):
             # 超时（while 正常结束）
             logging.error("Task timeout after 600 seconds.")
             self.result = "no pass"
+
+    def _write_summary(self, result):
+        if result == "pass":
+            return  # 成功不输出步骤摘要
+        summary_path = os.getenv("ATOMGIT_STEP_SUMMARY")
+        if not summary_path:
+            return
+        icon = "✅" if result == "pass" else "❌"
+        with open(summary_path, "a", encoding="utf-8") as f:
+            f.write(f"## {icon} 防投毒扫描 (Antipoison)\n\n")
+            f.write(f"| 参数 | 值 |\n|------|------|\n")
+            f.write(f"| 仓库 | {self.org_name}/{self.repository_name} |\n")
+            f.write(f"| PR | #{self.pr_id} |\n")
+            f.write(f"| 结果 | {icon} {result} |\n")
+            if self.report_url:
+                f.write(f"| 报告链接 | [查看报告]({self.report_url}) |\n")
+            if self.MESSAGE:
+                f.write(f"| 错误信息 | {self.MESSAGE} |\n")
+            f.write(f"\n")
+
     def run(self):
         self._get_pr_url()
 
@@ -243,6 +264,7 @@ class CodeCheck(object):
                 f"[anti posion {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] anti posion create task failed."
             )
             # self.write_task_json()
+            self._write_summary("no pass")
             sys.exit(-1)
 
         self._get_task_result()
@@ -252,8 +274,10 @@ class CodeCheck(object):
                 f"[anti posion {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] anti posion get task result failed. timeout after multiple attempts."
             )
             # self.write_task_json()
+            self._write_summary("no pass")
             sys.exit(-1)
         lresult = "pass" if self.comment == "pass" else "no pass"
+        self._write_summary(lresult)
         logging.info(json.dumps({"result": lresult, "url": self.report_url}))
         os.system(
             command=f'echo "report_url={self.report_url}" >> {self.gitcode_output}'
@@ -306,12 +330,20 @@ def init_args():
         help="Project name in Codecheck",
     )
     parser.add_argument("--commit_id", type=str, required=True, help="Commit ID")
+    parser.add_argument(
+        "--online",
+        type=lambda x: x.lower() in ("true", "1", "yes"),
+        default=False,
+        help="Whether to run online scan (default: false)",
+    )
     return parser.parse_args()
 
 
 if __name__ == "__main__":
-    sys.exit(0)
     args = init_args()
+    if not args.online:
+        logging.info("online is false, skip anti virus scan")
+        sys.exit(0)
     codecheck = CodeCheck(
         args.access_key,
         args.secret_access_key,
@@ -323,5 +355,6 @@ if __name__ == "__main__":
         args.commit_id,
         args.codecheck_ip,
         args.gitxx_api,
+        args.project_name
     )
     codecheck.run()

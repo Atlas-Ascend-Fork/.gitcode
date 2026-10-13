@@ -1,6 +1,9 @@
 #!/bin/bash
 
 target_branch="${TARGET_BRANCH}"
+OWNER="${OWNER:-}"
+REPO="${REPO:-}"
+PR_NUMBER="${PR_NUMBER:-}"
 GIT_TOKEN="${GIT_TOKEN:-}"
 cd "${WORKSPACE}"
 
@@ -33,10 +36,6 @@ git -c core.quotePath=false diff origin/${target_branch} HEAD --name-status > pr
 git -c core.quotePath=false diff origin/${target_branch} HEAD --name-only > pr_filelist.txt
 git -c core.quotePath=false diff origin/${target_branch}...HEAD --name-only --diff-filter=AM > pr_filelist_precommit.txt
 git -c core.quotePath=false diff -U0 -w --no-renames origin/${target_branch}...HEAD > update_file_detail.txt
-
-cat pr_filelist_mod.txt
-cat pr_filelist.txt
-cat pr_filelist_precommit.txt
 
 touch gitdiff.txt
 while IFS= read -r line;do

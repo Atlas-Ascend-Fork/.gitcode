@@ -18,6 +18,7 @@
 | `git_token` | 否 | - | 私有仓库访问 token |
 | `ut_process` | 否 | - | 仅 cov 模式：`ut_cov` / `coverage`，空则跳过打包 |
 | `ut_type` | 否 | - | cov 模式必填，UT 分类 |
+| `language` | 否 | `cpp` | cov 模式使用，代码语言类型（`cpp`/`python`） |
 | `ut_field` | 否 | - | report 模式必填，业务域标识 |
 | `modules` | 否 | - | report 模式必填，空格分隔模块列表 |
 | `source_branch` | 否 | - | report 模式必填，代码源分支 |
