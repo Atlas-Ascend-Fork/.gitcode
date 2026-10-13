@@ -2,8 +2,9 @@
 """
 CANN PR 门禁检测：开源依赖与 URL 白名单检查。
 
-门禁文件：oss_dep_security_gate_<branch>.json（如 master 分支为
-oss_dep_security_gate_master.json），由 sbom 扫描工程对各仓扫描生成，
+门禁文件：oss-dep/oss_dep_security_gate_<branch>.json（如 master 分支为
+oss-dep/oss_dep_security_gate_master.json，存于本 action 的 oss-dep/ 目录），
+由 sbom 扫描工程对各仓扫描生成，
 每仓 key 结构：branch / CANN_CMAKE_TAG / url / opensource_c /
 opensource_py / opensource_js。
 
@@ -66,6 +67,9 @@ except ImportError:  # py2 兜底
     from urllib import unquote
 
 THIS_FILE_PATH = os.path.dirname(os.path.realpath(__file__))
+
+# 门禁文件目录：action 根目录下 oss-dep/（本脚本位于其 dist/ 子目录）
+GATE_DIR = os.path.join(os.path.dirname(THIS_FILE_PATH), 'oss-dep')
 
 GATE_FILE_PREFIX = "oss_dep_security_gate_"
 
@@ -1064,10 +1068,10 @@ def main():
         log_warning("分支名 {} 不含可用门禁文件，门禁通过".format(target_branch))
         return 0
     gate_file = os.path.join(
-        THIS_FILE_PATH, "{}{}.json".format(GATE_FILE_PREFIX, target_branch))
+        GATE_DIR, "{}{}.json".format(GATE_FILE_PREFIX, target_branch))
     if not os.path.isfile(gate_file):
-        log_warning("门禁文件 {}{}.json 不存在，分支 {} 不作检查管控，门禁通过"
-                    .format(GATE_FILE_PREFIX, target_branch, target_branch))
+        log_warning("门禁文件 {} 不存在，分支 {} 不作检查管控，门禁通过"
+                    .format(gate_file, target_branch))
         return 0
 
     try:
