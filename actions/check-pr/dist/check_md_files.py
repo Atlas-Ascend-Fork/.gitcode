@@ -59,10 +59,10 @@ def read_pr_file(pr_file: str) -> list[str]:
 
 
 def _pick_branch(cfg, branch: str) -> list[str]:
-    """按分支提取屏蔽路径：配置了具体分支（非 master）时仅取该分支名单；
-    分支未配置或传入 master 时回退到 '*'；list 视为旧格式（全分支生效）"""
+    """按分支提取屏蔽路径：显式配置的分支键（含 master）优先；
+    分支未配置时回退到 '*'；list 视为旧格式（全分支生效）"""
     if isinstance(cfg, dict):
-        if branch != "master" and branch in cfg:
+        if branch in cfg:
             return list(cfg[branch])
         return list(cfg.get("*", []))
     if isinstance(cfg, list):

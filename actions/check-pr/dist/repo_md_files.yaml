@@ -1,7 +1,6 @@
 # 屏蔽路径配置：仓名 -> 分支 -> 路径列表
 # common 对所有仓、所有分支生效
-# '*' 为默认名单：目标分支为 master 或未配置该分支时使用
-# 配置了具体分支（非 master）时，仅使用该分支的名单
+# 显式配置的分支键（含 master）优先生效；'*' 为默认名单，分支未配置时使用
 common:
   - .claude
   - .opencode
@@ -110,6 +109,8 @@ oam-tools:
     - docs/en/profiling
     - docs/en/design
     - skills
+  'master':
+    - docs
 
 graph-autofusion:
   '*':
