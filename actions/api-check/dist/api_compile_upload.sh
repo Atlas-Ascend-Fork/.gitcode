@@ -19,7 +19,8 @@ python /home/api-doc/APIInfoGenTool/ops_analyser.py \
   --list pr_filelist_mod.txt \
   --mode full \
   --driver_path="/home/jenkins/opensource" \
-  --diff_file update_file_detail.txt 
+  --diff_file update_file_detail.txt \
+  --pathcheck_api_url http://10.0.0.193:10001/api/scan/path
 
 python /home/api-doc/APIInfoGenTool/uploadData.py \
   -o /home/api_result \
