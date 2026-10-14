@@ -57,7 +57,6 @@ driver-dev:
     - docs/zh/Ascend_910B_DCMI_API
     - docs/zh/Ascend_910_93_DCMI_API
     - docs/zh/msnpureport
-    - docs/en/msnpureport
     - docs/zh/Ascend_950_DCMI_API
     - docs/zh/Ascend_950_HCCN_Tool
     - docs/zh/Ascend_950_npu-smi
