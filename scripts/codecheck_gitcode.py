@@ -77,7 +77,7 @@ class CodeCheck(object):
     def _get_create_task(self):
         try:
             task_url = f"{self.codecheck_ip}{self.codecheck_prefix}"
-            if os.getenv("task_name") == "Code_Check_DT":
+            if os.getenv("codecheck_parent_task_id"):
                 logging.info(f"this is codestyle or dt task")
                 params = {
                     "projectName": self.project_name,
