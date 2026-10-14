@@ -62,6 +62,15 @@ driver-dev:
     - docs/zh/Ascend_950_HCCN_Tool
     - docs/zh/Ascend_950_npu-smi
     - docs/zh/Ascend_950_upgrade-tool
+    - docs/zh/nda
+    - docs/en/Ascend_910B_DCMI_API
+    - docs/en/Ascend_910_93_DCMI_API
+    - docs/en/msnpureport
+    - docs/en/Ascend_950_DCMI_API
+    - docs/en/Ascend_950_HCCN_Tool
+    - docs/en/Ascend_950_npu-smi
+    - docs/en/Ascend_950_upgrade-tool
+    - docs/en/nda
 
 runtime:
   '*':
