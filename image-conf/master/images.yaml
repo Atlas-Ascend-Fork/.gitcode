@@ -1470,3 +1470,11 @@ repos:
     stages:
       UT_Test:
         ubuntu24.04_gcc15:x86:lv6
+  asc-stl:	 
+    stages:	 
+      Compile_Ascend_X86_ubuntu24:	 
+        ubuntu24.04:x86:lv6	 
+      Compile_Ascend_ARM_ubuntu24:	 
+        ubuntu24.04:arm:lv6	 
+      UT_Test:	 
+        ubuntu24.04:x86:lv6
