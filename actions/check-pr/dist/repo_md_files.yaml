@@ -104,8 +104,21 @@ pypto:
 
 oam-tools:
   '*':
-    - docs
+    - docs/zh/asys
+    - docs/zh/env-vars
+    - docs/zh/hccl_test
+    - docs/zh/msaicerr
+    - docs/zh/profiling
+    - docs/zh/design
+    - docs/en/asys
+    - docs/en/env-vars
+    - docs/en/hccl_test
+    - docs/en/msaicerr
+    - docs/en/profiling
+    - docs/en/design
     - skills
+  'master':
+    - docs
 
 graph-autofusion:
   '*':
