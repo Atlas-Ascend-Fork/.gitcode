@@ -121,16 +121,51 @@ def count_yaml(class_rule_path, component, component_path, field_path):
         file = tmp_class_rule_path.read()
         content = yaml.load(file, Loader=yaml.SafeLoader)
         component_origin = component
-        if component not in content:
-            component = component + f"@{component}"
-        file_path = content[component]["src"]["release"]
-        print(file_path)
-        if component == "ops_math":
-            unrelease_path = ["*/*/test", "*/*/docs", "*/*/examples", "examples/*", "random/sim_thread_exponential/op_host/sim_thread_exponential_def.cpp"]
+        if component == "ops-nn":
+            for comp_key, comp_val in content.items():
+                if not isinstance(comp_val, dict) or "src" not in comp_val:
+                    continue
+                src = comp_val["src"]
+                release = src.get("release", {})
+                if isinstance(release, dict):
+                    for style in ["huawei_style", "style", "opensource_style", "kernel_style"]:
+                        if style in release and release[style]:
+                            file_path.extend(release[style])
+                elif isinstance(release, list):
+                    file_path.extend(release)
+                unrelease = src.get("unrelease", {})
+                if isinstance(unrelease, dict):
+                    for section in ["test_code", "non_delivery", "open_source"]:
+                        if section in unrelease and unrelease[section]:
+                            unrelease_path.extend(unrelease[section])
+                elif isinstance(unrelease, list):
+                    unrelease_path.extend(unrelease)
         else:
-            unrelease_path = content[component]["src"]["unrelease"]
+            if component not in content:
+                component = component + f"@{component}"
+            file_path = content[component]["src"]["release"]
+            if component == "ops_math":
+                unrelease_path = ["*/*/test", "*/*/docs", "*/*/examples", "examples/*", "random/sim_thread_exponential/op_host/sim_thread_exponential_def.cpp"]
+            else:
+                unrelease_path = content[component]["src"]["unrelease"]
     # 将读取yaml中release的内容写进责任田，如果是文件夹需要遍历文件夹再写入
     # auto_schedule的需要单独处理
+    if component_origin == "ops-nn":
+        processed_file_path = []
+        for p in file_path:
+            parts = p.split(os.sep)
+            new_path = os.sep.join(parts[2:]) if len(parts) > 2 else ""
+            if new_path:
+                processed_file_path.append(new_path)
+        file_path = processed_file_path
+
+        processed_unrelease_path = []
+        for p in unrelease_path:
+            parts = p.split(os.sep)
+            new_path = os.sep.join(parts[2:]) if len(parts) > 2 else ""
+            if new_path:
+                processed_unrelease_path.append(new_path)
+        unrelease_path = processed_unrelease_path
     field = os.path.join(field_path, component_origin + "_field.txt")
     release_file = []
     unreleas_file = []
@@ -160,34 +195,24 @@ def count_yaml(class_rule_path, component, component_path, field_path):
                             release_file.append(temp_path[1] + "\n")
             else:
                 continue
-    print("++++++++++++++++++++++++++++++++++++++++")
-    print(unrelease_path)
-    print(type(unrelease_path))
 
     if unrelease_path:
-        print("111111111111111111")
-        unreleas_set=set()
         for paths in unrelease_path:
             for path in Path(component_path).glob(paths):
                 if os.path.isdir(path):
-                    for file_line in get_unrelease_files(component_path, paths):
-                        unreleas_file.append(file_line)
-                        unreleas_set.add(file_line)
+                    unreleas_file.extend(
+                        get_unrelease_files(component_path, paths)
+                    )
                 else:
                     if path.is_file():
                         relative_path = path.relative_to(component_path)
                         unreleas_file.append(str(relative_path) + "\n")
-                        unreleas_set.add(str(relative_path) + "\n")
-        new_release = []
-        for line in release_file:
-            if line not in unreleas_set:
-                new_release.append(line)
-        release_file[:] = new_release
+        for tmp in release_file[:]:
+            if tmp in unreleas_file:
+                release_file.remove(tmp)
     with open(field, "a", encoding="utf-8") as tmp_class_rule_path:
         tmp_class_rule_path.writelines("[" + component_origin + "]" + "\n")
         tmp_class_rule_path.writelines(release_file)
-    print("-----------------------------------------------")
-    print(release_file)
 
 
 def read_dict(yaml_dict):
