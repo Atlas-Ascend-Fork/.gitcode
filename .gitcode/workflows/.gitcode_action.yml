@@ -57,46 +57,46 @@ stages:
   stage2:
     name: Compile
     jobs:
-JOB_compile:
-    name: compile
-    steps:
-      -
-        name: Checkout
-        identifier: process_checkout
-        uses: checkout
-        with:
-          ref: ${{ atomgit.event.pull_request.merge_commit_sha }}
-          allow-unsafe-pr-checkout: true
-      -
-        name: download
-        uses: obs-download
-        with:
-          endpoint: "https://obs.cn-north-4.myhuaweicloud.com"
-          bucket: "ascend-ci"
-          access-key: ${{ secrets.AK }}
-          secret-key: ${{ secrets.SK }}
-          key: |
-            ${{ env.obs_path }}/pr_filelist.txt
-            ${{ env.obs_path }}/pr_filelist_mod.txt
-            ${{ env.obs_path }}/update_file_detail.txt
-            ${{ env.obs_path }}/check_yaml.sh
-          path: ${{ steps.process_checkout.outputs.path }}
-      -
-        name: ut_acc
-        identifier: ut
-        run: |
-          export WORKSPACE=${{ steps.process_checkout.outputs.path }}
-          cd ${{ steps.process_checkout.outputs.path }}
-          export ut_type=${{ inputs.ut_type }}
-          export TARGET_BRANCH=${{ env.TARGET_BRANCH }}
-          bash check_yaml.sh "${WORKSPACE}/pr_filelist.txt"
-    if: "${{ default() }}"
-    runs-on:
-      - self-hosted
-      - arch=${{ inputs.arch }}
-      - spec=${{ inputs.size }}
-    container:
-      image: swr.cn-north-4.myhuaweicloud.com/ci_cann/{{ jobs.JOB_image.outputs.check_yaml }}
+      JOB_compile:
+          name: compile
+          steps:
+            -
+              name: Checkout
+              identifier: process_checkout
+              uses: checkout
+              with:
+                ref: ${{ atomgit.event.pull_request.merge_commit_sha }}
+                allow-unsafe-pr-checkout: true
+            -
+              name: download
+              uses: obs-download
+              with:
+                endpoint: "https://obs.cn-north-4.myhuaweicloud.com"
+                bucket: "ascend-ci"
+                access-key: ${{ secrets.AK }}
+                secret-key: ${{ secrets.SK }}
+                key: |
+                  ${{ env.obs_path }}/pr_filelist.txt
+                  ${{ env.obs_path }}/pr_filelist_mod.txt
+                  ${{ env.obs_path }}/update_file_detail.txt
+                  ${{ env.obs_path }}/check_yaml.sh
+                path: ${{ steps.process_checkout.outputs.path }}
+            -
+              name: ut_acc
+              identifier: ut
+              run: |
+                export WORKSPACE=${{ steps.process_checkout.outputs.path }}
+                cd ${{ steps.process_checkout.outputs.path }}
+                export ut_type=${{ inputs.ut_type }}
+                export TARGET_BRANCH=${{ env.TARGET_BRANCH }}
+                bash check_yaml.sh "${WORKSPACE}/pr_filelist.txt"
+          if: "${{ default() }}"
+          runs-on:
+            - self-hosted
+            - arch=${{ inputs.arch }}
+            - spec=${{ inputs.size }}
+          container:
+            image: swr.cn-north-4.myhuaweicloud.com/ci_cann/{{ jobs.JOB_image.outputs.check_yaml }}
     pre:
     - type: auto
     fail-fast: true
