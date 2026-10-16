@@ -93,7 +93,7 @@ stages:
           if: "${{ default() }}"
           runs-on: ["self-hosted", "arch=x64", "spec=small"]
           container:
-            image: swr.cn-north-4.myhuaweicloud.com/ci_cann/{{ jobs.JOB_image.outputs.check_yaml }}
+            image: swr.cn-north-4.myhuaweicloud.com/ci_cann/${{ jobs.JOB_image.outputs.check_yaml }}
     pre:
     - type: auto
     fail-fast: true
