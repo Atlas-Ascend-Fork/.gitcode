@@ -92,8 +92,6 @@ stages:
                 bash check_yaml.sh "${WORKSPACE}/pr_filelist.txt"
           if: "${{ default() }}"
           runs-on: ["self-hosted", "arch=x64", "spec=small"]
-          container:
-            image: swr.cn-north-4.myhuaweicloud.com/ci_cann/${{ jobs.JOB_image.outputs.check_yaml }}
     pre:
     - type: auto
     fail-fast: true
