@@ -1471,10 +1471,26 @@ repos:
       UT_Test:
         ubuntu24.04_gcc15:x86:lv6
   asc-stl:
-      stages:
+    stages:
       Compile_Ascend_X86_ubuntu24:
         ubuntu24.04:x86:lv6
       Compile_Ascend_ARM_ubuntu24:
         ubuntu24.04:arm:lv6
       UT_Test:
         ubuntu24.04:x86:lv6
+
+# ===== check_yaml.sh 验证注入区（测完执行: mv images.yaml.bak images.yaml 恢复） =====
+  zz-verify:
+    stages:
+	  TabIndent: 1
+      SpaceTab: 	1
+      TrailingTab: 3	
+      TrailingTabSpace: 4	 
+      TrailingSpace: 5    
+      FullColon： 6
+      FullWidthSpace:　7
+      ZeroWidth: a​b
+      Quoted: "x	y"
+      # 注释内	TAB
+      dup: 1
+      dup: 2
