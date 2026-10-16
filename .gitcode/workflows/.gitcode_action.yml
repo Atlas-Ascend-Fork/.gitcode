@@ -1,4 +1,4 @@
-name: PR-pipeline_ops-nn
+name: PR-pipeline_.gitcode
 
 concurrency:
     max: 15
@@ -55,10 +55,10 @@ stages:
     - type: auto
     fail-fast: true
   stage2:
-    name: Compile
+    name: check_yaml
     jobs:
       JOB_compile:
-          name: compile
+          name: check_yaml
           steps:
             -
               name: Checkout
@@ -91,10 +91,7 @@ stages:
                 export TARGET_BRANCH=${{ env.TARGET_BRANCH }}
                 bash check_yaml.sh "${WORKSPACE}/pr_filelist.txt"
           if: "${{ default() }}"
-          runs-on:
-            - self-hosted
-            - arch=${{ inputs.arch }}
-            - spec=${{ inputs.size }}
+          runs-on: ["self-hosted", "arch=x64", "spec=small"]
           container:
             image: swr.cn-north-4.myhuaweicloud.com/ci_cann/{{ jobs.JOB_image.outputs.check_yaml }}
     pre:
