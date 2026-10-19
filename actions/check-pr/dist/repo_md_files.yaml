@@ -172,3 +172,7 @@ asc-comm:
     - docs/en/guide
     - docs/en/programming_model
     - docs/en/index.md
+
+pypto-vscode:
+  'master':
+    - docs/zh
