@@ -144,6 +144,7 @@ metadef:
   '*':
     - docs/zh/api
     - docs/en/api
+
 asc-tools:
   '*':
     - skills
@@ -162,3 +163,14 @@ docs:
     - docs/zh/troubleshooting
     - docs/en/app-dev
     - docs/en/troubleshooting
+
+asc-comm:
+  'master':
+    - docs/zh/api
+    - docs/zh/guide
+    - docs/zh/programming_model
+    - docs/zh/index.md
+    - docs/en/api
+    - docs/en/guide
+    - docs/en/programming_model
+    - docs/en/index.md
