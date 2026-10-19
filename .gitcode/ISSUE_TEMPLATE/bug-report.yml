@@ -24,7 +24,7 @@ body:
         - CANN 版本：如 8.0.0、8.5.0 等
         - Python 版本：如 3.9.0
     validations:
-      required: false
+      required: true
   - type: textarea
     attributes:
       label: 重现步骤 / Steps to reproduce (Mandatory / 必填)
@@ -35,14 +35,14 @@ body:
         3. 接着输入 '...'
         4. 出现错误
     validations:
-      required: false
+      required: true
   - type: textarea
     attributes:
       label: 预期结果 / Expected behavior (Mandatory / 必填)
       description: 描述期望的行为应该是什么样子的
       placeholder: 请描述正常情况下应该得到的结果
     validations:
-      required: false
+      required: true
   - type: textarea
     attributes:
       label: 日志/截图 / Log / Screenshot (Mandatory / 必填)
@@ -55,7 +55,7 @@ body:
         - host日志路径：/usr/local/Ascend/log/
         - device日志路径：/usr/local/Ascend/log/
     validations:
-      required: false
+      required: true
   - type: textarea
     attributes:
       label: 备注 / Additional Notes (Optional / 选填)

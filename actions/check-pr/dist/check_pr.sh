@@ -18,6 +18,7 @@ export LC_ALL=en_US.UTF-8
 # 避免逐文件 spawn file 进程（decoded_line 需先赋值再使用）
 decoded_list="${WORKSPACE}/.pr_filelist_decoded.txt"
 : > "${decoded_list}"
+binary_check_result=0
 while IFS= read -r line; do
     line=${line%$'\r'}
     decoded_line=$(printf '%b' "$line")
@@ -43,17 +44,18 @@ if [ -s "${decoded_list}" ]; then
         if [[ "$file_type" == "data" || "$file_type" == *"image data"* ]]; then
             if ! [[ "$decoded_line" =~ ^docs?/([^/]*/)*[^/]*\.(png|jpg)$ ]]; then
                 LOG_ERROR "Binary image file not allowed in this path: $decoded_line"
-                break
+                binary_check_result=1
             fi
         fi
     done < "${decoded_list}.types"
 fi
 rm -f "${decoded_list}" "${decoded_list}.types"
+DP_ASSERT_EQUAL "${binary_check_result}" "0" "check binary files"
 
 python3 ${SCRIPT_DIR}/check_empty_file.py ${WORKSPACE} ${WORKSPACE}/pr_filelist.txt
 DP_ASSERT_EQUAL "$?" "0" "check empty file"
 
-if [[ "${REPOSITORY_NAME}" == @(metadef|driver|driver-dev|amct|asc-devkit|pypto|ge|oam-tools|runtime|graph-autofusion|hixl|tensorflow|ops-gnn|hcomm|hccl|ops-ras|asc-tools) ]] && \
+if [[ "${REPOSITORY_NAME}" == @(metadef|driver|driver-dev|amct|asc-devkit|pypto|ge|oam-tools|runtime|graph-autofusion|hixl|tensorflow|ops-gnn|hcomm|hccl|ops-ras|asc-tools|docs|asc-comm) ]] && \
    [ "${GIT_TARGET_BRANCH}" != "feature/community-tasks" ] && \
    [ "${GIT_TARGET_BRANCH}" != "feature/tensor_api_from_9.0.0" ];then
     echo "check md files"
