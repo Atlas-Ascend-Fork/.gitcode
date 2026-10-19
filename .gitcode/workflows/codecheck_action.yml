@@ -51,7 +51,7 @@ jobs:
           secret-key: ${{secrets.SK}}
           artifact-path: "${{ steps.process_checkout.outputs.path }}/pre-commit*.txt"
           object-prefix: ${{ env.obs_path }}/
-    runs-on: ["self-hosted", "arch=x64", "spec=slim"]
+    runs-on: ["self-hosted", "arch=x64", "spec=small"]
     container:
       image: swr.cn-north-4.myhuaweicloud.com/ci_cann/${{ inputs.precommit_image_version }}
   JOB_check_pr:
