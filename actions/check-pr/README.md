@@ -14,6 +14,11 @@
      - 新增三方库引用必须在 `opensource_c` 属性内；
       - `requirements.txt` / `package.json` 引入的依赖组件：组件在白名单内且版本满足约束则放行；**版本号大于 `opensource_py` / `opensource_js` 允许版本时拦截**，提示需要在相应依赖文件 `requirements.txt` 或 `package.json` 同步更新版本号；组件不在白名单内或版本落在约束范围外时拦截。
 4. **门禁日志留档**：常规放行（白名单/版本范围内等）聚合统计输出，避免大 PR 逐条日志刷屏；同步更新放行、豁免与拦截逐条输出。触发门禁豁免（豁免路径/图片文件/LFS 指针）或门禁拦截时，全量检查日志（含仓库/分支/PR编号/结论/豁免路径/明细）写入 workspace 下 `oss-dep-gate-log/<yyyymmdd>/oss-dep-gate-check_<仓名>_<分支>_<PR号>.txt`，由流水线 `obs-upload` 步骤（`if: always()`）统一上传至 OBS `CANN/oss_dep_check/` 前缀（按日期分档，全仓聚合），供后续追溯使用；正常放行（无豁免）不产生日志文件。
+5. **门禁结果展示（受控仓执行检查后生效，展示效果对齐 SCA 官方任务面板）**：生成"URL 开源依赖门禁检查结果" Markdown 面板（结论 / URL·C三方库·Python·NodeJS 分类放行拦截统计 / 拦截明细表），三通道输出：
+   - 写入 workspace 下 `oss-dep-gate-summary.md`（留档，供后续步骤/流水线读取）；
+   - 追加到步骤摘要（runner 为 GitHub-Actions 兼容，`$GITHUB_STEP_SUMMARY` 为文件路径；支持时在流水线 run 页 Summary 区渲染面板，与 SCA 面板同区展示；环境变量缺失时静默跳过）；
+   - **门禁拦截时**将面板回写 PR 评论（`GATE_PR_COMMENT=false` 可关闭；token/PR 编号复用 action 输入 `git_token`/`pr_number` 透传的 `GIT_TOKEN`/`PR_NUMBER` 环境变量，评论端点与 pre-pipeline/failure-analyze 一致）。
+   展示通道异常仅告警，不影响门禁结论与退出码。
 
 ## 输入参数
 
@@ -22,6 +27,8 @@
 | `workspace` | 是 | 代码检出目录 |
 | `repo_name` | 是 | 仓库名称（部分仓库跳过 Markdown 链接检查；URL/三方库门禁以仓库名作为门禁文件 key） |
 | `target_branch` | 否 | 目标分支，默认 `master`，决定读取的门禁文件 `oss-dep/oss_dep_security_gate_<branch>.json` |
+| `pr_number` | 否 | PR 编号，用于门禁拦截时结果回写 PR 评论 |
+| `git_token` | 否 | GitCode API 令牌，用于门禁拦截时结果回写 PR 评论（需 PR 评论权限） |
 
 ## 产物
 
@@ -29,6 +36,7 @@
 | --- | --- |
 | `link_check_report.txt` | 失败链接报告 |
 | `link_details.csv` | 全部链接检查明细 |
+| `oss-dep-gate-summary.md` | 门禁结果 Markdown 面板（结论 / 分类统计 / 拦截明细），同时追加到步骤摘要与 PR 评论（拦截时） |
 
 ## 使用示例
 
