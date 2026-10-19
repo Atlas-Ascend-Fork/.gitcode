@@ -52,6 +52,7 @@ async function run() {
         // cov 模式专属
         const utProcess = core.getInput("ut_process");
         const utType = core.getInput("ut_type");
+        const softFailRepos = core.getInput("UT_SOFT_FAIL_REPOS") || "";
         const language = core.getInput("language") || "cpp";
         // report 模式专属
         const utField = core.getInput("ut_field");
@@ -81,7 +82,8 @@ async function run() {
             COV_MODE: covMode,
             COVERAGE_NUM: coverageNum,
             GIT_TOKEN: gitToken,
-            TARGET_BRANCH: targetBranch
+            TARGET_BRANCH: targetBranch,
+            UT_SOFT_FAIL_REPOS: softFailRepos
         };
         let env;
         if (covMode === "report") {
