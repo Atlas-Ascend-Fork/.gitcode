@@ -37,7 +37,7 @@ query_pipeline 步骤输出 pipeline_failed 变量
 | `enable` | 否 | 总开关，默认 `false`；设置为 `true` 后启用失败分析，建议接入 `vars.FAILURE_ANALYZE_ENABLE` |
 | `pipeline_failed` | 否 | query_pipeline 步骤输出：`false`=成功跳过；`true`=失败触发；**缺失=其自身异常，兜底触发** |
 | `session_id` | 是 | agent-hub 事件型 Session ID（预先创建，绑定失败分析 Agent） |
-| `event_key` | 否 | 事件 Key，需与 Session `trigger_config.event_key` 匹配，默认 `gate_check` |
+| `event_key` | 否 | 事件 Key，需与 Session `trigger_config.event_key` 匹配，默认 `pipeline_failed` |
 | `enable_pr_comment` | 否 | **PR 评论回写开关**(默认 false)：true=要求 Agent 将分析结果回写到 PR 评论区；false=仅输出报告 |
 | `enable_success_review` | 否 | **成功评论开关**(默认 false, v1.1.0)：true=流水线成功时向 PR 写入 `/ai review force` 评论(成功态 AI 审查入口)；建议接 `vars.SUCCESS_AI_REVIEW_ENABLE` |
 | `git_token` | 否 | GitCode API 令牌(写 `/ai review force` 评论用, 需 PR 评论权限)；建议接 `secrets.GIT_TOKEN` |
