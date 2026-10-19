@@ -159,10 +159,8 @@ ops-ras:
 
 docs:
   '*':
-    - docs/zh/app-dev
-    - docs/zh/troubleshooting
-    - docs/en/app-dev
-    - docs/en/troubleshooting
+    - docs
+    - skills
 
 asc-comm:
   'master':
