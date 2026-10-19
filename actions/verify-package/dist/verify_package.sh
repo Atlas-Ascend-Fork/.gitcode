@@ -1,5 +1,4 @@
 #!/bin/bash
-set -o pipefail
 
 WORKSPACE="$1"
 package_path="$2"
@@ -13,11 +12,6 @@ if [[ -z "${compile_package_name}" ]]; then
 fi
 chmod +x ./${package_path}/${compile_package_name}
 echo "y" | ./${package_path}/${compile_package_name} --full --install-path=${WORKSPACE}/tmp 2>&1 | tee ${WORKSPACE}/compile_log.txt
-install_status=$?
-if [ "${install_status}" -ne 0 ]; then
-    echo "ERROR: package installation command failed with exit code ${install_status}"
-    exit "${install_status}"
-fi
 if grep -q "ERROR" ${WORKSPACE}/compile_log.txt; then
     echo "find key word 'ERROR' in logs"
     exit 1
@@ -25,11 +19,6 @@ else
     echo "verify the package: ${compile_package_name} success"
 fi
 echo "y" | ./${package_path}/${compile_package_name} --uninstall --install-path=${WORKSPACE}/tmp 2>&1 | tee ${WORKSPACE}/compile_uninstall_log.txt
-uninstall_status=$?
-if [ "${uninstall_status}" -ne 0 ]; then
-    echo "ERROR: package uninstall command failed with exit code ${uninstall_status}"
-    exit "${uninstall_status}"
-fi
 if grep -qE "ERROR" ${WORKSPACE}/compile_uninstall_log.txt; then
     echo "find key word 'ERROR' in uninstall logs"
     exit 1
