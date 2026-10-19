@@ -79,7 +79,7 @@ jobs:
       -
         name: check-pr
         identifier: check-pr
-        uses: cann/.gitcode/actions/check-pr@master
+        uses: gcw_UQE6G7Ro/.gitcode/actions/check-pr@master
         with:
           repo_name: ${{ env.repo_name }}
           workspace: ${{ steps.process_checkout.outputs.path }}
