@@ -159,10 +159,8 @@ ops-ras:
 
 docs:
   '*':
-    - docs/zh/app-dev
-    - docs/zh/troubleshooting
-    - docs/en/app-dev
-    - docs/en/troubleshooting
+    - docs
+    - skills
 
 asc-comm:
   'master':
@@ -174,3 +172,7 @@ asc-comm:
     - docs/en/guide
     - docs/en/programming_model
     - docs/en/index.md
+
+pypto-vscode:
+  'master':
+    - docs/zh
