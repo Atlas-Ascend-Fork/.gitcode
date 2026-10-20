@@ -7,6 +7,27 @@ from pathlib import Path
 import yaml
 
 
+OPS_NN_UT_PARTS = {
+    "opapi": {"op_api"},
+    "ophost": {"op_host", "framework"},
+    "opgraph": {"op_graph"},
+    "opkernel": {"op_kernel"},
+}
+
+
+def is_ops_nn_rules(content):
+    """UT job names are not ownership-table component keys."""
+    return any(str(key).endswith("@ops-nn") for key in content)
+
+
+def ops_nn_relative_path(path):
+    prefix = "ops/ops-nn/"
+    normalized = path.replace("\\", "/")
+    if normalized.startswith(prefix):
+        return normalized[len(prefix):]
+    return normalized
+
+
 def op_txt(cpt, op_path):
     """
     功能描述：操作责任田文件，以“【”为标志位来确定组件
@@ -106,7 +127,7 @@ def get_unrelease_files(root_path, pattern):
                 if file.is_file():
                     # 去掉根路径，转为相对路径字符串
                     relative_path = file.relative_to(root)
-                    file_paths.append(str(relative_path) + "\n")
+                    file_paths.append(relative_path.as_posix() + "\n")
     return file_paths
 
 
@@ -121,7 +142,13 @@ def count_yaml(class_rule_path, component, component_path, field_path):
         file = tmp_class_rule_path.read()
         content = yaml.load(file, Loader=yaml.SafeLoader)
         component_origin = component
-        if component == "ops-nn":
+        ops_nn_job = (
+            component in OPS_NN_UT_PARTS
+            and component not in content
+            and f"{component}@{component}" not in content
+            and is_ops_nn_rules(content)
+        )
+        if component == "ops-nn" or ops_nn_job:
             for comp_key, comp_val in content.items():
                 if not isinstance(comp_val, dict) or "src" not in comp_val:
                     continue
@@ -150,22 +177,9 @@ def count_yaml(class_rule_path, component, component_path, field_path):
                 unrelease_path = content[component]["src"]["unrelease"]
     # 将读取yaml中release的内容写进责任田，如果是文件夹需要遍历文件夹再写入
     # auto_schedule的需要单独处理
-    if component_origin == "ops-nn":
-        processed_file_path = []
-        for p in file_path:
-            parts = p.split(os.sep)
-            new_path = os.sep.join(parts[2:]) if len(parts) > 2 else ""
-            if new_path:
-                processed_file_path.append(new_path)
-        file_path = processed_file_path
-
-        processed_unrelease_path = []
-        for p in unrelease_path:
-            parts = p.split(os.sep)
-            new_path = os.sep.join(parts[2:]) if len(parts) > 2 else ""
-            if new_path:
-                processed_unrelease_path.append(new_path)
-        unrelease_path = processed_unrelease_path
+    if component_origin == "ops-nn" or ops_nn_job:
+        file_path = [ops_nn_relative_path(p) for p in file_path]
+        unrelease_path = [ops_nn_relative_path(p) for p in unrelease_path]
     field = os.path.join(field_path, component_origin + "_field.txt")
     release_file = []
     unreleas_file = []
@@ -191,8 +205,8 @@ def count_yaml(class_rule_path, component, component_path, field_path):
                             or file.endswith(".c")
                         ):
                             full_path = os.path.join(root, file)
-                            temp_path = full_path.split(component_path + "/", 1)
-                            release_file.append(temp_path[1] + "\n")
+                            relative_path = Path(full_path).relative_to(component_path)
+                            release_file.append(relative_path.as_posix() + "\n")
             else:
                 continue
 
@@ -206,10 +220,17 @@ def count_yaml(class_rule_path, component, component_path, field_path):
                 else:
                     if path.is_file():
                         relative_path = path.relative_to(component_path)
-                        unreleas_file.append(str(relative_path) + "\n")
+                        unreleas_file.append(relative_path.as_posix() + "\n")
         for tmp in release_file[:]:
             if tmp in unreleas_file:
                 release_file.remove(tmp)
+    if ops_nn_job:
+        required_parts = OPS_NN_UT_PARTS[component_origin]
+        release_file = [
+            name for name in release_file
+            if required_parts.intersection(Path(name.strip()).parts)
+            and not (component_origin == "ophost" and "op_api" in Path(name.strip()).parts)
+        ]
     with open(field, "a", encoding="utf-8") as tmp_class_rule_path:
         tmp_class_rule_path.writelines("[" + component_origin + "]" + "\n")
         tmp_class_rule_path.writelines(release_file)

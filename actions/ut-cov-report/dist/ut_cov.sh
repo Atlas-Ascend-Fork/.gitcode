@@ -82,8 +82,14 @@ else
       echo "DEBUG WORKSPACE: [${WORKSPACE}]"
       echo "DEBUG UT_TYPE: [${UT_TYPE}]"
 
-      # 查找 ops.info
-      coverage_info=$(find "${WORKSPACE}" -type f -name "ops.info" | head -n1)
+      # A native UT run may combine builtin and experimental scopes. Prefer its
+      # explicit merged artifact to an arbitrary last-scope build/ops.info.
+      merged_scopes="${WORKSPACE}/ut_${UT_TYPE}_scopes.info"
+      if [[ -s "${merged_scopes}" ]]; then
+          coverage_info="${merged_scopes}"
+      else
+          coverage_info=$(find "${WORKSPACE}" -type f -name "ops.info" | head -n1)
+      fi
       echo "DEBUG 第一轮find ops.info: [${coverage_info}]"
 
       # 为空则查 coverage.info
