@@ -28,6 +28,9 @@ inputs:
   ut_type:
     description: cov模式必填，UT分类
     required: false
+  UT_SOFT_FAIL_REPOS:
+    description: 软失败仓名清单（空格分隔），清单内仓的 UT 失败不拦截；可引用仓库参数 ${{ vars.UT_SOFT_FAIL_REPOS }}
+    required: false
   language:
     description: 代码语言类型（cpp/python），默认cpp
     required: false
