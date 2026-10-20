@@ -44,8 +44,19 @@ opensource_py / opensource_js。
    触发门禁豁免（豁免路径/图片文件/Git LFS 指针地址）或门禁拦截时，全量检查
    日志写入 workspace/oss-dep-gate-log/<yyyymmdd>/oss-dep-gate-check_<仓名>_
    <分支>_<PR号>.txt，由流水线 obs-upload 上传至 OBS（CANN/oss_dep_check/
-   前缀，按日期分档）留档供后续使用。
-   脚本内部异常按拦截处理（fail-closed）；patch/门禁文件缺失等数据类
+    前缀，按日期分档）留档供后续使用。
+    门禁结果展示（受控仓执行检查后，展示效果对齐 SCA 官方任务面板）：
+    - 分类登记放行/拦截计数与结构化拦截明细，生成 Markdown 摘要：
+      ① 写 workspace/oss-dep-gate-summary.md（留档，供后续步骤读取）；
+      ② 追加到 $ATOMGIT_STEP_SUMMARY（与 codecheck_gitcode.py 的
+         _write_summary 一致：runner 注入该变量，值为摘要文件路径，
+         支持 Markdown 渲染到流水线 run 页 Summary 区渲染面板；变量
+         缺失时静默跳过）；
+      ③ 门禁拦截时将面板回写 PR 评论（GATE_PR_COMMENT=false 可关闭；
+         token/PR 编号复用 action 输入透传的 GIT_TOKEN/PR_NUMBER 环境
+         变量，端点与 pre-pipeline/failure-analyze 一致）。
+      展示通道异常仅告警，不影响门禁结论与退出码。
+    脚本内部异常按拦截处理（fail-closed）；patch/门禁文件缺失等数据类
    失败按放行处理（fail-open，避免 CI 基础设施故障误伤）。
 
 用法：
@@ -65,6 +76,9 @@ try:
     from urllib.parse import unquote
 except ImportError:  # py2 兜底
     from urllib import unquote
+
+import urllib.error
+import urllib.request
 
 THIS_FILE_PATH = os.path.dirname(os.path.realpath(__file__))
 
@@ -610,6 +624,165 @@ def write_gate_log(workspace, repo_name, target_branch, verdict,
         return None
 
 
+# ---------------- 门禁结果结构化记录与展示 ----------------
+
+# 分类放行/拦截计数与结构化拦截明细：与纯文本 LOG_RECORDS 并行登记，
+# 供 build_gate_summary_md() 生成 Markdown 摘要（run 页步骤摘要面板 +
+# 拦截时 PR 评论，展示效果对齐 SCA 官方任务面板）。
+BLOCK_KIND_ZH = (('url', 'URL'), ('c', 'C三方库'),
+                 ('py', 'Python依赖'), ('js', 'NodeJS依赖'))
+GATE_STATS = {'url': [0, 0], 'c': [0, 0], 'py': [0, 0], 'js': [0, 0]}  # [放行, 拦截]
+BLOCK_RECORDS = []
+
+# 门禁摘要文件名（写入 workspace，供留档与后续步骤读取）
+GATE_SUMMARY_FILE = 'oss-dep-gate-summary.md'
+
+
+def record_pass(kind):
+    GATE_STATS[kind][0] += 1
+
+
+def record_block(kind, obj, reason, files):
+    GATE_STATS[kind][1] += 1
+    BLOCK_RECORDS.append({
+        'kind': kind,
+        'obj': str(obj),
+        'reason': str(reason),
+        'files': describe_files(files) if not isinstance(files, str) else files,
+    })
+
+
+def _md_cell(text):
+    """Markdown 表格单元格转义（竖线/换行）"""
+    return str(text).replace('|', '\\|').replace('\n', ' ')
+
+
+def build_gate_summary_md(repo_name, target_branch, pr_number):
+    """生成 OSS 开源依赖门禁 Markdown 面板（标题样式对齐 codecheck _write_summary）"""
+    blocked = any(GATE_STATS[kind][1] for kind, _ in BLOCK_KIND_ZH)
+    kind_zh = dict(BLOCK_KIND_ZH)
+    icon = '❌' if blocked else '✅'
+    lines = ['## {} OSS 开源依赖门禁 (Open Source Dependency Gate)'.format(icon), '']
+    if blocked:
+        lines.append('**结论**: ❌ 门禁拦截（引入的 URL / 三方库 / 依赖组件不合规）')
+    else:
+        lines.append('**结论**: ✅ 放行')
+    lines.append('')
+    lines.append('仓库: {}@{} ｜ PR: {} ｜ 检查时间: {}'.format(
+        repo_name, target_branch, (str(pr_number).strip() or '-'),
+        time.strftime('%Y-%m-%d %H:%M:%S')))
+    lines.append('')
+    lines.append('| 检查项 | 放行 | 拦截 |')
+    lines.append('| --- | --- | --- |')
+    for kind, zh in BLOCK_KIND_ZH:
+        lines.append('| {} | {} | {} |'.format(
+            zh, GATE_STATS[kind][0], GATE_STATS[kind][1]))
+    if BLOCK_RECORDS:
+        lines.append('')
+        lines.append('### 拦截明细')
+        lines.append('| 类别 | 对象 | 拦截原因 | 涉及文件 |')
+        lines.append('| --- | --- | --- | --- |')
+        for r in BLOCK_RECORDS:
+            lines.append('| {} | `{}` | {} | {} |'.format(
+                kind_zh[r['kind']], _md_cell(r['obj']),
+                _md_cell(r['reason']), _md_cell(r['files'])))
+    lines.append('')
+    lines.append('> 门禁基线: {}{}.json ｜ 完整日志: OBS CANN/oss_dep_check/'.format(
+        GATE_FILE_PREFIX, target_branch))
+    return '\n'.join(lines)
+
+
+def get_remote_owner(workspace):
+    """从工作区 origin 远端提取目标仓 owner（PR 评论回写对象，如 cann）"""
+    try:
+        r = subprocess.run(['git', '-C', workspace, 'remote', 'get-url', 'origin'],
+                           stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=30)
+        url = r.stdout.decode('utf-8', errors='replace').strip()
+        m = re.search(r'gitcode\.com[/:]([^/]+)/', url)
+        if m:
+            return m.group(1)
+    except Exception:
+        pass
+    return ''
+
+
+def post_pr_comment(owner, repo, pr_number, body, token, max_retries=2):
+    """写 PR 评论（端点同 pre-pipeline/failure-analyze）；返回 (http_code, resp)"""
+    url = 'https://api.gitcode.com/api/v5/repos/{}/{}/pulls/{}/comments'.format(
+        owner, repo, pr_number)
+    data = json.dumps({'access_token': token, 'body': body}).encode('utf-8')
+    last = (-1, '')
+    for _ in range(max_retries):
+        req = urllib.request.Request(url, data=data, method='POST')
+        req.add_header('Authorization', 'Bearer {}'.format(token))
+        req.add_header('Content-Type', 'application/json')
+        try:
+            with urllib.request.urlopen(req, timeout=30) as resp:
+                return resp.status, resp.read().decode('utf-8', errors='replace')
+        except urllib.error.HTTPError as e:
+            last = (e.code, e.read().decode('utf-8', errors='replace'))
+            if e.code not in (429, 500, 502):
+                break
+        except Exception as e:
+            last = (-1, str(e))
+    return last
+
+
+def publish_gate_summary(workspace, repo_name, target_branch, pr_number):
+    """
+    门禁结果展示（三通道，任一失败仅告警、不影响门禁结论与退出码）：
+    ① workspace/oss-dep-gate-summary.md 摘要文件（留档/后续步骤读取）；
+    ② 追加到 $ATOMGIT_STEP_SUMMARY 步骤摘要（与 codecheck_gitcode.py 的
+       _write_summary 机制一致：runner 注入该环境变量，值为摘要文件路径，
+       支持 Markdown 渲染到流水线 run 页 Summary 区；变量缺失时静默跳过）；
+    ③ 门禁拦截时将面板回写 PR 评论（GATE_PR_COMMENT=false 可关闭；token
+       与 PR 编号复用 action 输入透传的 GIT_TOKEN/PR_NUMBER 环境变量）。
+    """
+    md = build_gate_summary_md(repo_name, target_branch, pr_number)
+    # ① 摘要文件
+    try:
+        path = os.path.join(workspace, GATE_SUMMARY_FILE)
+        with open(path, 'w', encoding='utf-8') as f:
+            f.write(md + '\n')
+        log_info('门禁摘要已写入: {}'.format(path))
+    except Exception as e:
+        log_warning('门禁摘要文件写入失败: {}'.format(e))
+    # ② run 页步骤摘要（与 codecheck_gitcode.py 的 _write_summary 实现一致：
+    #    平台 runner 注入 ATOMGIT_STEP_SUMMARY 环境变量，值为摘要文件路径，
+    #    追加 Markdown 即在流水线 run 页 Summary 区渲染面板）
+    summary_env = os.environ.get('ATOMGIT_STEP_SUMMARY') \
+        or os.environ.get('GITHUB_STEP_SUMMARY')
+    if summary_env:
+        try:
+            with open(summary_env, 'a', encoding='utf-8') as f:
+                f.write(md + '\n')
+            log_info('门禁摘要已追加到步骤摘要: {}'.format(summary_env))
+        except Exception as e:
+            log_warning('步骤摘要追加失败: {}（平台不支持时仅走日志/PR评论）'.format(e))
+    # ③ 拦截时 PR 评论回写
+    if not BLOCK_RECORDS:
+        return
+    if os.environ.get('GATE_PR_COMMENT', 'true').lower() not in ('true', '1', 'yes'):
+        log_info('门禁结果 PR 评论回写已关闭(GATE_PR_COMMENT)，跳过')
+        return
+    token = os.environ.get('GIT_TOKEN', '').strip()
+    pr = str(pr_number or os.environ.get('PR_NUMBER', '')
+             or os.environ.get('MERGE_ID', '')).strip()
+    if not (token and pr):
+        log_warning('缺少 GIT_TOKEN/PR 编号，跳过门禁结果 PR 评论')
+        return
+    owner = get_remote_owner(workspace)
+    if not owner:
+        log_warning('无法从 origin 远端解析 owner，跳过门禁结果 PR 评论')
+        return
+    code, body = post_pr_comment(owner, repo_name, pr, md, token)
+    if 200 <= code < 300:
+        log_info('门禁拦截明细已回写 PR#{} 评论(HTTP {})'.format(pr, code))
+    else:
+        log_warning('门禁结果 PR 评论写入失败(HTTP {}): {} —— 不影响门禁结论'
+                    .format(code, body[:200]))
+
+
 # ---------------- patch 获取与解析 ----------------
 
 
@@ -925,6 +1098,9 @@ def check_dep_version(ecosystem, name, spec, wl_specs, files, sync_specs=None):
                       .format(eco_label, name, spec, attr,
                               ' || '.join(wl_specs), dep_file,
                               describe_files(files)))
+            record_block(ecosystem, '{} {}'.format(name, spec),
+                         '版本约束无上界，超出白名单允许版本，'
+                         '需在 {} 同步更新版本号'.format(dep_file), files)
             return False, 'no_upper'
     wl_parsed = parse_specs(wl_specs, ecosystem)
     if not wl_parsed:
@@ -947,10 +1123,15 @@ def check_dep_version(ecosystem, name, spec, wl_specs, files, sync_specs=None):
                   .format(eco_label, name, spec, attr,
                           ' || '.join(wl_specs), dep_file,
                           describe_files(files)))
+        record_block(ecosystem, '{} {}'.format(name, spec),
+                     '版本号大于白名单允许版本，'
+                     '需在 {} 同步更新版本号'.format(dep_file), files)
         return False, 'greater'
     log_error("引入的{}依赖组件 {} 版本('{}') 不在{}白名单版本约束 {} 范围内 (文件: {})"
               .format(eco_label, name, spec, attr, ' || '.join(wl_specs),
                       describe_files(files)))
+    record_block(ecosystem, '{} {}'.format(name, spec),
+                 '版本不在白名单版本约束范围内', files)
     return False, 'out'
 
 
@@ -970,6 +1151,7 @@ def check_url_entry(url, files, url_wl, url_exact, py_wl, js_wl, py_sync, js_syn
     if not dep:
         log_error("引入的URL 不在白名单列表内: {} (文件: {})"
                   .format(clean_url(url), describe_files(files)))
+        record_block('url', clean_url(url), '不在 url 白名单列表内', files)
         return False, 'not_in_wl'
     dep_name, dep_ver = dep
     eco, specs = resolve_dep_ecosystem(dep_name, py_wl, js_wl)
@@ -979,6 +1161,9 @@ def check_url_entry(url, files, url_wl, url_exact, py_wl, js_wl, py_sync, js_syn
                   "{} (文件: {})"
                   .format(dep_name, dep_ver or '-', clean_url(url),
                           describe_files(files)))
+        record_block('url', clean_url(url),
+                     '识别为依赖组件 {}@{} 不在 opensource_py/opensource_js '
+                     '白名单内'.format(dep_name, dep_ver or '-'), files)
         return False, 'unknown_component'
     conf = ECO_CONF[eco]
     attr, dep_file = conf['attr'], conf['dep_file']
@@ -1011,12 +1196,19 @@ def check_url_entry(url, files, url_wl, url_exact, py_wl, js_wl, py_sync, js_syn
                   .format(eco_label, dep_name, dep_ver, attr,
                           ' || '.join(specs), dep_file,
                           clean_url(url), describe_files(files)))
+        record_block('url', clean_url(url),
+                     '依赖组件 {} 版本({}) 大于{}白名单允许版本，'
+                     '需在 {} 同步更新版本号'.format(dep_name, dep_ver, attr,
+                                                    dep_file), files)
     else:
         log_error("新增 URL 引入的{}依赖组件 {} 版本({}) 不在{}白名单版本约束 {} "
                   "范围内: {} (文件: {})"
                   .format(eco_label, dep_name, dep_ver, attr,
-                          ' || '.join(specs), clean_url(url),
-                          describe_files(files)))
+                          ' || '.join(specs), dep_file,
+                          clean_url(url), describe_files(files)))
+        record_block('url', clean_url(url),
+                     '依赖组件 {} 版本({}) 不在{}白名单版本约束范围内'
+                     .format(dep_name, dep_ver, attr), files)
     return False, status
 
 
@@ -1125,10 +1317,13 @@ def main():
     for name in sorted(new_third_party):
         files = new_third_party[name]
         if name in c_whitelist:
+            record_pass('c')
             log_info("新增三方库在白名单内: add_cann_third_party({}) ({})"
                      .format(name, describe_files(files)))
         else:
             blocked = True
+            record_block('c', 'add_cann_third_party({})'.format(name),
+                         '不在 opensource_c 白名单列表内', files)
             log_error("引入的三方库 不在opensource_c白名单列表内: "
                       "add_cann_third_party({}) (文件: {})"
                       .format(name, describe_files(files)))
@@ -1140,6 +1335,7 @@ def main():
         key = normalize_py_name(name)
         if key not in py_wl:
             blocked = True
+            record_block('py', name, '不在 opensource_py 白名单列表内', files)
             log_error("引入的Python依赖组件 {} 不在opensource_py白名单列表内 "
                       "(文件: {})".format(name, describe_files(files)))
             continue
@@ -1147,8 +1343,10 @@ def main():
                                        py_sync.get(key))
         if not ok:
             blocked = True
-        elif reason in REASON_ZH:
-            py_pass[reason] = py_pass.get(reason, 0) + 1
+        else:
+            record_pass('py')
+            if reason in REASON_ZH:
+                py_pass[reason] = py_pass.get(reason, 0) + 1
     log_pass_summary("Python依赖声明检查", py_pass)
 
     # 6. NodeJS 依赖声明检查（opensource_js）
@@ -1158,6 +1356,7 @@ def main():
         specs = js_lookup(js_wl, name)
         if specs is None:
             blocked = True
+            record_block('js', name, '不在 opensource_js 白名单列表内', files)
             log_error("引入的NodeJS依赖组件 {} 不在opensource_js白名单列表内 "
                       "(文件: {})".format(name, describe_files(files)))
             continue
@@ -1165,8 +1364,10 @@ def main():
                                        js_lookup(js_sync, name))
         if not ok:
             blocked = True
-        elif reason in REASON_ZH:
-            js_pass[reason] = js_pass.get(reason, 0) + 1
+        else:
+            record_pass('js')
+            if reason in REASON_ZH:
+                js_pass[reason] = js_pass.get(reason, 0) + 1
     log_pass_summary("NodeJS依赖声明检查", js_pass)
 
     # 7. URL 检查（url 白名单 + opensource_py/js 宽范围版本放行）
@@ -1176,9 +1377,14 @@ def main():
                                      py_wl, js_wl, py_sync, js_sync)
         if not ok:
             blocked = True
-        elif reason in REASON_ZH:
-            url_pass[reason] = url_pass.get(reason, 0) + 1
+        else:
+            record_pass('url')
+            if reason in REASON_ZH:
+                url_pass[reason] = url_pass.get(reason, 0) + 1
     log_pass_summary("URL检查", url_pass)
+
+    # 门禁结果展示（摘要文件 + run 页步骤摘要面板 + 拦截时 PR 评论）
+    publish_gate_summary(workspace, repo_name, target_branch, pr_number)
 
     if blocked:
         log_error("门禁检查未通过：引入的URL/三方库/依赖组件不合规")

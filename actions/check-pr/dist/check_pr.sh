@@ -64,7 +64,8 @@ if [[ "${REPOSITORY_NAME}" == @(metadef|driver|driver-dev|amct|asc-devkit|pypto|
 fi
 
 # OSS 开源依赖门禁：暂时仅在以下仓生效，其余仓跳过
-if [[ "${REPOSITORY_NAME}" == @(asc-devkit|ops-math) ]]; then
+# opencann/asc-devkit 为验证用临时受控仓（按全名与短名两种形态匹配）
+if [[ "${REPOSITORY_NAME}" == @(asc-devkit|ops-math|opencann/asc-devkit) ]]; then
     LOG_HEAD "Check URL and third-party library gate"
     python3 ${SCRIPT_DIR}/check_oss_dep.py ${WORKSPACE} ${REPOSITORY_NAME} ${GIT_TARGET_BRANCH} "${MERGE_ID:-}"
     DP_ASSERT_EQUAL "$?" "0" "check URL and third-party library gate"
