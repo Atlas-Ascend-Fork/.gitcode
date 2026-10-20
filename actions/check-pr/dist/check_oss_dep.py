@@ -48,9 +48,10 @@ opensource_py / opensource_js。
     门禁结果展示（受控仓执行检查后，展示效果对齐 SCA 官方任务面板）：
     - 分类登记放行/拦截计数与结构化拦截明细，生成 Markdown 摘要：
       ① 写 workspace/oss-dep-gate-summary.md（留档，供后续步骤读取）；
-      ② 追加到 $GITHUB_STEP_SUMMARY（runner 为 GitHub-Actions 兼容，该
-         变量为文件路径；支持时在流水线 run 页 Summary 区渲染"URL 开源
-         依赖门禁检查结果"面板，变量缺失时静默跳过）；
+      ② 追加到 $ATOMGIT_STEP_SUMMARY（与 codecheck_gitcode.py 的
+         _write_summary 一致：runner 注入该变量，值为摘要文件路径，
+         支持 Markdown 渲染到流水线 run 页 Summary 区渲染面板；变量
+         缺失时静默跳过）；
       ③ 门禁拦截时将面板回写 PR 评论（GATE_PR_COMMENT=false 可关闭；
          token/PR 编号复用 action 输入透传的 GIT_TOKEN/PR_NUMBER 环境
          变量，端点与 pre-pipeline/failure-analyze 一致）。
@@ -657,10 +658,11 @@ def _md_cell(text):
 
 
 def build_gate_summary_md(repo_name, target_branch, pr_number):
-    """生成"URL 开源依赖门禁检查结果" Markdown 面板（结构对齐 SCA 扫描结果面板）"""
+    """生成 OSS 开源依赖门禁 Markdown 面板（标题样式对齐 codecheck _write_summary）"""
     blocked = any(GATE_STATS[kind][1] for kind, _ in BLOCK_KIND_ZH)
     kind_zh = dict(BLOCK_KIND_ZH)
-    lines = ['## URL 开源依赖门禁检查结果', '']
+    icon = '❌' if blocked else '✅'
+    lines = ['## {} OSS 开源依赖门禁 (Open Source Dependency Gate)'.format(icon), '']
     if blocked:
         lines.append('**结论**: ❌ 门禁拦截（引入的 URL / 三方库 / 依赖组件不合规）')
     else:
@@ -730,9 +732,9 @@ def publish_gate_summary(workspace, repo_name, target_branch, pr_number):
     """
     门禁结果展示（三通道，任一失败仅告警、不影响门禁结论与退出码）：
     ① workspace/oss-dep-gate-summary.md 摘要文件（留档/后续步骤读取）；
-    ② 追加到 $GITHUB_STEP_SUMMARY（runner 为 GitHub-Actions 兼容，该变量
-       为文件路径；支持时在流水线 run 页 Summary 区渲染面板，效果对齐
-       SCA 官方任务；变量缺失时静默跳过）；
+    ② 追加到 $ATOMGIT_STEP_SUMMARY 步骤摘要（与 codecheck_gitcode.py 的
+       _write_summary 机制一致：runner 注入该环境变量，值为摘要文件路径，
+       支持 Markdown 渲染到流水线 run 页 Summary 区；变量缺失时静默跳过）；
     ③ 门禁拦截时将面板回写 PR 评论（GATE_PR_COMMENT=false 可关闭；token
        与 PR 编号复用 action 输入透传的 GIT_TOKEN/PR_NUMBER 环境变量）。
     """
@@ -745,9 +747,11 @@ def publish_gate_summary(workspace, repo_name, target_branch, pr_number):
         log_info('门禁摘要已写入: {}'.format(path))
     except Exception as e:
         log_warning('门禁摘要文件写入失败: {}'.format(e))
-    # ② run 页步骤摘要
-    summary_env = os.environ.get('GITHUB_STEP_SUMMARY') \
-        or os.environ.get('ATOMGIT_SUMMARY')
+    # ② run 页步骤摘要（与 codecheck_gitcode.py 的 _write_summary 实现一致：
+    #    平台 runner 注入 ATOMGIT_STEP_SUMMARY 环境变量，值为摘要文件路径，
+    #    追加 Markdown 即在流水线 run 页 Summary 区渲染面板）
+    summary_env = os.environ.get('ATOMGIT_STEP_SUMMARY') \
+        or os.environ.get('GITHUB_STEP_SUMMARY')
     if summary_env:
         try:
             with open(summary_env, 'a', encoding='utf-8') as f:
