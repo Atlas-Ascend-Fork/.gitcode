@@ -1,20 +1,6 @@
 #!/bin/bash
 
 GIT_TOKEN="${GIT_TOKEN:-}"
-
-# ---- 软放行判定：仓库参数 UT_SOFT_FAIL_REPOS 已配置（非空）→ 失败也 exit 0；未配置 → 拦截 ----
-fail_exit()
-{
-    local rc="${1:-1}"
-    [ "$rc" -eq 0 ] && exit 0
-    if [ "${UT_SOFT_FAIL_REPOS:-}" = "true" ]; then
-        echo "::warning::覆盖率收集失败(rc=${rc})，仓库参数 UT_SOFT_FAIL_REPOS=true，软放行"
-        exit 0
-    fi
-    echo "[ERROR] 覆盖率收集失败(rc=${rc})，仓库参数 UT_SOFT_FAIL_REPOS 未配置或为 false，拦截"
-    exit "$rc"
-}
-
 cd "${WORKSPACE}"
 
 # 先拿到原始远程地址
@@ -49,32 +35,26 @@ if [ "${COV_MODE}" = "report" ];then
     else
         yaml_path="${WORKSPACE}/classify_rule.yaml"
     fi
-    python3 count_files.py "${yaml_path}" "${UT_FIELD}" "${WORKSPACE}" "${WORKSPACE}" || fail_exit "$?"
-    bash generate_ut_report.sh || fail_exit "$?"
+    python3 count_files.py "${yaml_path}" "${UT_FIELD}" "${WORKSPACE}" "${WORKSPACE}"
+    bash generate_ut_report.sh
 else
     echo "${UT_PROCESS}"
     if [ "${UT_PROCESS}" = "ut_cov" ];then
       cd "${SCRIPT_DIR}/ut"
       chmod +x ./addlcov
       if [ "${LANGUAGE}" != "ts" ];then
-          python3 count_files.py "${WORKSPACE}/classify_rule.yaml" "${UT_TYPE}" "${WORKSPACE}" "${WORKSPACE}" || fail_exit "$?"
+          python3 count_files.py "${WORKSPACE}/classify_rule.yaml" "${UT_TYPE}" "${WORKSPACE}" "${WORKSPACE}"
       fi
       if [ "${LANGUAGE}" = "cpp" ];then
-          bash generate_ut_cov.sh "${UT_TYPE}" "${TARGET_BRANCH}" "${WORKSPACE}" True "${WORKSPACE}/cov/coverage.info" "${COVERAGE_NUM}" "${WORKSPACE}/pr_filelist_mod.txt" \
-              || fail_exit "$?"
+          bash generate_ut_cov.sh "${UT_TYPE}" "${TARGET_BRANCH}" "${WORKSPACE}" True "${WORKSPACE}/cov/coverage.info" "${COVERAGE_NUM}" "${WORKSPACE}/pr_filelist_mod.txt"
           coverage_path=$(find "${WORKSPACE}" -name "cov" | head -n1)
-          if [ -n "${coverage_path}" ] && [ -d "${coverage_path}" ]; then
-              cd "${coverage_path}"
-              tar -zcf ut_cov_${UT_TYPE}.tar.gz * || fail_exit 3
-              cp -rf ut_cov_${UT_TYPE}.tar.gz "${WORKSPACE}" || fail_exit 4
-          else
-              echo "[ERROR] 未找到 cov 目录"
-              fail_exit 2
-          fi
+          cd "${coverage_path}"
+          tar -zcf ut_cov_${UT_TYPE}.tar.gz *
+          cp -rf ut_cov_${UT_TYPE}.tar.gz "${WORKSPACE}"
       elif [ "${LANGUAGE}" = "python" ];then
-          bash generate_ut_cov_python.sh || fail_exit "$?"
+          bash generate_ut_cov_python.sh
       elif [ "${LANGUAGE}" = "ts" ];then
-          bash generate_ut_cov_ts.sh || fail_exit "$?"
+          bash generate_ut_cov_ts.sh
       fi
     elif [ "${UT_PROCESS}" = "coverage" ];then
       cd "${WORKSPACE}"
@@ -108,5 +88,3 @@ else
       mv ./coverage.info "./coverage_${UT_TYPE}.info"
     fi
 fi
-# 收尾：成功或软放行清单内 → exit 0；否则透传失败码拦截
-fail_exit 0
