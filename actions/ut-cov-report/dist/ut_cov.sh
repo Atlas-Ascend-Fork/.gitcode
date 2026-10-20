@@ -62,8 +62,14 @@ else
       echo "DEBUG WORKSPACE: [${WORKSPACE}]"
       echo "DEBUG UT_TYPE: [${UT_TYPE}]"
 
-      # 查找 ops.info
-      coverage_info=$(find "${WORKSPACE}" -type f -name "ops.info" | head -n1)
+      # A native UT run may combine builtin and experimental scopes. Prefer its
+      # explicit merged artifact to an arbitrary last-scope build/ops.info.
+      merged_scopes="${WORKSPACE}/ut_${UT_TYPE}_scopes.info"
+      if [[ -s "${merged_scopes}" ]]; then
+          coverage_info="${merged_scopes}"
+      else
+          coverage_info=$(find "${WORKSPACE}" -type f -name "ops.info" | head -n1)
+      fi
       echo "DEBUG 第一轮find ops.info: [${coverage_info}]"
 
       # 为空则查 coverage.info
@@ -75,12 +81,12 @@ else
       # 双重校验：变量非空 + 文件真实存在
       if [[ -z "${coverage_info}" ]]; then
           echo "ERROR: 未找到 ops.info / coverage.info 任意文件"
-          exit 0
+          exit 1
       fi
       if [[ ! -f "${coverage_info}" ]]; then
           echo "ERROR: 找到的路径不存在文件: ${coverage_info}"
           ls -la "${WORKSPACE}"
-          exit 0
+          exit 1
       fi
 
       # 拷贝、重命名，所有变量加双引号兼容空格路径
