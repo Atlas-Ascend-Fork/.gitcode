@@ -9,6 +9,7 @@
 
 import os
 from pathlib import Path
+import shutil
 import subprocess
 import tempfile
 import unittest
@@ -17,7 +18,18 @@ import unittest
 SCRIPT = Path(__file__).resolve().parents[1] / "dist/ut_cov.sh"
 
 
-@unittest.skipUnless(os.name == "posix", "Bash integration tests run on Linux")
+def find_bash():
+    if os.name == "nt":
+        candidate = Path(os.environ.get("ProgramFiles", "C:/Program Files"))
+        candidate /= "Git/bin/bash.exe"
+        return str(candidate) if candidate.is_file() else None
+    return shutil.which("bash")
+
+
+BASH = find_bash()
+
+
+@unittest.skipUnless(BASH, "Bash is required for integration tests")
 class NativeCoverageTests(unittest.TestCase):
     def setUp(self):
         self.temporary = tempfile.TemporaryDirectory()
@@ -25,16 +37,18 @@ class NativeCoverageTests(unittest.TestCase):
         self.root = Path(self.temporary.name)
         self.bin = self.root / "bin"
         self.bin.mkdir()
+        self.script = self.root / "ut_cov.sh"
+        self.script.write_bytes(SCRIPT.read_bytes().replace(b"\r\n", b"\n"))
         git = self.bin / "git"
-        git.write_text(
-            '#!/bin/bash\nif [[ "$1" == remote ]]; then echo https://example.invalid/repo.git; fi\nexit 0\n'
+        git.write_bytes(
+            b'#!/bin/bash\nif [[ "$1" == remote ]]; then echo https://example.invalid/repo.git; fi\nexit 0\n'
         )
         git.chmod(0o755)
 
-    def run_script(self):
+    def run_script(self, overrides=None):
         env = {
             **os.environ,
-            "WORKSPACE": str(self.root),
+            "WORKSPACE": self.root.as_posix(),
             "COV_MODE": "cov",
             "UT_PROCESS": "coverage",
             "UT_TYPE": "ophost",
@@ -42,10 +56,11 @@ class NativeCoverageTests(unittest.TestCase):
             "GIT_TOKEN": "",
             "UT_SOFT_FAIL_REPOS": "",
             "LANGUAGE": "cpp",
-            "PATH": str(self.bin) + os.pathsep + os.environ["PATH"],
+            "PATH": self.bin.as_posix() + os.pathsep + os.environ["PATH"],
         }
+        env.update(overrides or {})
         return subprocess.run(
-            ["bash", str(SCRIPT)],
+            [BASH, self.script.as_posix()],
             cwd=self.root,
             env=env,
             text=True,
@@ -80,6 +95,12 @@ class NativeCoverageTests(unittest.TestCase):
     def test_missing_coverage_still_fails(self):
         result = self.run_script()
         self.assertEqual(result.returncode, 1)
+        self.assertFalse((self.root / "coverage_ophost.info").exists())
+
+    def test_missing_native_coverage_cannot_be_soft_passed(self):
+        result = self.run_script({"UT_SOFT_FAIL_REPOS": "true"})
+        self.assertEqual(result.returncode, 1)
+        self.assertNotIn("command not found", result.stderr)
         self.assertFalse((self.root / "coverage_ophost.info").exists())
 
 
