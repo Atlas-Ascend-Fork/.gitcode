@@ -51,6 +51,9 @@ driver:
     - docs/en/Ascend_950_npu-smi
     - docs/en/Ascend_950_upgrade-tool
     - docs/en/nda
+    - skills
+    - .gitcode
+
 
 driver-dev:
   '*':
@@ -70,6 +73,8 @@ driver-dev:
     - docs/en/Ascend_950_npu-smi
     - docs/en/Ascend_950_upgrade-tool
     - docs/en/nda
+    - skills
+    - .gitcode
 
 runtime:
   '*':
