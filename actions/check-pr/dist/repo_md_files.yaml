@@ -54,7 +54,6 @@ driver:
     - skills
     - .gitcode
 
-
 driver-dev:
   '*':
     - docs/zh/Ascend_910B_DCMI_API

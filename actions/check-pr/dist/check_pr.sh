@@ -41,10 +41,25 @@ if [ -s "${decoded_list}" ]; then
         full_path="${type_line%%:*}"
         file_type="${type_line#*: }"
         decoded_line="${full_path#${WORKSPACE}/}"
-        if [[ "$file_type" == "data" || "$file_type" == *"image data"* ]]; then
-            if ! [[ "$decoded_line" =~ ^docs?/([^/]*/)*[^/]*\.(png|jpg)$ ]]; then
-                LOG_ERROR "Binary image file not allowed in this path: $decoded_line"
-                binary_check_result=1
+        if [[ "$decoded_line" =~ \.gitkeep$ ]]; then
+            echo "Skipping .gitkeep: $decoded_line"
+            continue
+        fi
+        if [[ "${REPOSITORY_NAME}" != "cann-samples" ]] && [[ "${REPOSITORY_NAME}" != "cann-learning-hub" ]]; then
+            # 非样例仓：命中文本类型白名单放行；否则仅允许 docs 路径下的 png/jpg 图片
+            if ! echo "$file_type" | grep -qiE 'text|json|svg|ascii|utf|unicode|xml|csv|ini'; then
+                if ! [[ "$decoded_line" =~ ^docs?/([^/]*/)*[^/]*\.(png|jpg|PNG|JPG)$ ]]; then
+                    LOG_ERROR "Binary file not allowed in this path: $decoded_line"
+                    binary_check_result=1
+                fi
+            fi
+        else
+            # cann-samples/cann-learning-hub 仓库：只允许图片文件放在 images 目录，任意层级
+            if ! echo "$file_type" | grep -qi 'text\|json\|svg'; then
+                if [[ ! "$decoded_line" =~ ^images/ && ! "$decoded_line" =~ /images/ ]]; then
+                    LOG_ERROR "Binary file must be placed under images directory in cann-samples: $decoded_line"
+                    binary_check_result=1
+                fi
             fi
         fi
     done < "${decoded_list}.types"
