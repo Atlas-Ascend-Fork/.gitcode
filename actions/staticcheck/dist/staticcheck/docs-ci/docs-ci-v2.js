@@ -1,8 +1,8 @@
 /**
  * 文档 pr 门禁检查脚本
- * 
+ *
  * 该脚本用于对 pr 变更的文档内容进行检查。
- * 
+ *
  * 命令行参数说明：
  * --repoPath                     必需，文档仓库存储路径
  * --targetOwnerRepo              必需，目标仓库信息，格式为 "owner/repo"
@@ -17,7 +17,7 @@
  * --outputJsonPath               可选，输出原始检查结果 result.json 路径，不指定默认为执行命令的当前路径
  * --proxy                        可选，代理地址
  * --concurrency                  可选，并发检查的文件数，默认 1
- * 
+ *
  * 支持的检查项：
  * - markdownlint: Markdown格式规范检查
  * - tag-closed-check: HTML标签闭合检查
@@ -27,10 +27,10 @@
  * - codespell-check: 英文单词拼写检查
  * - file-naming-check: 文件命名规范检查
  * - file-naming-consistency-check: 中英文文件命名一致性检查
- * 
+ *
  * 输出结果：
  * 脚本执行完成后会在当前目录生成 output.md 文件，包含检查结果详情。
- * 
+ *
  * 注意事项：
  * 1. 请确保 --repoPath 是文档所在的目录，脚本执行后也会将检查的文件路径打印出
  * 2. 请确认执行环境中文能够正常输出，否则存在中文文件时会导致获取的路径是乱码
@@ -39,7 +39,7 @@
  * 5. --detailUrl 是 | 检查项 | 检查结果 | 详情 | 这个表格中，详情这一列的链接回填项，不传递将没有详情这一列
  * 6. --ciConfigUrl 相关配置请查阅 https://atomgit.com/openeuler/docs/blob/stable-common/.doctools/%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6%E8%AF%B4%E6%98%8E.md 配置说明
  * 7. 非 --checkAll 模式下，若 PR 中存在文档删除变更（含重命名前的旧路径），且启用了 link-validity-check 或 resource-existence-check 中的任意一项，将在变更文件检查完成后单独对全量 md 文件执行删除文件引用扫描；命中的引用按节点类型分别归入 link-validity-check（link 节点、a 标签）与 resource-existence-check（image 节点、img/source/video/audio/image 标签、<<< 嵌入）；只启用一项时仅扫描对应类别的节点，避免污染未启用的检查项；--checkAll 全量模式下不进行该检查
- * 
+ *
  * 使用示例：
  * node docs-ci-v2.js \
     --repoPath="Your Repo Path" \
@@ -47,7 +47,7 @@
     --targetBranch="branch" \
     --detailUrl="Your Detail Url" \
     --outputCount="20" \
-    --ciConfigUrl="https://raw.atomgit.com/openeuler/docs-website/raw/ci/repo_ci.json" 
+    --ciConfigUrl="https://raw.atomgit.com/openeuler/docs-website/raw/ci/repo_ci.json"
  */
 "use strict";
 var __create = Object.create;
@@ -183483,7 +183483,7 @@ var CVirtualFS = class {
     if (this.loggingEnabled) {
       const id = event.traceID.toFixed(13).replaceAll(/\d{4}(?=\d)/g, "$&.");
       const msg = event.message ? `
-		${event.message}` : "";
+    ${event.message}` : "";
       const method = rPad(`${event.method}-${event.event}`, 16);
       this.log(`${method} ID:${id} ts:${event.ts.toFixed(13)} ${chopUrl(event.url)}${msg}`);
     }
@@ -194339,16 +194339,38 @@ async function execCheckLinkValidity(depthNodes, opts) {
   } = opts;
   const results = [];
   const idsMap = /* @__PURE__ */ new Map();
+  const lineCountMap = /* @__PURE__ */ new Map();
+  const contentsMap = /* @__PURE__ */ new Map();
+  const getContent = /* @__PURE__ */ __name((mdPath) => {
+    if (!contentsMap.has(mdPath)) {
+      contentsMap.set(mdPath, mdPath === "." ? Promise.resolve(content3) : getFileContentAsync(mdPath));
+    }
+    return contentsMap.get(mdPath);
+  }, "getContent");
   const getIds = /* @__PURE__ */ __name((mdPath) => {
     if (!idsMap.has(mdPath)) {
-      const contentPromise = mdPath === "." ? Promise.resolve(content3) : getFileContentAsync(mdPath);
       idsMap.set(
         mdPath,
-        contentPromise.then((c) => getMarkdownIds(c))
+        getContent(mdPath).then((c) => getMarkdownIds(c))
       );
     }
     return idsMap.get(mdPath);
   }, "getIds");
+  const getLineCount = /* @__PURE__ */ __name((mdPath) => {
+    if (!lineCountMap.has(mdPath)) {
+      lineCountMap.set(mdPath, getContent(mdPath).then((c) => c.split(/\r?\n/).length));
+    }
+    return lineCountMap.get(mdPath);
+  }, "getLineCount");
+  const isValidAnchor = /* @__PURE__ */ __name(async (mdPath, anchor) => {
+    const lineMatch = /^[Ll](\d+)$/.exec(anchor);
+    if (lineMatch) {
+      const lineNo = parseInt(lineMatch[1], 10);
+      return lineNo >= 1 && await getLineCount(mdPath) >= lineNo;
+    }
+    const ids = await getIds(mdPath);
+    return ids.has(anchor) || ids.has(anchor.toLowerCase());
+  }, "isValidAnchor");
   const excludedRanges = [];
   for (const item of depthNodes) {
     const start2 = item.node.position?.start?.offset;
@@ -194446,8 +194468,7 @@ async function execCheckLinkValidity(depthNodes, opts) {
               errors.push({ status: 404, zhMsg: "\u951A\u70B9\u65E0\u6CD5\u8BBF\u95EE\uFF0C#\u524D\u5B58\u5728\u591A\u4F59\u7684/" });
             } else {
               const mdPath = import_path4.default.join(prefixPath, decodeURI(link3.replace(".html", ".md")));
-              const ids = await getIds(mdPath);
-              if (!ids.has(anchor) && !ids.has(anchor.toLowerCase())) {
+              if (!await isValidAnchor(mdPath, anchor)) {
                 errors.push({ status: 404, zhMsg: "\u951A\u70B9\u65E0\u6CD5\u8BBF\u95EE" });
               }
             }
@@ -194458,8 +194479,7 @@ async function execCheckLinkValidity(depthNodes, opts) {
           errors.push({ status: linkStatus, zhMsg: `${link3.startsWith("http") ? "http " : "\u672C\u5730\u8DEF\u5F84"}\u94FE\u63A5\u65E0\u6CD5\u8BBF\u95EE` });
         }
       } else if (!disableCheckAnchor && anchor) {
-        const ids = await getIds(".");
-        if (!ids.has(anchor) && !ids.has(anchor.toLowerCase())) {
+        if (!await isValidAnchor(".", anchor)) {
           errors.push({ status: 404, zhMsg: "\u951A\u70B9\u65E0\u6CD5\u8BBF\u95EE" });
         }
       }
@@ -194961,7 +194981,7 @@ function checkAttrs(depthNodes, signal) {
       const blankSpaces = attr.raw.length - raw.length;
       if (attr.quote === "" && attr.value !== "") {
         results.push({
-          name: `attrs-check`,
+          name: `tag-closed-check`,
           type: "error",
           content: raw,
           start: startOffset + attr.index + blankSpaces,
@@ -194974,7 +194994,7 @@ function checkAttrs(depthNodes, signal) {
       }
       if (set2.has(attr.name)) {
         results.push({
-          name: `attrs-check`,
+          name: `tag-closed-check`,
           type: "error",
           content: attr.raw,
           start: startOffset + attr.index + blankSpaces,
@@ -196371,9 +196391,9 @@ ${Object.keys(checkItems).length ? outputCheckItemsTable2.join("\n") : ""}`);
   });
   const output = `\u274C \u6587\u6863\u95E8\u7981\u672A\u901A\u8FC7\uFF01
 
-${outputCheckItemsTable.join("\n")} 
+${outputCheckItemsTable.join("\n")}
 
- ${outputItems.length > outputCount ? `\u{1F4A1} \u672C\u6B21\u68C0\u67E5\u51FA ${outputItems.length} \u9879\u9519\u8BEF\uFF0C\u4EC5\u5C55\u793A\u524D ${outputCount} \u6761${detailUrl ? "\uFF0C\u8BF7\u901A\u8FC7\u4E0A\u65B9\u8868\u683C\u7684 \u201C\u67E5\u770B\u8BE6\u60C5\u201D \u83B7\u53D6\u66F4\u591A\u4FE1\u606F~" : ""}` : `\u{1F4A1} \u672C\u6B21\u68C0\u67E5\u51FA ${outputItems.length} \u9879\u9519\u8BEF\uFF0C\u8BE6\u60C5\u5185\u5BB9\u5982\u4E0B\uFF1A`} 
+ ${outputItems.length > outputCount ? `\u{1F4A1} \u672C\u6B21\u68C0\u67E5\u51FA ${outputItems.length} \u9879\u9519\u8BEF\uFF0C\u4EC5\u5C55\u793A\u524D ${outputCount} \u6761${detailUrl ? "\uFF0C\u8BF7\u901A\u8FC7\u4E0A\u65B9\u8868\u683C\u7684 \u201C\u67E5\u770B\u8BE6\u60C5\u201D \u83B7\u53D6\u66F4\u591A\u4FE1\u606F~" : ""}` : `\u{1F4A1} \u672C\u6B21\u68C0\u67E5\u51FA ${outputItems.length} \u9879\u9519\u8BEF\uFF0C\u8BE6\u60C5\u5185\u5BB9\u5982\u4E0B\uFF1A`}
 
 ${outputErrorsTable.join("\n")}`;
   import_fs5.default.writeFileSync(outputPath, output);
