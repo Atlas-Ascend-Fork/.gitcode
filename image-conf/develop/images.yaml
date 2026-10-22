@@ -23,16 +23,16 @@ global:
         lv6_last: ubuntu20.04.05_x86:lv6_v1.1035
     ubuntu24.04:
       arm:
-        lv6: ubuntu24.04_arm:lv6_v1.1133
-        smoke: ubuntu24.04_arm:pre_mindspore_A2_conda_v1.1051
+        lv6: ubuntu24.04_arm:lv6_v1.1135
+        smoke: ubuntu24.04_arm:pre_mindspore_A2_conda_v1.1052
       x86:
-        lv6: ubuntu24.04_x86:lv6_v1.1151
+        lv6: ubuntu24.04_x86:lv6_v1.1153
         xla_npu: ubuntu_npu:v1.0
     ubuntu24.04_gcc15:
       arm:
-        lv6: ubuntu24.04_arm:lv6_v2.1015
+        lv6: ubuntu24.04_arm:lv6_v2.1017
       x86:
-        lv6: ubuntu24.04_x86:lv6_v2.1016
+        lv6: ubuntu24.04_x86:lv6_v2.1018
     ubuntu22.04:
       x86:
         asnumpy: ubuntu22.04_x86:v1.0
@@ -409,7 +409,7 @@ repos:
         arm:
           lv6: ubuntu20.04.05_arm:lv6_v1.1038
         x86:
-          lv6: ubuntu20.04.05_x86:lv6_v1.1039        
+          lv6: ubuntu20.04.05_x86:lv6_v1.1039
       ubuntu24.04:
         x86:
           api_check: ubuntu24.04.3_x86:lv6_v1.1038
@@ -677,7 +677,7 @@ repos:
         x86:
           driver: ubuntu20.04.05_x86:headers540-v1.3
       openeuler:
-        arm: 
+        arm:
           driver: openeuler_arm:kernel510-v1.3
       ubuntu24.04:
         x86:
