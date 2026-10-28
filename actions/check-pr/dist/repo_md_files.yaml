@@ -180,3 +180,11 @@ asc-comm:
 pypto-vscode:
   'master':
     - docs/zh
+
+opbase:
+  'master':
+    - docs
+    - experimental
+    - aclnn*.md
+    - torchapi_*.md
+    - '*Pass.md'

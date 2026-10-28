@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """检查 PR 中的修改文件是否缺少对应的中英文双语版本"""
 from __future__ import annotations
+import fnmatch
 import logging
 import sys
 from pathlib import Path
@@ -94,9 +95,15 @@ def read_yaml(md_yaml: str, repo: str, branch: str) -> list[str]:
 
 
 def is_in_paths(file_path: str, ref_paths: list[str], workspace: Path) -> bool:
-    """判断 file_path 是否在 ref_paths 中某个路径下（含自身）"""
+    """判断 file_path 是否在 ref_paths 中某个路径下（含自身）；
+    ref 含通配符（* ? [）时按 fnmatch 对相对路径整体匹配"""
     p = (workspace / file_path).resolve()
+    norm = file_path.replace("\\", "/")
     for ref in ref_paths:
+        if any(ch in ref for ch in "*?["):
+            if fnmatch.fnmatch(norm, ref):
+                return True
+            continue
         r = (workspace / ref).resolve()
         if p == r or r in p.parents:
             return True
