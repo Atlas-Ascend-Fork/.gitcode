@@ -23,16 +23,16 @@ global:
         lv6_last: ubuntu20.04.05_x86:lv6_v1.1035
     ubuntu24.04:
       arm:
-        lv6: ubuntu24.04_arm:lv6_v1.1135
-        smoke: ubuntu24.04_arm:pre_mindspore_A2_conda_v1.1052
+        lv6: ubuntu24.04_arm:lv6_v1.1137
+        smoke: ubuntu24.04_arm:pre_mindspore_A2_conda_v1.1054
       x86:
-        lv6: ubuntu24.04_x86:lv6_v1.1153
+        lv6: ubuntu24.04_x86:lv6_v1.1155
         xla_npu: ubuntu_npu:v1.0
     ubuntu24.04_gcc15:
       arm:
-        lv6: ubuntu24.04_arm:lv6_v2.1017
+        lv6: ubuntu24.04_arm:lv6_v2.1019
       x86:
-        lv6: ubuntu24.04_x86:lv6_v2.1018
+        lv6: ubuntu24.04_x86:lv6_v2.1020
     ubuntu22.04:
       x86:
         asnumpy: ubuntu22.04_x86:v1.0
@@ -467,6 +467,18 @@ repos:
         ubuntu24.04_gcc15:x86:lv6
 
   ge:
+    os_mirror:
+      ubuntu24.04:
+        arm:
+          lv6: ubuntu24.04_arm:lv6_v1.1135
+          smoke: ubuntu24.04_arm:pre_mindspore_A2_conda_v1.1052
+        x86:
+          lv6: ubuntu24.04_x86:lv6_v1.1153
+      ubuntu24.04_gcc15:
+        arm:
+          lv6: ubuntu24.04_arm:lv6_v2.1017
+        x86:
+          lv6: ubuntu24.04_x86:lv6_v2.1018
     stages:
       Compile_X86_compiler:
         ubuntu24.04:x86:lv6
