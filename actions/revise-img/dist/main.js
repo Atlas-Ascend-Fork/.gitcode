@@ -63,14 +63,18 @@ async function run() {
         const cloneDir = "cann-ci";
         const comment = core.getInput('comment') || '';
         let ciBranch = '';
-        const m = comment.match(/.*@(\S+)/);
+        const m = comment.match(/^\/?compile@([A-Za-z0-9._-]+)\s*$/);
         if (m) ciBranch = m[1];
         let repoUrl, cloneBranch;
         if (ciBranch) {
             repoUrl = "https://gitcode.com/opencann/.gitcode.git";
             cloneBranch = ciBranch;
             if (token) {
-                (0, child_process_1.execSync)(`git config --global url."https://cann-robot:${token}@gitcode.com/".insteadOf "https://gitcode.com/"`);
+                (0, child_process_1.execFileSync)('git', [
+                    'config', '--global',
+                    `url.https://cann-robot:${token}@gitcode.com/.insteadOf`,
+                    'https://gitcode.com/'
+                ]);
             }
             console.log(`拉取分支：${ciBranch}（使用 ci 仓库分支配置）`);
         }
@@ -82,7 +86,12 @@ async function run() {
         console.log(`仓库名：${repo_name}`);
         console.log(`目标分支：${target_branch}`);
         console.log('开始拉取 cann-ci...');
-        (0, child_process_1.execSync)(`git clone ${cloneBranch ? '-b ' + cloneBranch + ' ' : ''}${repoUrl} ${cloneDir} --depth 1`, { stdio: 'inherit' });
+        const cloneArgs = ['clone'];
+        if (cloneBranch) {
+            cloneArgs.push('-b', cloneBranch);
+        }
+        cloneArgs.push(repoUrl, cloneDir, '--depth', '1');
+        (0, child_process_1.execFileSync)('git', cloneArgs, { stdio: 'inherit' });
         // 1. 优先当前分支配置
         const branchYamlRel = `image-conf/${target_branch}/images.yaml`;
         const branchYamlFull = path_1.default.join(cloneDir, branchYamlRel);
@@ -103,7 +112,7 @@ async function run() {
         }
         console.log(`配置文件路径：${fullYamlPath}`);
         const pyScript = path_1.default.resolve(__dirname, "./get_repo_images.py");
-        const output = (0, child_process_1.execSync)(`python3 "${pyScript}" "${fullYamlPath}" "${repo_name}"`, { encoding: 'utf-8', stdio: ['pipe', 'pipe', 'inherit'] }).trim();
+        const output = (0, child_process_1.execFileSync)('python3', [pyScript, fullYamlPath, repo_name], { encoding: 'utf-8', stdio: ['pipe', 'pipe', 'inherit'] }).trim();
         console.log("脚本输出：\n" + output);
         const lines = output.split('\n').filter(l => l.trim() !== '');
         if (lines.length === 0) {

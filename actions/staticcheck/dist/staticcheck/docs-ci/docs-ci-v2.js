@@ -143403,7 +143403,7 @@ var import_path2 = __toESM(require("path"));
 var import_child_process = require("child_process");
 function getPRChangedFiles(repoPath, baseBranch = "main") {
   try {
-    const output = (0, import_child_process.execSync)(`git -c core.quotepath=false diff --diff-filter=AMR --name-status ${baseBranch}...HEAD`, {
+    const output = (0, import_child_process.execFileSync)("git", ["-c", "core.quotepath=false", "diff", "--diff-filter=AMR", "--name-status", `${baseBranch}...HEAD`], {
       cwd: repoPath,
       encoding: "utf-8"
     }).trim();
@@ -143438,7 +143438,7 @@ function getPRChangedFiles(repoPath, baseBranch = "main") {
 __name(getPRChangedFiles, "getPRChangedFiles");
 function getPRDeletedFiles(repoPath, baseBranch = "main") {
   try {
-    const output = (0, import_child_process.execSync)(`git -c core.quotepath=false diff --diff-filter=DR --name-status ${baseBranch}...HEAD`, {
+    const output = (0, import_child_process.execFileSync)("git", ["-c", "core.quotepath=false", "diff", "--diff-filter=DR", "--name-status", `${baseBranch}...HEAD`], {
       cwd: repoPath,
       encoding: "utf-8"
     }).trim();
