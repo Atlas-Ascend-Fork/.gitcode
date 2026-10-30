@@ -1503,3 +1503,31 @@ repos:
         ubuntu24.04_gcc15:x86:lv6
       Compile_Ascend_ARM_ubuntu24:
         ubuntu24.04_gcc15:arm:lv6
+  cann-device-lm:
+    os_mirror:
+      ubuntu24.04_ndk:
+        x86:
+          repo: ubuntu24.04_x86_ndk:repo_20261023074923
+        arm:
+          repo: ubuntu24.04_arm_ndk:repo_20261023075532
+      ubuntu24.04_gcc15:
+        x86:
+          lv6: ubuntu24.04_x86:lv6_v2.1018
+      ubuntu24.04:
+        arm:
+          smoke: ubuntu24.04_arm:pre_mindspore_A2_conda_v1.1052
+    stages:
+      Compile_Ascend_X86:
+        ubuntu24.04_ndk:x86:repo
+      Compile_Ascend_ARM:
+        ubuntu24.04_ndk:arm:repo
+      Compile_TorchDelegate_X86:
+        ubuntu24.04_ndk:x86:repo
+      Compile_TorchDelegate_ARM:
+        ubuntu24.04_ndk:arm:repo
+      UT_Test:
+        ubuntu24.04_gcc15:x86:lv6
+      UT_TorchDelegate:
+        ubuntu24.04_gcc15:x86:lv6
+      Smoke_TorchDelegate_A2:
+        ubuntu24.04:arm:smoke
