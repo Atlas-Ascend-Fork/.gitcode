@@ -70,7 +70,7 @@ DP_ASSERT_EQUAL "${binary_check_result}" "0" "check binary files"
 python3 ${SCRIPT_DIR}/check_empty_file.py ${WORKSPACE} ${WORKSPACE}/pr_filelist.txt
 DP_ASSERT_EQUAL "$?" "0" "check empty file"
 
-if [[ "${REPOSITORY_NAME}" == @(metadef|driver|driver-dev|amct|asc-devkit|pypto|ge|oam-tools|runtime|graph-autofusion|hixl|tensorflow|ops-gnn|hcomm|hccl|ops-ras|asc-tools|asc-comm|opbase) ]] && \
+if [[ "${REPOSITORY_NAME}" == @(metadef|driver|driver-dev|amct|asc-devkit|pypto|ge|oam-tools|runtime|graph-autofusion|hixl|tensorflow|ops-gnn|hcomm|hccl|ops-ras|asc-tools|asc-comm|opbase|ops-cv|) ]] && \
    [ "${GIT_TARGET_BRANCH}" != "feature/community-tasks" ] && \
    [ "${GIT_TARGET_BRANCH}" != "feature/tensor_api_from_9.0.0" ];then
     echo "check md files"
