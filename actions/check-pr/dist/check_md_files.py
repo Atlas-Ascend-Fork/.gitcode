@@ -15,7 +15,7 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-ALL_ENGLISH_SKIP_EXCLUDED_REPOS = {"pypto"}
+ALL_ENGLISH_SKIP_EXCLUDED_REPOS = set()
 
 
 def is_english_md(file_path: str) -> bool:
@@ -205,7 +205,7 @@ def main(repo: str, branch: str, md_yaml: str, pr_file: str, workspace: str) -> 
         logger.info("PR 中没有 .md 文件，跳过检查")
         return 0
 
-    # 英文文档逐个跳过检测（pypto 例外：其英文文档同样要求与中文同步）
+    # 英文文档（en/ 或 *_en.md）逐个跳过检测
     skip_english = repo not in ALL_ENGLISH_SKIP_EXCLUDED_REPOS
 
     repo_md_paths = read_yaml(md_yaml, repo, branch)
