@@ -112,7 +112,7 @@ jobs:
   JOB_sca:
     name: SCA
     steps:
-      - 
+      -
         name: sca
         id: sca-pr-scan
         uses: sca-pr-scan
@@ -150,7 +150,13 @@ jobs:
         run: |
           cd ${{ steps.process_checkout.outputs.path }}
           cd CI/scripts
-          python3 anti_virus_gitcode.py --access_key ${{secrets.ANTI_AK}} --secret_access_key ${{secrets.ANTI_SK}} --access_key_get ${{secrets.ANTI_AK_GET}} --secret_access_key_get ${{secrets.ANTI_SK_GET}} --org_name ${org_name} --pr_id ${MERGE_ID} --repo ${repo_name} --commit_id ${{ atomgit.event.pull_request.merge_commit_sha }} --online ${{ vars.APPLY_LABEL }}
+          COMMIT_ID="${{ atomgit.event.pull_request.merge_commit_sha }}"
+          if [ -z "${COMMIT_ID}" ]; then
+            echo "ERROR: 流水线检出代码不正确(merge_commit_sha为空), PR 可能存在冲突, 请排查并解决冲突后重新触发流水线"
+            echo "ERROR: 若冲突已解决仍反复失败, 可能是平台Note事件传参问题, 请联系CI维护者"
+            exit 1
+          fi
+          python3 anti_virus_gitcode.py --access_key ${{secrets.ANTI_AK}} --secret_access_key ${{secrets.ANTI_SK}} --access_key_get ${{secrets.ANTI_AK_GET}} --secret_access_key_get ${{secrets.ANTI_SK_GET}} --org_name ${org_name} --pr_id ${MERGE_ID} --repo ${repo_name} --commit_id "${COMMIT_ID}" --online ${{ vars.APPLY_LABEL }}
     if: env.online == 'true'
     runs-on: ["self-hosted", "arch=x64", "spec=slim"]
     container:
@@ -183,7 +189,13 @@ jobs:
           fi
           cd ${{ steps.process_checkout.outputs.path }}
           cd CI/scripts
-          python3 codecheck_gitcode.py --access_key ${{secrets.CODECHECK_AK}} --secret_access_key ${{secrets.CODECHECK_SK}} --access_key_get ${{secrets.CODECHECK_AK_GET}} --secret_access_key_get ${{secrets.CODECHECK_SK_GET}} --org_name ${org_name} --pr_id ${MERGE_ID} --repo ${repo_name} --commit_id ${{ atomgit.event.pull_request.merge_commit_sha }} --online ${{ vars.APPLY_LABEL }}
+          COMMIT_ID="${{ atomgit.event.pull_request.merge_commit_sha }}"
+          if [ -z "${COMMIT_ID}" ]; then
+            echo "ERROR: 流水线检出代码不正确(merge_commit_sha为空), PR 可能存在冲突, 请排查并解决冲突后重新触发流水线"
+            echo "ERROR: 若冲突已解决仍反复失败, 可能是平台Note事件传参问题, 请联系CI维护者"
+            exit 1
+          fi
+          python3 codecheck_gitcode.py --access_key ${{secrets.CODECHECK_AK}} --secret_access_key ${{secrets.CODECHECK_SK}} --access_key_get ${{secrets.CODECHECK_AK_GET}} --secret_access_key_get ${{secrets.CODECHECK_SK_GET}} --org_name ${org_name} --pr_id ${MERGE_ID} --repo ${repo_name} --commit_id "${COMMIT_ID}" --online ${{ vars.APPLY_LABEL }}
     if: env.online == 'true'
     runs-on: ["self-hosted", "arch=x64", "spec=slim"]
     container:
@@ -219,7 +231,13 @@ jobs:
           codecheck_parent_task_id=$(bash parse_codecheck_style.sh) || exit 0
           export remark=codestyle
           export codecheck_parent_task_id=$codecheck_parent_task_id
-          python3 codecheck_gitcode.py --access_key ${{secrets.CODECHECK_AK}} --secret_access_key ${{secrets.CODECHECK_SK}} --access_key_get ${{secrets.CODECHECK_AK_GET}} --secret_access_key_get ${{secrets.CODECHECK_SK_GET}} --org_name ${org_name} --pr_id ${MERGE_ID} --repo ${repo_name} --commit_id ${{ atomgit.event.pull_request.merge_commit_sha }} --online ${{ vars.APPLY_LABEL }}
+          COMMIT_ID="${{ atomgit.event.pull_request.merge_commit_sha }}"
+          if [ -z "${COMMIT_ID}" ]; then
+            echo "ERROR: 流水线检出代码不正确(merge_commit_sha为空), PR 可能存在冲突, 请排查并解决冲突后重新触发流水线"
+            echo "ERROR: 若冲突已解决仍反复失败, 可能是平台Note事件传参问题, 请联系CI维护者"
+            exit 1
+          fi
+          python3 codecheck_gitcode.py --access_key ${{secrets.CODECHECK_AK}} --secret_access_key ${{secrets.CODECHECK_SK}} --access_key_get ${{secrets.CODECHECK_AK_GET}} --secret_access_key_get ${{secrets.CODECHECK_SK_GET}} --org_name ${org_name} --pr_id ${MERGE_ID} --repo ${repo_name} --commit_id "${COMMIT_ID}" --online ${{ vars.APPLY_LABEL }}
     if: env.online == 'true'
     runs-on: ["self-hosted", "arch=x64", "spec=slim"]
     container:
