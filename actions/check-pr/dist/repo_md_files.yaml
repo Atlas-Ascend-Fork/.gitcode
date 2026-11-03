@@ -100,7 +100,10 @@ ge:
 
 pypto:
   '*':
-    - docs/zh
+    - docs/zh/api
+    - docs/zh/guide
+    - docs/en/api
+    - docs/en/guide
     - docs/en
     - .opencode
     - .agents
@@ -180,6 +183,8 @@ asc-comm:
     - docs/en/guide
     - docs/en/programming_model
     - docs/en/index.md
+    - docs/en/experimental
+    - docs/zh/experimental
   '9.3.0-beta.1':
     - docs/zh/api
     - docs/zh/guide

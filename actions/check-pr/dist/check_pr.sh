@@ -70,9 +70,20 @@ DP_ASSERT_EQUAL "${binary_check_result}" "0" "check binary files"
 python3 ${SCRIPT_DIR}/check_empty_file.py ${WORKSPACE} ${WORKSPACE}/pr_filelist.txt
 DP_ASSERT_EQUAL "$?" "0" "check empty file"
 
-if [[ "${REPOSITORY_NAME}" == @(metadef|driver|driver-dev|amct|asc-devkit|pypto|ge|oam-tools|runtime|graph-autofusion|hixl|tensorflow|ops-gnn|hcomm|hccl|ops-ras|asc-tools|asc-comm|opbase|ops-cv|) ]] && \
+# md 双语检查分两组生效：
+# - 常规名单仓：除两个 feature 分支外，全分支生效
+# - ops-ras/ops-cv/opbase/ops-math/ops-nn/ops-transformer：仅在 master 分支生效
+run_md_check=false
+if [[ "${REPOSITORY_NAME}" == @(metadef|driver|driver-dev|amct|asc-devkit|pypto|ge|oam-tools|runtime|graph-autofusion|hixl|tensorflow|ops-gnn|hcomm|hccl|asc-tools|asc-comm|) ]] && \
    [ "${GIT_TARGET_BRANCH}" != "feature/community-tasks" ] && \
    [ "${GIT_TARGET_BRANCH}" != "feature/tensor_api_from_9.0.0" ];then
+    run_md_check=true
+elif [[ "${REPOSITORY_NAME}" == @(ops-ras|ops-cv|opbase|ops-math|ops-nn|ops-transformer) ]] && \
+   [ "${GIT_TARGET_BRANCH}" == "master" ];then
+    run_md_check=true
+fi
+
+if [ "${run_md_check}" = "true" ];then
     echo "check md files"
     python3  ${SCRIPT_DIR}/check_md_files.py ${REPOSITORY_NAME} ${GIT_TARGET_BRANCH} ${SCRIPT_DIR}/repo_md_files.yaml ${WORKSPACE}/pr_filelist_mod.txt ${WORKSPACE}
     DP_ASSERT_EQUAL "$?" "0" "Check ${REPOSITORY_NAME} md files " "true"
