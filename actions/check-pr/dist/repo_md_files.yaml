@@ -168,6 +168,14 @@ ops-ras:
   9.2.0:
     - .
 
+ops-nn:
+  'master':
+    - docs
+    - experimental
+    - aclnn*.md
+    - torchapi_*.md
+    - '*Pass.md'
+
 docs:
   '*':
     - docs

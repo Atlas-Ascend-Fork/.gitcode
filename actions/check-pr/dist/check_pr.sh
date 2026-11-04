@@ -78,7 +78,7 @@ if [[ "${REPOSITORY_NAME}" == @(metadef|driver|driver-dev|amct|asc-devkit|pypto|
    [ "${GIT_TARGET_BRANCH}" != "feature/community-tasks" ] && \
    [ "${GIT_TARGET_BRANCH}" != "feature/tensor_api_from_9.0.0" ];then
     run_md_check=true
-elif [[ "${REPOSITORY_NAME}" == @(ops-ras|ops-cv|opbase) ]] && \
+elif [[ "${REPOSITORY_NAME}" == @(ops-ras|ops-cv|opbase|ops-nn) ]] && \
    [ "${GIT_TARGET_BRANCH}" == "master" ];then
     run_md_check=true
 fi
