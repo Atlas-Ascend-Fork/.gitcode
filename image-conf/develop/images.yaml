@@ -27,6 +27,7 @@ global:
         smoke: ubuntu24.04_arm:pre_mindspore_A2_conda_v1.1055
       x86:
         lv6: ubuntu24.04_x86:lv6_v1.1156
+        smoke_A5: ubuntu24.04_x86:pre_mindspore_A5_conda_v1.1003
         xla_npu: ubuntu_npu:v1.0
     ubuntu24.04_gcc15:
       arm:
@@ -548,6 +549,8 @@ repos:
         ubuntu24.04_gcc15:x86:lv6
       PreSmoke_A900_npupool:
         ubuntu24.04:arm:smoke
+      PreSmoke_A5:
+        ubuntu24.04:x86:smoke_A5
 
 
   metadef:
@@ -566,6 +569,8 @@ repos:
         ubuntu24.04_gcc15:x86:lv6
       Smoke_A900_npupool:
         ubuntu24.04:arm:smoke
+      PreSmoke_A5:
+        ubuntu24.04:x86:smoke_A5
 
   runtime-dev:
     os_mirror:
