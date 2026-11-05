@@ -14,6 +14,7 @@ global:
         lv6_monitor_9_0_0: ubuntu20.04.05_arm:lv6_v1.1089
         boost_component: ubuntu:20.04.arm.cann_20260429060022
         boost_component_cann920: ubuntu:20.04.arm.cann920_260828
+        boost_component_cann920_v2: ubuntu:20.04.arm.cann920.261019
       x86:
         lv1: ubuntu20.04.05_x86:lv1_v1.1003
         lv2: ubuntu20.04.05_x86:lv2_v1.1010
@@ -24,6 +25,7 @@ global:
         lv6_monitor: ubuntu20.04.05_x86:lv6_v1.1069
         lv6_monitor_9_0_0: ubuntu20.04.05_x86:lv6_v1.1092
         boost_component: ubuntu:20.04.x86.cann_20260429060022
+        boost_component_cann920_v2: ubuntu:20.04.x86.cann920.261019
     ubuntu22.04:
       x86:
         dsl_ut: ascend-catlass-dsl:latest
@@ -1393,11 +1395,11 @@ repos:
   catlass:
     stages:
       Compile_Ascend_ARM:
-        ubuntu20.04:arm:boost_component_cann920
+        ubuntu20.04:arm:boost_component_cann920_v2
       UT_dsl:
         ubuntu22.04:x86:dsl_ut
       PreSmoke:
-        ubuntu20.04:arm:boost_component
+        ubuntu20.04:arm:boost_component_cann920_v2
   ascend-boost-comm:
     stages:
       Compile_Ascend_ARM:
@@ -1419,13 +1421,13 @@ repos:
   sip:
     stages:
       Compile_Ascend_X86:
-        ubuntu20.04:x86:boost_component
+        ubuntu20.04:x86:boost_component_cann920_v2
       Compile_Ascend_ARM:
-        ubuntu20.04:arm:boost_component
+        ubuntu20.04:arm:boost_component_cann920_v2
       UT_Test:
-        ubuntu20.04:arm:boost_component
+        ubuntu20.04:arm:boost_component_cann920_v2
       PreSmoke:
-        ubuntu20.04:arm:boost_component
+        ubuntu20.04:arm:boost_component_cann920_v2
   shmem:
     stages:
       Compile_Ascend_ARM:
