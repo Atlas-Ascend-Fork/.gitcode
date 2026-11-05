@@ -162,8 +162,8 @@ ops-ras:
   'master':
     - docs
     - experimental
-    - aclnn*.md
-    - torchapi_*.md
+    - '*aclnn*.md'
+    - '*torchapi_*.md'
     - '*Pass.md'
   9.2.0:
     - .
@@ -172,8 +172,8 @@ ops-nn:
   'master':
     - docs
     - experimental
-    - aclnn*.md
-    - torchapi_*.md
+    - '*aclnn*.md'
+    - '*torchapi_*.md'
     - '*Pass.md'
 
 docs:
@@ -211,14 +211,22 @@ opbase:
   'master':
     - docs
     - experimental
-    - aclnn*.md
-    - torchapi_*.md
+    - '*aclnn*.md'
+    - '*torchapi_*.md'
     - '*Pass.md'
 
 ops-cv:
   'master':
     - docs
     - experimental
-    - aclnn*.md
-    - torchapi_*.md
+    - '*aclnn*.md'
+    - '*torchapi_*.md'
+    - '*Pass.md'
+
+ops-math:
+  'master':
+    - docs
+    - experimental
+    - '*aclnn*.md'
+    - '*torchapi_*.md'
     - '*Pass.md'
