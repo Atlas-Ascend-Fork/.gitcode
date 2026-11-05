@@ -31,9 +31,9 @@ fi
 git branch
 git branch -r
 
-git diff origin/${target_branch} HEAD --stat
-git -c core.quotePath=false diff origin/${target_branch} HEAD --name-status > pr_filelist_mod.txt
-git -c core.quotePath=false diff origin/${target_branch} HEAD --name-only > pr_filelist.txt
+git diff origin/${target_branch}...HEAD --stat
+git -c core.quotePath=false diff origin/${target_branch}...HEAD --name-status > pr_filelist_mod.txt
+git -c core.quotePath=false diff origin/${target_branch}...HEAD --name-only > pr_filelist.txt
 git -c core.quotePath=false diff origin/${target_branch}...HEAD --name-only --diff-filter=AM > pr_filelist_precommit.txt
 git -c core.quotePath=false diff -U0 -w --no-renames origin/${target_branch}...HEAD > update_file_detail.txt
 
@@ -41,6 +41,6 @@ touch gitdiff.txt
 while IFS= read -r line;do
   if [[ -f "$line" && "$line" == *.md ]];then
     echo "------${line}" >> gitdiff.txt
-    git diff origin/${target_branch} "$line" >> gitdiff.txt
+    git diff origin/${target_branch}...HEAD "$line" >> gitdiff.txt
   fi
 done < pr_filelist.txt
