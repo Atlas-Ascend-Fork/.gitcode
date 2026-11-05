@@ -274,46 +274,6 @@ def compliance(code_dir, script_dir, repo_name, check_md_lst):
     return data_lst
 
 
-
-def compliance(code_dir, script_dir, repo_name, check_md_lst):
-    """芯片标签的合法性检查"""
-    data_lst = []
-    tag_check_js = os.path.join(script_dir, "js/tag_check.js")
-    tag_check_result_json = os.path.join(code_dir, "tag_check_result.json")
-    start_time = datetime.now()
-    for mdfile in check_md_lst:
-        if os.path.exists(tag_check_result_json):
-            os.remove(tag_check_result_json)
-        # node tag_checker.js <markdown文件/文件夹路径> <输出结果文件夹路径> <仓名>
-        cmd = ["node", tag_check_js, os.path.join(code_dir, mdfile), code_dir, repo_name]
-        subprocess.run(cmd, capture_output=True, text=True, encoding="utf-8")
-        if os.path.exists(tag_check_result_json):
-            tmp_data = []
-            with open(tag_check_result_json, "r", encoding="utf-8") as fr:
-                tmp_data = json.load(fr)
-            if not tmp_data:
-                continue
-            for info in tmp_data:
-                localtion = info.get("location", "N/A")
-                line_number = info.get("line_number", "N/A")
-                rule_item = info.get("rule_item", "N/A")
-                description = info.get("description", "N/A")
-                snippet = info.get("snippet", "N/A")
-                rule_level = info.get("rule_level", "N/A")
-                mode_str = (
-                    f"| 999 | [文件路径]：{localtion.replace(code_dir + '/', '')}<br>"
-                    f"[错误位置]：第 {line_number} 行<br>"
-                    f"[检查类型]：{rule_item}<br>"
-                    f"[严重程度]：{rule_level}<br>"
-                    f"[错误信息]：{description}<br>"
-                    f"[错误内容]：{snippet}|"
-                )
-                data_lst.append(mode_str)
-    end_time = datetime.now()
-    elapsed_time = (end_time - start_time).total_seconds()
-    print(f"running compliance time: {elapsed_time}s")
-    return data_lst
-
 def md_utf8(code_dir, script_dir, check_md_lst):
     """编码格式检测utf-8检查"""
     start_time = datetime.now()
@@ -449,7 +409,6 @@ if __name__ == "__main__":
             },
         }
     }
-
     with open(config_json, "w", encoding="utf-8") as fw:
         json.dump(context, fw, ensure_ascii=False)
 
