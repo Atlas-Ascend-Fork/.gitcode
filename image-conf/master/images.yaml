@@ -1411,13 +1411,13 @@ repos:
   ascend-transformer-boost:
     stages:
       Compile_Ascend_X86:
-        ubuntu20.04:x86:boost_component
+        ubuntu20.04:x86:boost_component_cann920_v2
       Compile_Ascend_ARM:
-        ubuntu20.04:arm:boost_component
+        ubuntu20.04:arm:boost_component_cann920_v2
       UT_Test_ARM:
-        ubuntu20.04:arm:boost_component
+        ubuntu20.04:arm:boost_component_cann920_v2
       UT_Test_X86:
-        ubuntu20.04:x86:boost_component
+        ubuntu20.04:x86:boost_component_cann920_v2
   sip:
     stages:
       Compile_Ascend_X86:
