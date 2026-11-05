@@ -31,7 +31,6 @@ global:
       arm:
         lv6: ubuntu24.04_arm:lv6_v1.1138
         smoke: ubuntu24.04_arm:pre_mindspore_A2_conda_v1.1055
-        smoke_1028: ubuntu24.04_arm:pre_mindspore_A2_conda_v1.1054
         smoke_A3: ubuntu24.04_arm:pre_mindspore_A3_conda_v1.1047
         asnumpy: ubuntu24.04_arm:asnumpy_v1.1001
         opencode: ubuntu24.04_arm:opencode_ai_check_v1.1001
@@ -466,7 +465,7 @@ repos:
       API_Check:
         ubuntu24.04:x86:api_check
       Presmoke_A900_npupool:
-        ubuntu24.04:arm:smoke_1028
+        ubuntu24.04:arm:smoke
       PreSmoke_A5:
         ubuntu24.04:x86:smoke_A5
 
