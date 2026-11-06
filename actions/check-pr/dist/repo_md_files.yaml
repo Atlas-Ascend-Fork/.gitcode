@@ -230,3 +230,12 @@ ops-math:
     - '*aclnn*.md'
     - '*torchapi_*.md'
     - '*Pass.md'
+
+ops-transformer:
+  'master':
+    - docs
+    - experimental
+    - '*aclnn*.md'
+    - '*torchapi_*.md'
+    - '*Pass.md'
+  
