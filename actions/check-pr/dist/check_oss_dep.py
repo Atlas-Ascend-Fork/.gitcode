@@ -38,20 +38,25 @@ opensource_py / opensource_js。
          视为已完成版本同步更新，放行；否则拦截，并提示需要在相应依赖
          文件 requirements.txt 或 package.json 同步更新版本号；
        - 组件不在白名单内：拦截（新组件需先进入门禁基线）。
-   全部通过则门禁通过，否则门禁拦截并以非 0 退出。
+   全部通过则门禁通过，否则门禁检测不通过：拦截名单（BLOCKING_REPOS：
+   asc-devkit / ops-math）内仓库以非 0 退出拦截；名单外受控仓库同样执行
+   门禁检测与日志上传，但门禁放行不作拦截（观察模式）。
    常规放行（白名单/版本范围内等）聚合统计输出，避免大 PR 逐条日志刷屏；
    同步更新放行、豁免与拦截逐条输出。
-   触发门禁豁免（豁免路径/图片文件/Git LFS 指针地址）或门禁拦截时，全量检查
-   日志写入 workspace/oss-dep-gate-log/<yyyymmdd>/oss-dep-gate-check_<仓名>_
+   触发门禁豁免（豁免路径/图片文件/Git LFS 指针地址）或门禁检测不通过
+   （含拦截与名单外仓库观察留档）时，全量检查日志写入
+   workspace/oss-dep-gate-log/<yyyymmdd>/oss-dep-gate-check_<仓名>_
    <分支>_<PR号>.txt，由流水线 obs-upload 上传至 OBS（CANN/oss_dep_check/
    前缀，按日期分档）留档供后续使用。
-   脚本内部异常按拦截处理（fail-closed）；patch/门禁文件缺失等数据类
-   失败按放行处理（fail-open，避免 CI 基础设施故障误伤）。
+   脚本内部异常对拦截名单内仓库按拦截处理（fail-closed），名单外仓库放行；
+   patch/门禁文件缺失等数据类失败按放行处理（fail-open，避免 CI 基础设施
+   故障误伤）。
 
 用法：
     python3 check_oss_dep.py <WORKSPACE> <REPOSITORY_NAME> <GIT_TARGET_BRANCH> [PR_NUMBER]
 
-退出码：0 门禁通过；1 门禁拦截
+退出码：0 门禁通过（含名单外仓库检测未通过时的不拦截放行）；
+        1 门禁拦截（仅 BLOCKING_REPOS 内仓库）
 """
 
 import json
@@ -72,6 +77,10 @@ THIS_FILE_PATH = os.path.dirname(os.path.realpath(__file__))
 GATE_DIR = os.path.join(os.path.dirname(THIS_FILE_PATH), 'oss-dep')
 
 GATE_FILE_PREFIX = "oss_dep_security_gate_"
+
+# 门禁拦截仓名单：仅名单内仓库门禁检测不通过时拦截（退出码 1）；
+# 名单外受控仓库仍执行全量门禁检测与日志上传留档，但门禁放行不拦截
+BLOCKING_REPOS = ('asc-devkit', 'ops-math')
 
 URL_PATTERN = re.compile(r'https?://[^\s"\'<>\)\\]+', re.IGNORECASE)
 
@@ -1182,9 +1191,16 @@ def main():
 
     if blocked:
         log_error("门禁检查未通过：引入的URL/三方库/依赖组件不合规")
+        if repo_name in BLOCKING_REPOS:
+            write_gate_log(workspace, repo_name, target_branch,
+                           "拦截（门禁不通过）", exempt_files, pr_number)
+            return 1
+        log_warning("{} 仓不在门禁拦截名单内，仅记录日志留档，不作门禁拦截"
+                    .format(repo_name))
         write_gate_log(workspace, repo_name, target_branch,
-                       "拦截（门禁不通过）", exempt_files, pr_number)
-        return 1
+                       "检测未通过（{} 仓不作门禁拦截，仅日志留档）"
+                       .format(repo_name), exempt_files, pr_number)
+        return 0
 
     verdict = "放行（含门禁豁免）" if exempt_files else "放行"
     log_info("门禁结论: {}".format(verdict))
@@ -1201,6 +1217,12 @@ if __name__ == "__main__":
     except SystemExit:
         raise
     except Exception as exc:
-        # fail-closed：脚本内部异常按拦截处理，避免异常路径成为绕过面
-        log_error("门禁脚本内部异常（按拦截处理）: {}".format(exc))
-        sys.exit(1)
+        # fail-closed：脚本内部异常对拦截名单内仓库按拦截处理，避免异常
+        # 路径成为绕过面；名单外仓库放行，不作门禁拦截
+        repo_name = sys.argv[2] if len(sys.argv) > 2 else ''
+        if repo_name in BLOCKING_REPOS:
+            log_error("门禁脚本内部异常（按拦截处理）: {}".format(exc))
+            sys.exit(1)
+        log_error("门禁脚本内部异常（{} 仓不作门禁拦截，按放行处理）: {}"
+                  .format(repo_name, exc))
+        sys.exit(0)

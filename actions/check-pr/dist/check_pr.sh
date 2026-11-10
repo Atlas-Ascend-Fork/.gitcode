@@ -89,8 +89,10 @@ if [ "${run_md_check}" = "true" ];then
     DP_ASSERT_EQUAL "$?" "0" "Check ${REPOSITORY_NAME} md files " "true"
 fi
 
-# OSS 开源依赖门禁：暂时仅在以下仓生效，其余仓跳过
-if [[ "${REPOSITORY_NAME}" == @(asc-devkit|ops-math) ]]; then
+# OSS 开源依赖门禁：对 oss-dep/oss_dep_security_gate_master.json 涉及的所有
+# 代码仓开启（名单与门禁文件 key 保持一致）；其中仅 asc-devkit/ops-math 实际
+# 拦截，其余仓执行门禁检测与日志上传但不拦截（见 check_oss_dep.py）
+if [[ "${REPOSITORY_NAME}" == @(runtime|asc-devkit|hccl|hcomm|hixl|oam-tools|ge|metadef|amct|opbase|ops-cv|ops-nn|ops-transformer|ops-math|pto-as|asc-tools|atvc|graph-autofusion|pto-isa|pypto-vscode) ]]; then
     LOG_HEAD "Check URL and third-party library gate"
     python3 ${SCRIPT_DIR}/check_oss_dep.py ${WORKSPACE} ${REPOSITORY_NAME} ${GIT_TARGET_BRANCH} "${MERGE_ID:-}"
     DP_ASSERT_EQUAL "$?" "0" "check URL and third-party library gate"
