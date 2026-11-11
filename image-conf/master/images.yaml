@@ -967,6 +967,8 @@ repos:
         ubuntu24.04_gcc15:arm:lv6
       PreSmoke_A3_npupool:
         ubuntu24.04:arm:smoke_A3
+      PreSmoke_A5:
+        ubuntu24.04:x86:smoke_A5
 
   ops-base-dev:
     os_mirror:
