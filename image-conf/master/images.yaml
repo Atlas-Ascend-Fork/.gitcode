@@ -1343,6 +1343,8 @@ repos:
         ubuntu24.04:arm:lv6
       UT_Test:
         ubuntu24.04:x86:lv6
+      PreSmoke_A5:
+        ubuntu24.04:x86:smoke_A5
   cloud-ops-turbo:
     stages:
       Compile_Ascend_X86:
