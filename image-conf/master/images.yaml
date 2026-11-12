@@ -31,33 +31,33 @@ global:
         dsl_ut: ascend-catlass-dsl:latest
     ubuntu24.04:
       arm:
-        lv6: ubuntu24.04_arm:lv6_v1.1138
-        smoke: ubuntu24.04_arm:pre_mindspore_A2_conda_v1.1055
-        smoke_A3: ubuntu24.04_arm:pre_mindspore_A3_conda_v1.1047
+        lv6: ubuntu24.04_arm:lv6_v1.1141
+        smoke: ubuntu24.04_arm:pre_mindspore_A2_conda_v1.1058
+        smoke_A3: ubuntu24.04_arm:pre_mindspore_A3_conda_v1.1050
         asnumpy: ubuntu24.04_arm:asnumpy_v1.1001
         opencode: ubuntu24.04_arm:opencode_ai_check_v1.1001
-        lv6_monitor: ubuntu24.04_arm:lv6_v1.1106
+        lv6_monitor: ubuntu24.04_arm:lv6_v1.1134
         lv6_monitor_9.2.0_beta.2: ubuntu24.04_arm:lv6_v1.1122
         boost_component: ubuntu:24.04.CANN900.arm.260730
         boost_component_2: atb_version_build_arm:latest
       x86:
-        lv6: ubuntu24.04_x86:lv6_v1.1156
-        smoke_A5: ubuntu24.04_x86:pre_mindspore_A5_conda_v1.1003
+        lv6: ubuntu24.04_x86:lv6_v1.1159
+        smoke_A5: ubuntu24.04_x86:pre_mindspore_A5_conda_v1.1007
         xla_npu: ubuntu_npu:v1.0
         asnumpy: ubuntu24.04_x86:asnumpy_v1.1002
-        lv6_monitor: ubuntu24.04_x86:lv6_v1.1110
+        lv6_monitor: ubuntu24.04_x86:lv6_v1.1152
         lv6_monitor_9.2.0_beta.2: ubuntu24.04_x86:lv6_v1.1132
         boost_component_2: atb_version_build_x86:latest
     openeuler24.03:
       arm:
-        lv6: openeuler24.03_arm:lv6_v1.1039
+        lv6: openeuler24.03_arm:lv6_v1.1042
       x86:
-        lv6: openeuler24.03_x86:lv6_v1.1039
+        lv6: openeuler24.03_x86:lv6_v1.1042
     ubuntu24.04_gcc15:
       arm:
-        lv6: ubuntu24.04_arm:lv6_v2.1020
+        lv6: ubuntu24.04_arm:lv6_v2.1023
       x86:
-        lv6: ubuntu24.04_x86:lv6_v2.1021
+        lv6: ubuntu24.04_x86:lv6_v2.1024
 gray_global:
   os_mirror:
     ubuntu20.04:
@@ -155,6 +155,8 @@ repos:
         ubuntu24.04_gcc15:x86:lv6
       PreSmoke_A900:
         ubuntu24.04:arm:smoke
+      PreSmoke_A5:
+        ubuntu24.04:x86:smoke_A5
 
   ops-nn:
     stages:
@@ -310,10 +312,6 @@ repos:
         ubuntu24.04:arm:lv6
 
   ops-transformer:
-    os_mirror:
-      ubuntu24.04:
-        x86:
-          lv6: ubuntu24.04_x86:lv6_v1.1155
     stages:
       Compile_Ascend_X86:
         ubuntu24.04:x86:lv6
