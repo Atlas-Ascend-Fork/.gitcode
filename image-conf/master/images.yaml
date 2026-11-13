@@ -349,6 +349,8 @@ repos:
         ubuntu24.04_gcc15:x86:lv6
       PreSmoke_A900:
         ubuntu24.04:arm:smoke
+      PreSmoke_A5:
+        ubuntu24.04:x86:smoke_A5
 
   asnumpy:
     stages:
@@ -1013,6 +1015,8 @@ repos:
         ubuntu24.04:arm:smoke_A3
       PreSmoke_npupool:
         ubuntu24.04:arm:smoke
+      PreSmoke_A5:
+        ubuntu24.04:x86:smoke_A5
   dvpp-dev:
     stages:
       Compile_Ascend_X86:
