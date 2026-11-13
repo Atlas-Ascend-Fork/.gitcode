@@ -795,6 +795,8 @@ repos:
         ubuntu24.04_gcc15:x86:lv6
       Smoke_A900_npupool:
         ubuntu24.04:arm:smoke
+      PreSmoke_A5:
+        ubuntu24.04:x86:smoke_A5
       API_Check:
         ubuntu24.04_gcc15:x86:lv6
 
