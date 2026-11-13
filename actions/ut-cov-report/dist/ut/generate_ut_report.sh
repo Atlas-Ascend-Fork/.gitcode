@@ -56,7 +56,7 @@ function genStReport(){
     
     echo "run increment coverage tools"
     # lcov --list ${coverage_info}
-    bash generate_ut_cov.sh ${UT_FIELD} ${SOURCE_BRANCH} "${WORKSPACE}" True ${coverage_info} ${COVERAGE_NUM} "${WORKSPACE}/pr_filelist_mod.txt"
+    bash generate_ut_cov.sh ${UT_FIELD} ${TARGET_BRANCH} "${WORKSPACE}" True ${coverage_info} ${COVERAGE_NUM} "${WORKSPACE}/pr_filelist_mod.txt"
     ret=$?
     # copy coverage report html
     coverage_path=$(find ${WORKSPACE} -name "cov" | head -n1)
