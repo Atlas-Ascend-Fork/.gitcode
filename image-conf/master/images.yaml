@@ -962,6 +962,19 @@ repos:
         ubuntu24.04_gcc15:x86:lv6
 
   pypto-gym:
+    os_mirror:
+      ubuntu24.04_gcc15:
+        x86:
+          lv6: ubuntu24.04_x86:lv6_v2.1021
+        arm:
+          lv6: ubuntu24.04_arm:lv6_v2.1020
+
+      ubuntu24.04:
+        x86:
+          smoke_A5: ubuntu24.04_x86:pre_mindspore_A5_conda_v1.1003
+        arm:
+          smoke: ubuntu24.04_arm:pre_mindspore_A2_conda_v1.1055
+          smoke_A3: ubuntu24.04_arm:pre_mindspore_A3_conda_v1.1047
     stages:
       Compile_Ascend_X86_ubuntu24:
         ubuntu24.04_gcc15:x86:lv6
