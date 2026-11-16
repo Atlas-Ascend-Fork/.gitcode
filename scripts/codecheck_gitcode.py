@@ -339,7 +339,7 @@ class CodeCheck(object):
         os.system(
             command=f'echo "report_url={self.report_url}" >> {self.gitcode_output}'
         )
-        if lresult == "no pass" and os.getenv("remark") != "codestyle":
+        if lresult == "no pass":
             logging.info(
                 f"[codecheck {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] codecheck result: no pass."
             )
