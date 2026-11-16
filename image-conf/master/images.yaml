@@ -32,7 +32,7 @@ global:
     ubuntu24.04:
       arm:
         lv6: ubuntu24.04_arm:lv6_v1.1141
-        smoke: ubuntu24.04_arm:pre_mindspore_A2_conda_v1.1058
+        smoke: ubuntu24.04_arm:pre_mindspore_A2_conda_v1.1059
         smoke_A3: ubuntu24.04_arm:pre_mindspore_A3_conda_v1.1050
         asnumpy: ubuntu24.04_arm:asnumpy_v1.1001
         opencode: ubuntu24.04_arm:opencode_ai_check_v1.1001
