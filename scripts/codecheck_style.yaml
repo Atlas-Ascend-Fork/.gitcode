@@ -7,7 +7,7 @@ repos:
   manifest: 42f946c5d7c34d498dedca6da5a1252f
   its-matrix-computation: cc184a87152a483b8e023331c248016b
   gauss-splat: 7f9a08e1d8d2495cadefe2b9092f8e7b
-  cannbot-dsl: 860e0146fe71430299246014c01797a9
+  cannbot-dsl: f6a9dba3d0a940389cce9450ec970059
   ops-df: 6e64257e94614bbfa18dbecff549eafc
   ops-spconv: 952c6e9bf7244fed9c9582e4d309b398
   cann-spack-package: 8bde4817d18b4282b7f745b04deb55be
