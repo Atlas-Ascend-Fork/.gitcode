@@ -31,9 +31,9 @@ global:
         dsl_ut: ascend-catlass-dsl:latest
     ubuntu24.04:
       arm:
-        lv6: ubuntu24.04_arm:lv6_v1.1141
-        smoke: ubuntu24.04_arm:pre_mindspore_A2_conda_v1.1059
-        smoke_A3: ubuntu24.04_arm:pre_mindspore_A3_conda_v1.1050
+        lv6: ubuntu24.04_arm:lv6_v1.1143
+        smoke: ubuntu24.04_arm:pre_mindspore_A2_conda_v1.1060
+        smoke_A3: ubuntu24.04_arm:pre_mindspore_A3_conda_v1.1051
         asnumpy: ubuntu24.04_arm:asnumpy_v1.1001
         opencode: ubuntu24.04_arm:opencode_ai_check_v1.1001
         lv6_monitor: ubuntu24.04_arm:lv6_v1.1134
@@ -41,8 +41,9 @@ global:
         boost_component: ubuntu:24.04.CANN900.arm.260730
         boost_component_2: atb_version_build_arm:latest
       x86:
-        lv6: ubuntu24.04_x86:lv6_v1.1159
-        smoke_A5: ubuntu24.04_x86:pre_mindspore_A5_conda_v1.1007
+        lv6: ubuntu24.04_x86:lv6_v1.1161
+        smoke_A5: ubuntu24.04_x86:pre_mindspore_A5_conda_v1.1009
+        smoke_A5_1112: ubuntu24.04_x86:pre_mindspore_A5_conda_v1.1007
         xla_npu: ubuntu_npu:v1.0
         asnumpy: ubuntu24.04_x86:asnumpy_v1.1002
         lv6_monitor: ubuntu24.04_x86:lv6_v1.1152
@@ -50,14 +51,14 @@ global:
         boost_component_2: atb_version_build_x86:latest
     openeuler24.03:
       arm:
-        lv6: openeuler24.03_arm:lv6_v1.1042
+        lv6: openeuler24.03_arm:lv6_v1.1043
       x86:
-        lv6: openeuler24.03_x86:lv6_v1.1042
+        lv6: openeuler24.03_x86:lv6_v1.1043
     ubuntu24.04_gcc15:
       arm:
-        lv6: ubuntu24.04_arm:lv6_v2.1023
+        lv6: ubuntu24.04_arm:lv6_v2.1025
       x86:
-        lv6: ubuntu24.04_x86:lv6_v2.1024
+        lv6: ubuntu24.04_x86:lv6_v2.1026
 gray_global:
   os_mirror:
     ubuntu20.04:
@@ -492,7 +493,7 @@ repos:
       Presmoke_A900_npupool:
         ubuntu24.04:arm:smoke
       PreSmoke_A5:
-        ubuntu24.04:x86:smoke_A5
+        ubuntu24.04:x86:smoke_A5_1112
 
   asc-devkit-dev:
     os_mirror:

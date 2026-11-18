@@ -23,17 +23,17 @@ global:
         lv6_last: ubuntu20.04.05_x86:lv6_v1.1035
     ubuntu24.04:
       arm:
-        lv6: ubuntu24.04_arm:lv6_v1.1141
-        smoke: ubuntu24.04_arm:pre_mindspore_A2_conda_v1.1058
+        lv6: ubuntu24.04_arm:lv6_v1.1143
+        smoke: ubuntu24.04_arm:pre_mindspore_A2_conda_v1.1060
       x86:
-        lv6: ubuntu24.04_x86:lv6_v1.1159
-        smoke_A5: ubuntu24.04_x86:pre_mindspore_A5_conda_v1.1007
+        lv6: ubuntu24.04_x86:lv6_v1.1161
+        smoke_A5: ubuntu24.04_x86:pre_mindspore_A5_conda_v1.1009
         xla_npu: ubuntu_npu:v1.0
     ubuntu24.04_gcc15:
       arm:
-        lv6: ubuntu24.04_arm:lv6_v2.1023
+        lv6: ubuntu24.04_arm:lv6_v2.1025
       x86:
-        lv6: ubuntu24.04_x86:lv6_v2.1024
+        lv6: ubuntu24.04_x86:lv6_v2.1026
     ubuntu22.04:
       x86:
         asnumpy: ubuntu22.04_x86:v1.0
