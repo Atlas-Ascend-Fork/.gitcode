@@ -4,7 +4,6 @@
 common:
   - .claude
   - .opencode
-  - AGENTS.md
   - .codex
   - .agents
   - docs/en/api
@@ -23,13 +22,13 @@ asc-devkit:
     - .claude
     - .codex
     - .opencode
+    - AGENTS.md
 
 amct:
   '*':
     - docs
     - .claude
     - .opencode
-    - AGENTS.md
     - skills
     - .agents
 
@@ -53,6 +52,7 @@ driver:
     - docs/en/nda
     - skills
     - .gitcode
+    - AGENTS.md
 
 driver-dev:
   '*':
@@ -74,12 +74,14 @@ driver-dev:
     - docs/en/nda
     - skills
     - .gitcode
+    - AGENTS.md
 
 runtime:
   '*':
     - docs
     - .claude
     - python/docs
+    - AGENTS.md
 
 ge:
   '*':
@@ -113,12 +115,12 @@ oam-tools:
   '*':
     - docs
     - skills
+    - AGENTS.md
 
 graph-autofusion:
   '*':
     - .claude
     - .opencode
-    - AGENTS.md
 
 hixl:
   '*':
@@ -130,8 +132,8 @@ hixl:
     - .claude
     - .codex
     - .opencode
-    - AGENTS.md
     - CLAUDE.md
+    - AGENTS.md
 
 hccl:
   '*':
@@ -139,6 +141,7 @@ hccl:
     - docs/zh/user_guide
     - docs/en/api_ref
     - docs/en/user_guide
+    - AGENTS.md
 
 hcomm:
   '*':
@@ -146,17 +149,20 @@ hcomm:
     - docs/zh/comm_op_dev_guide
     - docs/en/api_ref
     - docs/en/comm_op_dev_guide
+    - AGENTS.md
 
 metadef:
   '*':
     - docs/zh/api
     - docs/en/api
+    - AGENTS.md
 
 asc-tools:
   '*':
     - skills
     - docs/zh/operator_compilation_tool
     - docs/en/operator_compilation_tool
+    - AGENTS.md
 
 ops-ras:
   'master':
@@ -165,6 +171,7 @@ ops-ras:
     - '*aclnn*.md'
     - '*torchapi_*.md'
     - '*Pass.md'
+    - AGENTS.md
   9.2.0:
     - .
 
@@ -175,11 +182,13 @@ ops-nn:
     - '*aclnn*.md'
     - '*torchapi_*.md'
     - '*Pass.md'
+    - AGENTS.md
 
 docs:
   '*':
     - docs
     - skills
+    - AGENTS.md
 
 asc-comm:
   'master':
@@ -193,6 +202,7 @@ asc-comm:
     - docs/en/index.md
     - docs/en/experimental
     - docs/zh/experimental
+    - AGENTS.md
   '9.3.0-beta.1':
     - docs/zh/api
     - docs/zh/guide
@@ -202,10 +212,12 @@ asc-comm:
     - docs/en/guide
     - docs/en/programming_model
     - docs/en/index.md
+    - AGENTS.md
 
 pypto-vscode:
   'master':
     - docs/zh
+    - AGENTS.md
 
 opbase:
   'master':
@@ -214,6 +226,7 @@ opbase:
     - '*aclnn*.md'
     - '*torchapi_*.md'
     - '*Pass.md'
+    - AGENTS.md
 
 ops-cv:
   'master':
@@ -222,6 +235,7 @@ ops-cv:
     - '*aclnn*.md'
     - '*torchapi_*.md'
     - '*Pass.md'
+    - AGENTS.md
 
 ops-math:
   'master':
@@ -230,6 +244,7 @@ ops-math:
     - '*aclnn*.md'
     - '*torchapi_*.md'
     - '*Pass.md'
+    - AGENTS.md
 
 ops-transformer:
   'master':
@@ -238,4 +253,4 @@ ops-transformer:
     - '*aclnn*.md'
     - '*torchapi_*.md'
     - '*Pass.md'
-  
+    - AGENTS.md
