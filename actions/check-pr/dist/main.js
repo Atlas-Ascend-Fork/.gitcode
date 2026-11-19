@@ -76,11 +76,17 @@ async function run() {
 }
 function execShellScript(script, args, cwd, env) {
     return new Promise((resolve, reject) => {
-        const child = (0, child_process_1.execFile)("bash", [script, ...args], {
+        const child = (0, child_process_1.spawn)("bash", [script, ...args], {
             cwd,
-            env,
-            timeout: 600000
+            env
         });
+        let timedOut = false;
+        const timeout = setTimeout(() => {
+            timedOut = true;
+            child.kill("SIGTERM");
+        }, 600000);
+        child.stdout?.setEncoding("utf8");
+        child.stderr?.setEncoding("utf8");
         child.stdout?.on("data", (data) => {
             core.info(data.toString().trimEnd());
         });
@@ -88,7 +94,10 @@ function execShellScript(script, args, cwd, env) {
             core.info("[shell stderr] " + data.toString().trimEnd());
         });
         child.on("close", (code, signal) => {
-            if (code === 0) {
+            clearTimeout(timeout);
+            if (timedOut) {
+                reject(new Error("check_pr.sh 执行超时（600000 ms）"));
+            } else if (code === 0) {
                 resolve();
             } else {
                 core.error(`check_pr.sh 异常退出: exit code=${code}, signal=${signal}`);
@@ -96,6 +105,7 @@ function execShellScript(script, args, cwd, env) {
             }
         });
         child.on("error", (err) => {
+            clearTimeout(timeout);
             core.error(`check_pr.sh 执行错误: ${err.message}`);
             reject(err);
         });

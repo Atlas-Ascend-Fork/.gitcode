@@ -30,6 +30,10 @@
 | `link_check_report.txt` | 失败链接报告 |
 | `link_details.csv` | 全部链接检查明细 |
 
+## 脚本执行行为
+
+`check_pr.sh` 通过 Node.js 子进程流式转发 stdout/stderr，输出大小不会触发 `execFile` 的默认缓冲区上限；UTF-8 字符跨数据块时会保持完整。脚本运行超过 10 分钟将收到 SIGTERM，且无论脚本如何处理该信号，action 都会以超时失败结束。
+
 ## 使用示例
 
 ```yaml
