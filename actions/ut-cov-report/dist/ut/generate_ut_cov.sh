@@ -42,7 +42,7 @@ then
     then
         exit 0
     else
-        exit 0
+        exit 1
     fi
 else
     exit 1
