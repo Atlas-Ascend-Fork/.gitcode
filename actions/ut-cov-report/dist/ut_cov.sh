@@ -2,7 +2,6 @@
 
 GIT_TOKEN="${GIT_TOKEN:-}"
 cd "${WORKSPACE}"
-UT_COV_EXIT=0
 
 # 先拿到原始远程地址
 ORIG_URL=$(git remote get-url origin)
@@ -37,7 +36,7 @@ if [ "${COV_MODE}" = "report" ];then
         yaml_path="${WORKSPACE}/classify_rule.yaml"
     fi
     python3 count_files.py "${yaml_path}" "${UT_FIELD}" "${WORKSPACE}" "${WORKSPACE}"
-    bash generate_ut_report.sh || UT_COV_EXIT=1
+    bash generate_ut_report.sh
 else
     echo "${UT_PROCESS}"
     if [ "${UT_PROCESS}" = "ut_cov" ];then
@@ -47,15 +46,15 @@ else
           python3 count_files.py "${WORKSPACE}/classify_rule.yaml" "${UT_TYPE}" "${WORKSPACE}" "${WORKSPACE}"
       fi
       if [ "${LANGUAGE}" = "cpp" ];then
-          bash generate_ut_cov.sh "${UT_TYPE}" "${TARGET_BRANCH}" "${WORKSPACE}" True "${WORKSPACE}/cov/coverage.info" "${COVERAGE_NUM}" "${WORKSPACE}/pr_filelist_mod.txt" || UT_COV_EXIT=1
+          bash generate_ut_cov.sh "${UT_TYPE}" "${TARGET_BRANCH}" "${WORKSPACE}" True "${WORKSPACE}/cov/coverage.info" "${COVERAGE_NUM}" "${WORKSPACE}/pr_filelist_mod.txt"
           coverage_path=$(find "${WORKSPACE}" -name "cov" | head -n1)
           cd "${coverage_path}"
           tar -zcf ut_cov_${UT_TYPE}.tar.gz *
           cp -rf ut_cov_${UT_TYPE}.tar.gz "${WORKSPACE}"
       elif [ "${LANGUAGE}" = "python" ];then
-          bash generate_ut_cov_python.sh || UT_COV_EXIT=1
+          bash generate_ut_cov_python.sh
       elif [ "${LANGUAGE}" = "ts" ];then
-          bash generate_ut_cov_ts.sh || UT_COV_EXIT=1
+          bash generate_ut_cov_ts.sh
       fi
     elif [ "${UT_PROCESS}" = "coverage" ];then
       cd "${WORKSPACE}"
@@ -89,11 +88,3 @@ else
       mv ./coverage.info "./coverage_${UT_TYPE}.info"
     fi
 fi
-
-# ut_soft_fail_repos: 调用方显式传 false 时, UT/覆盖率环节失败不拦截(exit 0);
-# 不传参数则失败照常拦截(exit 1), 保持流水线红。
-if [ "${UT_COV_EXIT:-0}" -ne 0 ] && [ "${UT_SOFT_FAIL_REPOS:-}" = "false" ]; then
-    echo "[ut_soft_fail] UT_SOFT_FAIL_REPOS=false, UT/覆盖率环节失败不拦截"
-    exit 0
-fi
-exit ${UT_COV_EXIT:-0}

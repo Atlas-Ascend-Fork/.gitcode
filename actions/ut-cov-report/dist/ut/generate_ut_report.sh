@@ -73,14 +73,9 @@ function genStReport(){
     fi
     if [ "${ret}x" == "0x" ];then
         exit 0
+    else
+        exit 1
     fi
-    # ut_soft_fail_repos: 调用方传入 UT_SOFT_FAIL_REPOS=false 时,
-    # 覆盖率失败不拦截(exit 0); 未传/传其他值则维持拦截(exit 1)
-    if [ "${UT_SOFT_FAIL_REPOS:-}" = "false" ]; then
-        echo "[ut_soft_fail] UT_SOFT_FAIL_REPOS=false, 覆盖率失败不拦截"
-        exit 0
-    fi
-    exit 1
 
 }
 
