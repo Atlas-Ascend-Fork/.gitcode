@@ -24,7 +24,7 @@ global:
     ubuntu24.04:
       arm:
         lv6: ubuntu24.04_arm:lv6_v1.1143
-        smoke: ubuntu24.04_arm:pre_mindspore_A2_conda_v1.1060
+        smoke: ubuntu24.04_arm:pre_mindspore_A2_conda_v1.1061
       x86:
         lv6: ubuntu24.04_x86:lv6_v1.1161
         smoke_A5: ubuntu24.04_x86:pre_mindspore_A5_conda_v1.1009
