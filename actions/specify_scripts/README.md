@@ -19,9 +19,11 @@
 | `token` | 否 | - | 拉取 CI 仓库的 git token |
 | `endpoint` | 是 | - | OBS endpoint，如 `https://obs.cn-north-4.myhuaweicloud.com` |
 | `bucket` | 是 | - | OBS 桶名 |
-| `access-key` | 是 | - | OBS Access Key |
-| `secret-key` | 是 | - | OBS Secret Key |
+| `access-key` | 否 | - | OBS Access Key，未传时回退 OIDC 临时凭证环境变量 `HUAWEICLOUD_OIDC_AK` |
+| `secret-key` | 否 | - | OBS Secret Key，未传时回退 OIDC 临时凭证环境变量 `HUAWEICLOUD_OIDC_SK` |
 | `object-prefix` | 是 | - | OBS 对象前缀，如 `org/repo/ci/package/<pr_id>/` |
+
+> **凭证说明**：推荐配合 `huaweicloud-oidc-auth` 插件使用（在同 Job 的前置步骤调用），本 action 自动读取其写入的 `HUAWEICLOUD_OIDC_AK / HUAWEICLOUD_OIDC_SK` 环境变量，无需配置永久 AK/SK。
 
 ## 输出
 
@@ -40,6 +42,15 @@
         name: specify_scripts
         steps:
           -
+            name: oidc_auth
+            uses: huaweicloud-oidc-auth
+            with:
+              audience: ${{ secrets.audience }}
+              agency_urn: ${{ secrets.agency_urn }}
+              provider_urn: ${{ secrets.provider_urn }}
+              region: cn-north-4
+              duration: 3600
+          -
             name: specify_scripts
             identifier: specify_scripts
             uses: cann/.gitcode/actions/specify_scripts@master
@@ -49,8 +60,7 @@
               token: ${{ secrets.TESTTOKEN }}
               endpoint: "https://obs.cn-north-4.myhuaweicloud.com"
               bucket: "ascend-ci"
-              access-key: ${{ secrets.AK }}
-              secret-key: ${{ secrets.SK }}
+              # access-key/secret-key 省略，自动回退 oidc_auth 写入的临时凭证
               object-prefix: ${{ env.obs_path }}/
         runs-on: ["self-hosted", "arch=x64", "spec=slim"]
         container:

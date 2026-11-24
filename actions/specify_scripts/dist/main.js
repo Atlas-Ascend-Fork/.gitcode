@@ -69,8 +69,8 @@ async function run() {
         const token = getInput('token');
         const endpoint = getInput('endpoint', true);
         const bucket = getInput('bucket', true);
-        const ak = getInput('access-key', true);
-        const sk = getInput('secret-key', true);
+        const ak = getInput('access-key');
+        const sk = getInput('secret-key');
         const objectPrefix = getInput('object-prefix', true).replace(/^\/+|\/+$/g, '');
 
         const m = comment.match(/compile[^@]*@(\S+)/i);

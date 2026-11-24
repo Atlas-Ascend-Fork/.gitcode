@@ -13,6 +13,9 @@ on:
 
 jobs:
   JOB_precommit:
+    permissions:
+      repository: read
+      id-token: write
     name: CodeCheck_precommit
     steps:
       -
@@ -23,6 +26,15 @@ jobs:
           ref: ${{ atomgit.event.pull_request.merge_commit_sha }}
           allow-unsafe-pr-checkout: true
           token: ${{secrets.GIT_TOKEN}}
+      -
+        name: oidc_auth
+        uses: huaweicloud-oidc-auth
+        with:
+          audience: ${{ secrets.audience }}
+          agency_urn: ${{ secrets.agency_urn }}
+          provider_urn: ${{ secrets.provider_urn }}
+          region: cn-north-4
+          duration: 3600
       -
         name: download
         uses: obs-download
@@ -47,14 +59,15 @@ jobs:
         with:
           endpoint: "https://obs.cn-north-4.myhuaweicloud.com"
           bucket: "ascend-ci"
-          access-key: ${{secrets.AK}}
-          secret-key: ${{secrets.SK}}
           artifact-path: "${{ steps.process_checkout.outputs.path }}/pre-commit*.txt"
           object-prefix: ${{ env.obs_path }}/
     runs-on: ["self-hosted", "arch=x64", "spec=small"]
     container:
       image: swr.cn-north-4.myhuaweicloud.com/ci_cann/${{ inputs.precommit_image_version }}
   JOB_check_pr:
+    permissions:
+      repository: read
+      id-token: write
     name: CodeCheck_check-pr
     steps:
       -
@@ -65,6 +78,15 @@ jobs:
           ref: ${{ atomgit.event.pull_request.merge_commit_sha }}
           allow-unsafe-pr-checkout: true
           token: ${{secrets.GIT_TOKEN}}
+      -
+        name: oidc_auth
+        uses: huaweicloud-oidc-auth
+        with:
+          audience: ${{ secrets.audience }}
+          agency_urn: ${{ secrets.agency_urn }}
+          provider_urn: ${{ secrets.provider_urn }}
+          region: cn-north-4
+          duration: 3600
       -
         name: download
         uses: obs-download
@@ -102,8 +124,6 @@ jobs:
         with:
           endpoint: "https://obs.cn-north-4.myhuaweicloud.com"
           bucket: "ascend-ci"
-          access-key: ${{secrets.AK}}
-          secret-key: ${{secrets.SK}}
           artifact-path: "${{ steps.process_checkout.outputs.path }}/oss-dep-gate-log/${{ steps.gate_log_date.outputs.gate_date }}/*.txt"
           object-prefix: CANN/oss_dep_check/${{ steps.gate_log_date.outputs.gate_date }}/
     runs-on: ["self-hosted", "arch=x64", "spec=slim"]

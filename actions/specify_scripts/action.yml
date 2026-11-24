@@ -22,10 +22,10 @@ inputs:
     required: true
   access-key:
     description: OBS Access Key
-    required: true
+    required: false
   secret-key:
     description: OBS Secret Key
-    required: true
+    required: false
   object-prefix:
     description: OBS 对象前缀，如 org/repo/ci/package/<pr_id>/
     required: true

@@ -6,6 +6,9 @@ on:
     
 jobs:
   JOB_pr:
+    permissions:
+      repository: read
+      id-token: write
     name: Test_get-pr
     steps:
       -
@@ -28,13 +31,20 @@ jobs:
           pr_number: ${{ atomgit.event.pull_request.number }}
           git_token: ${{ secrets.GIT_TOKEN }}
       -
+        name: oidc_auth
+        uses: huaweicloud-oidc-auth
+        with:
+          audience: ${{ secrets.audience }}
+          agency_urn: ${{ secrets.agency_urn }}
+          provider_urn: ${{ secrets.provider_urn }}
+          region: cn-north-4
+          duration: 3600
+      -
         name: upload
         uses: obs-upload
         with:
           endpoint: "https://obs.cn-north-4.myhuaweicloud.com"
           bucket: "ascend-ci"
-          access-key: ${{ secrets.AK }}
-          secret-key: ${{ secrets.SK }}
           artifact-path: |
             ${{ steps.process_checkout.outputs.path }}/pr_filelist.txt
             ${{ steps.process_checkout.outputs.path }}/pr_filelist_mod.txt
@@ -46,6 +56,9 @@ jobs:
     container:
       image: swr.cn-north-4.myhuaweicloud.com/ci_cann/ubuntu20.04.05_x86:k8s_v1.1006
   JOB_shell:
+    permissions:
+      repository: read
+      id-token: write
     name: Test_get-shell
     steps:
       -
@@ -56,13 +69,20 @@ jobs:
           ref: master
           token: ${{ secrets.GIT_TOKEN }}
       -
+        name: oidc_auth
+        uses: huaweicloud-oidc-auth
+        with:
+          audience: ${{ secrets.audience }}
+          agency_urn: ${{ secrets.agency_urn }}
+          provider_urn: ${{ secrets.provider_urn }}
+          region: cn-north-4
+          duration: 3600
+      -
         name: upload
         uses: obs-upload
         with:
           endpoint: "https://obs.cn-north-4.myhuaweicloud.com"
           bucket: "ascend-ci"
-          access-key: ${{ secrets.AK }}
-          secret-key: ${{ secrets.SK }}
           artifact-path: |
             ${{ steps.process_checkout.outputs.path }}/.gitcode/scripts/*
           object-prefix: ${{ env.obs_path }}/
@@ -77,8 +97,6 @@ jobs:
           token: ${{ secrets.TESTTOKEN }}
           endpoint: "https://obs.cn-north-4.myhuaweicloud.com"
           bucket: "ascend-ci"
-          access-key: ${{ secrets.AK }}
-          secret-key: ${{ secrets.SK }}
           object-prefix: ${{ env.obs_path }}/
     runs-on: ["self-hosted", "arch=x64", "spec=slim"]
     container:
