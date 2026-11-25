@@ -15,6 +15,7 @@ global:
         boost_component: ubuntu:20.04.arm.cann_20260429060022
         boost_component_cann920: ubuntu:20.04.arm.cann920_260828
         boost_component_cann920_v2: ubuntu:20.04.arm.cann920.261019
+        boost_component_cann920_310P_v2: ubuntu:20.04.arm.cann920.310p.261019_v2
       x86:
         lv1: ubuntu20.04.05_x86:lv1_v1.1003
         lv2: ubuntu20.04.05_x86:lv2_v1.1010
@@ -1454,10 +1455,10 @@ repos:
         ubuntu20.04:x86:boost_component_cann920_v2
       Compile_Ascend_ARM:
         ubuntu20.04:arm:boost_component_cann920_v2
-      UT_Test_ARM:
+      UT_Test_910B_ARM:
         ubuntu20.04:arm:boost_component_cann920_v2
-      UT_Test_X86:
-        ubuntu20.04:x86:boost_component_cann920_v2
+      UT_Test_310P_ARM:
+        ubuntu20.04:arm:boost_component_cann920_310P_v2
   sip:
     stages:
       Compile_Ascend_X86:
