@@ -978,6 +978,8 @@ repos:
         ubuntu24.04_gcc15:x86:lv6
       UT_Test_report:
         ubuntu24.04_gcc15:x86:lv6
+      PreSmoke_A5:
+        ubuntu24.04:x86:smoke_A5
 
   pypto-gym:
     stages:
