@@ -32,7 +32,7 @@ stages:
     name: PreBuild
     jobs:
       JOB_image:
-        name: Test_image
+        name: Get_image
         steps:
           - name: revise_image
             identifier: revise_image
@@ -49,7 +49,7 @@ stages:
         if: "${{ default() }}"
         runs-on: ["self-hosted", "arch=x64", "spec=small"]
       JOB_pre:
-        name: Test_PreBuild
+        name: PreBuild
         uses: cann/.gitcode/.gitcode/workflows/pre_action.yml@master
     pre:
     - type: auto
@@ -109,5 +109,5 @@ stages:
 post:
   jobs:
     job_post:
-      name: Test_post
+      name: PostBuild
       uses: cann/.gitcode/.gitcode/workflows/post_action.yml@master

@@ -254,3 +254,7 @@ ops-transformer:
     - '*torchapi_*.md'
     - '*Pass.md'
     - AGENTS.md
+
+shmem:
+  'master':
+    - .agents

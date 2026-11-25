@@ -2,13 +2,12 @@ name: post_action
 
 on:
   workflow_call:
-  
 
-jobs: 
-  JOB_finish: 
-    name: Test_finish
+jobs:
+  JOB_finish:
+    name: PostBuild
     steps:
-      - 
+      -
         name: query_pipeline
         identifier: query_pipeline
         uses: cann/.gitcode/actions/query-pipeline@master

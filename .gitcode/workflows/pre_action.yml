@@ -9,7 +9,7 @@ jobs:
     permissions:
       repository: read
       id-token: write
-    name: Test_get-pr
+    name: PreBuild_get-pr
     steps:
       -
         name: Checkout
@@ -59,7 +59,7 @@ jobs:
     permissions:
       repository: read
       id-token: write
-    name: Test_get-shell
+    name: PreBuild_upload-scripts
     steps:
       -
         name: Checkout
@@ -102,7 +102,7 @@ jobs:
     container:
       image: swr.cn-north-4.myhuaweicloud.com/ci_cann/ubuntu20.04.05_x86:k8s_v1.1006
   JOB_pre:
-    name: Test_pre_pipeline
+    name: PreBuild_pipeline
     steps:
       - name: pre_pipeline
         uses: cann/.gitcode/actions/pre-pipeline@master
