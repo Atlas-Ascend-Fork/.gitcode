@@ -58,9 +58,9 @@ stages:
     name: check_yaml
     jobs:
       JOB_compile:
-        permissions:
-          repository: read
-          id-token: write
+          permissions:
+            repository: read
+            id-token: write
           name: check_yaml
           steps:
             -
