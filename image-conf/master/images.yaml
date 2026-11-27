@@ -44,7 +44,6 @@ global:
       x86:
         lv6: ubuntu24.04_x86:lv6_v1.1162
         smoke_A5: ubuntu24.04_x86:pre_mindspore_A5_conda_v1.1013
-        smoke_A5_1112: ubuntu24.04_x86:pre_mindspore_A5_conda_v1.1007
         xla_npu: ubuntu_npu:v1.0
         asnumpy: ubuntu24.04_x86:asnumpy_v1.1002
         lv6_monitor: ubuntu24.04_x86:lv6_v1.1152
@@ -495,7 +494,7 @@ repos:
       Presmoke_A900_npupool:
         ubuntu24.04:arm:smoke
       PreSmoke_A5:
-        ubuntu24.04:x86:smoke_A5_1112
+        ubuntu24.04:x86:smoke_A5
 
   asc-devkit-dev:
     os_mirror:
