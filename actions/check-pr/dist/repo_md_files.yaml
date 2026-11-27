@@ -258,3 +258,7 @@ ops-transformer:
 shmem:
   'master':
     - .agents
+
+sip:
+  'master':
+    - docs
