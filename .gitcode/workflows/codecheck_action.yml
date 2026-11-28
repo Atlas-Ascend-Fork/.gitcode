@@ -109,6 +109,7 @@ jobs:
           pr_number: ${{ atomgit.event.pull_request.number }}
           git_token: ${{ secrets.GIT_TOKEN }}
           pr_issue: ${{ vars.PR_ISSUE }}
+          agent_hub_token: ${{ secrets.AGENT_HUB_TOKEN }}
       -
         name: gate_log_date
         identifier: gate_log_date

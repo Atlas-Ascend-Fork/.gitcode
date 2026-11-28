@@ -45,6 +45,9 @@ async function run() {
         const prNumber = core.getInput("pr_number", { required: false }) || "";
         const gitToken = core.getInput("git_token", { required: false }) || "";
         const prIssue = core.getInput("pr_issue", { required: false }) || "";
+        const agentHubToken = core.getInput("agent_hub_token", { required: false }) || "";
+        const agentHubUrl = core.getInput("agent_hub_url", { required: false })
+            || "https://cannbot.hicann.cn/agent-hub";
         const scriptDir = __dirname;
         const scriptPath = path_1.default.resolve(scriptDir, "./check_pr.sh");
         await promises_1.default.access(scriptPath);
@@ -54,6 +57,8 @@ async function run() {
         core.info(`REPOSITORY_NAME：${repoName}`);
         core.info(`GIT_TARGET_BRANCH:${targetBranch}`);
         core.info(`PR_NUMBER:${prNumber}`);
+        core.info(`AGENT_HUB_URL：${agentHubUrl}`);
+        core.info(`AGENT_HUB_TOKEN：${agentHubToken ? "已配置" : "未配置"}`);
         // 环境变量注入 SCRIPT_DIR=dist目录路径
         const env = {
             ...process.env,
@@ -63,7 +68,9 @@ async function run() {
             GIT_TARGET_BRANCH: targetBranch,
             PR_NUMBER: prNumber,
             GIT_TOKEN: gitToken,
-            PR_ISSUE: prIssue
+            PR_ISSUE: prIssue,
+            AGENT_HUB_TOKEN: agentHubToken,
+            AGENT_HUB_URL: agentHubUrl
         };
         // cwd 使用 dist 目录执行
         await execShellScript(scriptPath, [], scriptDir, env);

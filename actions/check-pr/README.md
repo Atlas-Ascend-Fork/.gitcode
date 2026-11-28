@@ -14,14 +14,20 @@
      - 新增三方库引用必须在 `opensource_c` 属性内；
       - `requirements.txt` / `package.json` 引入的依赖组件：组件在白名单内且版本满足约束则放行；**版本号大于 `opensource_py` / `opensource_js` 允许版本时拦截**，提示需要在相应依赖文件 `requirements.txt` 或 `package.json` 同步更新版本号；组件不在白名单内或版本落在约束范围外时拦截。
 4. **门禁日志留档**：常规放行（白名单/版本范围内等）聚合统计输出，避免大 PR 逐条日志刷屏；同步更新放行、豁免与拦截逐条输出。触发门禁豁免（豁免路径/图片文件/LFS 指针）或门禁拦截时，全量检查日志（含仓库/分支/PR编号/结论/豁免路径/明细）写入 workspace 下 `oss-dep-gate-log/<yyyymmdd>/oss-dep-gate-check_<仓名>_<分支>_<PR号>.txt`，由流水线 `obs-upload` 步骤（`if: always()`）统一上传至 OBS `CANN/oss_dep_check/` 前缀（按日期分档，全仓聚合），供后续追溯使用；正常放行（无豁免）不产生日志文件。
+5. **PR 泄密扫描**：调用 `pr_secret_scan.sh`（参照 aicodecheck.sh 修改），入参仅 5 个——`repository`（`repo_name`）、`pr_id`（优先 CI `MERGE_ID`，回退 `pr_number` 入参）、`agent_hub_url`、`AGENT_HUB_TOKEN`、`gitcode_token`（`git_token`，预留）；触发 agent-hub `pr-secret-review` skill 泄密检视后即返回（agent 异步执行，不阻塞流水线），检视结果由 agent 以行内评论发表在 PR 上（不重复评论）；触发失败（HTTP 非 2xx）将导致本步骤失败。
 
 ## 输入参数
 
 | 参数 | 必填 | 说明 |
 | --- | --- | --- |
 | `workspace` | 是 | 代码检出目录 |
-| `repo_name` | 是 | 仓库名称（部分仓库跳过 Markdown 链接检查；URL/三方库门禁以仓库名作为门禁文件 key） |
+| `repo_name` | 是 | 仓库名称（部分仓库跳过 Markdown 链接检查；URL/三方库门禁以仓库名作为门禁文件 key；泄密扫描作为 repository 入参） |
 | `target_branch` | 否 | 目标分支，默认 `master`，决定读取的门禁文件 `oss-dep/oss_dep_security_gate_<branch>.json` |
+| `pr_number` | 否 | PR 编号（泄密扫描等使用） |
+| `git_token` | 否 | gitcode_token，GitCode API token（PR 关联 issue 检测、泄密扫描 PR 打标签） |
+| `pr_issue` | 否 | 仓库配置变量，为 true 时开启 PR 关联 issue 检测，未配置或 false 跳过 |
+| `agent_hub_token` | 否 | agent-hub 认证 token，触发 AI 泄密扫描用（仅泄密扫描启用的仓需要） |
+| `agent_hub_url` | 否 | agent-hub 服务地址，默认 `https://cannbot.hicann.cn/agent-hub` |
 
 ## 产物
 
@@ -49,4 +55,5 @@
   with:
     repo_name: ${{ env.repo_name }}
     workspace: ${{ steps.process_checkout.outputs.path }}
+    agent_hub_token: ${{ secrets.AGENT_HUB_TOKEN }}
 ```

@@ -121,3 +121,8 @@ if [ "${PR_ISSUE}" = "true" ]; then
 else
     LOG_HEAD "check linked issue not enabled for ${REPOSITORY_NAME} (PR_ISSUE=${PR_ISSUE:-unset}), skip"
 fi
+
+if [[ "${REPOSITORY_NAME}" == @(opbase|ops-nn|ops-cv|ops-math|ops-ras|ops-transformer|cannbot-skills) ]];then
+    LOG_HEAD "**Review the PR for any secrets leak**"
+    bash ${SCRIPT_DIR}/pr_secret_scan.sh "${REPOSITORY_NAME}" "${MERGE_ID:-${PR_NUMBER:-}}"
+fi

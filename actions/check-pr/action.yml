@@ -1,6 +1,6 @@
 name: 'check-pr'
 author: 'CANN'
-version: '1.0.0'
+version: '1.1.0'
 description: 'this is a check pr filelist action'
 inputs:
   workspace:
@@ -24,6 +24,14 @@ inputs:
     description: 仓库配置变量，为true时开启PR关联issue检测，未配置或false跳过
     required: false
     default: ''
+  agent_hub_token:
+    description: agent-hub认证token，用于触发AI泄密扫描pr_secret_scan.sh（仅opbase/ops-nn/ops-cv/ops-math/ops-ras/cannbot-skills仓启用泄密扫描时需要）
+    required: false
+    default: ''
+  agent_hub_url:
+    description: agent-hub服务地址，用于触发AI泄密扫描
+    required: false
+    default: 'https://cannbot.hicann.cn/agent-hub'
 
 runs:
   using: 'node16'
